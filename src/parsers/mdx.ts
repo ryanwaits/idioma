@@ -16,27 +16,40 @@ function addParentReferences(tree: any) {
 }
 
 // Check if a text node should be translated based on config rules
-function shouldTranslateNode(node: any, parent: any, config: Config): boolean {
+function shouldTranslateNode(node: any, parent: any, config: Config, nodeIndex?: number): boolean {
   if (node.type !== 'text' || !node.value.trim()) return false;
   
-  // Get skip patterns from config
+  const trimmedValue = node.value.trim();
+  
+  // Check if this is a directive pseudo-attribute (first line of directive content)
+  // This handles patterns like "type: help" that appear as the first content in directives
+  if (parent && parent.type === 'paragraph' && nodeIndex === 0) {
+    // Check if the paragraph's parent is a directive
+    let paragraphParent = parent.parent;
+    if (paragraphParent && (
+      paragraphParent.type === 'containerDirective' || 
+      paragraphParent.type === 'leafDirective' || 
+      paragraphParent.type === 'textDirective'
+    )) {
+      // Check if this paragraph is the first child of the directive
+      const firstChild = paragraphParent.children[0];
+      if (firstChild === parent) {
+        // Check if the text matches a key-value pattern (e.g., "type: help", "variant: warning")
+        if (/^[\w-]+:\s*[\w-]+(\n|$)/.test(trimmedValue)) {
+          return false; // Skip directive pseudo-attributes
+        }
+      }
+    }
+  }
+  
+  // Get skip patterns from config for other cases
   const patterns = config.translation?.rules?.patternsToSkip?.map(p => new RegExp(p)) || 
                    config.translation?.skipPatterns?.map(p => new RegExp(p)) || 
-                   [/^type:\s*\w+$/]; // Default pattern
+                   [];
   
   // Check if text matches any skip pattern
-  const trimmedValue = node.value.trim();
   if (patterns.some(p => p.test(trimmedValue))) {
-    // Additional check: only skip if inside a directive
-    let currentParent = parent;
-    while (currentParent) {
-      if (currentParent.type === 'containerDirective' || 
-          currentParent.type === 'leafDirective' || 
-          currentParent.type === 'textDirective') {
-        return false; // Skip this node
-      }
-      currentParent = currentParent.parent;
-    }
+    return false;
   }
   
   return true;
@@ -82,7 +95,7 @@ export class MDXStrategy implements TranslationStrategy {
     
     // Visit text nodes
     visit(tree, 'text', (node, index, parent) => {
-      if (shouldTranslateNode(node, parent, config)) {
+      if (shouldTranslateNode(node, parent, config, index)) {
         textsToTranslate.push({ 
           node, 
           type: 'text', 

@@ -19,7 +19,7 @@ export const ConfigSchema = z.object({
     // New fields for extensibility
     provider: z.string().default('anthropic'),
     rules: z.object({
-      patternsToSkip: z.array(z.string()).default(['^type:\\s*\\w+$']), // Default pattern for backward compatibility
+      patternsToSkip: z.array(z.string()).default([]), // No default patterns - intelligent detection instead
     }).optional(),
   }).optional(),
 });
