@@ -1,7 +1,8 @@
 import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
-import { Config, loadConfig, saveConfig, loadLock, saveLock } from '../utils';
+import { glob } from 'glob';
+import { Config, loadConfig, saveConfig, loadLock, saveLock, replaceLocaleInPattern } from '../utils';
 import { processFiles } from '../core';
 
 // Init command - create config file
@@ -36,7 +37,7 @@ export async function initCommand(): Promise<void> {
     await saveConfig(defaultConfig);
     console.log('✓ Created openlocale.json');
     console.log('\nNext steps:');
-    console.log('1. Add target locales: openlocale locale add <locale>');
+    console.log('1. Add target locales: openlocale add <locale>');
     console.log('2. Configure your file patterns in openlocale.json');
     console.log('3. Run translation: openlocale translate');
   }
@@ -66,19 +67,26 @@ export async function translateCommand(options: { costs?: boolean }): Promise<vo
   }
 }
 
-// Locale add command
-export async function localeAddCommand(locale: string): Promise<void> {
+// Locale add command - supports comma-separated locales
+export async function localeAddCommand(locales: string): Promise<void> {
   try {
     const config = await loadConfig();
+    const localeList = locales.split(',').map(l => l.trim());
+    const added: string[] = [];
     
-    if (config.locale.targets.includes(locale)) {
-      console.log(`Locale '${locale}' already exists.`);
-      return;
+    for (const locale of localeList) {
+      if (!config.locale.targets.includes(locale)) {
+        config.locale.targets.push(locale);
+        added.push(locale);
+      }
     }
     
-    config.locale.targets.push(locale);
-    await saveConfig(config);
-    console.log(`✓ Added locale: ${locale}`);
+    if (added.length > 0) {
+      await saveConfig(config);
+      console.log(`✓ Added locales: ${added.join(', ')}`);
+    } else {
+      console.log('All specified locales already exist.');
+    }
   } catch (error) {
     if (error instanceof Error) {
       console.error('Error:', error.message);
@@ -89,20 +97,27 @@ export async function localeAddCommand(locale: string): Promise<void> {
   }
 }
 
-// Locale remove command
-export async function localeRemoveCommand(locale: string): Promise<void> {
+// Locale remove command - supports comma-separated locales
+export async function localeRemoveCommand(locales: string): Promise<void> {
   try {
     const config = await loadConfig();
+    const localeList = locales.split(',').map(l => l.trim());
+    const removed: string[] = [];
     
-    const index = config.locale.targets.indexOf(locale);
-    if (index === -1) {
-      console.log(`Locale '${locale}' not found.`);
-      return;
+    for (const locale of localeList) {
+      const index = config.locale.targets.indexOf(locale);
+      if (index !== -1) {
+        config.locale.targets.splice(index, 1);
+        removed.push(locale);
+      }
     }
     
-    config.locale.targets.splice(index, 1);
-    await saveConfig(config);
-    console.log(`✓ Removed locale: ${locale}`);
+    if (removed.length > 0) {
+      await saveConfig(config);
+      console.log(`✓ Removed locales: ${removed.join(', ')}`);
+    } else {
+      console.log('None of the specified locales were found.');
+    }
   } catch (error) {
     if (error instanceof Error) {
       console.error('Error:', error.message);
@@ -120,6 +135,67 @@ export async function localeListCommand(): Promise<void> {
     
     console.log('Source locale:', config.locale.source);
     console.log('Target locales:', config.locale.targets.length ? config.locale.targets.join(', ') : 'None');
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error('Error:', error.message);
+    } else {
+      console.error('An unknown error occurred');
+    }
+    process.exit(1);
+  }
+}
+
+// Reset command - reset translation status and remove generated files
+export async function resetCommand(): Promise<void> {
+  try {
+    const config = await loadConfig();
+    const lock = await loadLock();
+    
+    if (config.locale.targets.length === 0) {
+      console.log('No target locales configured.');
+      return;
+    }
+    
+    const deletedFiles: string[] = [];
+    
+    // Process each file type and pattern
+    for (const [fileType, fileConfig] of Object.entries(config.files)) {
+      for (const pattern of fileConfig.include) {
+        for (const targetLocale of config.locale.targets) {
+          // Replace [locale] placeholder with target locale
+          const targetPattern = replaceLocaleInPattern(pattern, targetLocale);
+          
+          // Find all files matching the target pattern
+          const files = await glob(targetPattern);
+          
+          for (const file of files) {
+            try {
+              await fs.unlink(file);
+              deletedFiles.push(file);
+            } catch (error) {
+              // File might not exist, continue
+            }
+          }
+        }
+      }
+    }
+    
+    // Clear translation status from lock file
+    for (const fileEntry of Object.values(lock.files)) {
+      if (fileEntry.translations) {
+        fileEntry.translations = {};
+      }
+    }
+    
+    await saveLock(lock);
+    
+    if (deletedFiles.length > 0) {
+      console.log(`✓ Reset complete. Removed ${deletedFiles.length} generated translation files:`);
+      deletedFiles.forEach(file => console.log(`  - ${file}`));
+      console.log('\nTranslation status cleared. Run "openlocale translate" to regenerate translations.');
+    } else {
+      console.log('No translation files found. Lock file has been reset.');
+    }
   } catch (error) {
     if (error instanceof Error) {
       console.error('Error:', error.message);

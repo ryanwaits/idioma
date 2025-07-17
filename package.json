@@ -1,8 +1,11 @@
 {
   "name": "openlocale",
+  "version": "0.1.0",
   "module": "index.ts",
   "type": "module",
-  "private": true,
+  "bin": {
+    "openlocale": "./src/cli.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/glob": "^9.0.0",

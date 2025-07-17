@@ -5,7 +5,8 @@ import {
   translateCommand, 
   localeAddCommand, 
   localeRemoveCommand, 
-  localeListCommand 
+  localeListCommand,
+  resetCommand
 } from './commands';
 
 const program = new Command();
@@ -28,25 +29,27 @@ program
   .option('--costs', 'Show translation costs based on token usage')
   .action(translateCommand);
 
-// Locale commands
-const localeCmd = program
-  .command('locale')
-  .description('Manage target locales');
-
-localeCmd
-  .command('add <locale>')
-  .description('Add a target locale')
+// Direct locale commands
+program
+  .command('add <locales>')
+  .description('Add target locale(s) - supports comma-separated values (e.g., pt,fr)')
   .action(localeAddCommand);
 
-localeCmd
-  .command('remove <locale>')
-  .description('Remove a target locale')
+program
+  .command('remove <locales>')
+  .description('Remove target locale(s) - supports comma-separated values (e.g., pt,fr)')
   .action(localeRemoveCommand);
 
-localeCmd
+program
   .command('list')
   .description('List all configured locales')
   .action(localeListCommand);
+
+// Reset command
+program
+  .command('reset')
+  .description('Reset translation status and remove generated translation files')
+  .action(resetCommand);
 
 // Parse command line arguments
 program.parse();
