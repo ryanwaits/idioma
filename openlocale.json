@@ -1,0 +1,23 @@
+{
+  "projectId": "prj_53b8dc3dfc3160334916",
+  "locale": {
+    "source": "en",
+    "targets": [
+      "es"
+    ]
+  },
+  "files": {
+    "mdx": {
+      "include": [
+        "content/docs/**/*.mdx"
+      ]
+    }
+  },
+  "translation": {
+    "frontmatterFields": [
+      "title",
+      "description",
+      "sidebarTitle"
+    ]
+  }
+}
