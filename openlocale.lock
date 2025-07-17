@@ -5,8 +5,10 @@ files:
     translations:
       es: true
       fr: true
+      zh: true
   content/docs/en/tools/clarinet/index.mdx:
     content: 90d8c7441c095b156d922047f24fce00
     translations:
       es: true
       fr: true
+      zh: true

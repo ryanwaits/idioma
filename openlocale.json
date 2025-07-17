@@ -2,7 +2,7 @@
   "projectId": "prj_53b8dc3dfc3160334916",
   "locale": {
     "source": "en",
-    "targets": ["es", "fr"]
+    "targets": ["es", "fr", "zh"]
   },
   "files": {
     "mdx": {
