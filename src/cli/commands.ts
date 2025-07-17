@@ -28,6 +28,7 @@ export async function initCommand(): Promise<void> {
         frontmatterFields: ['title', 'description', 'sidebarTitle'],
         jsxAttributes: ['title', 'description', 'tag', 'alt', 'placeholder', 'label'],
         provider: 'anthropic',
+        model: 'claude-3-5-sonnet-20240620',
         rules: {
           patternsToSkip: ['^type:\\s*\\w+$'],
         },
@@ -51,7 +52,6 @@ export async function translateCommand(options: { costs?: boolean }): Promise<vo
     const lock = await loadLock();
     
     // Process all files
-    console.log('Starting translation...');
     const result = await processFiles(config, lock, { showCosts: options.costs });
     
     // Save updated lock file
@@ -163,7 +163,7 @@ export async function resetCommand(): Promise<void> {
       for (const pattern of fileConfig.include) {
         for (const targetLocale of config.locale.targets) {
           // Replace [locale] placeholder with target locale
-          const targetPattern = replaceLocaleInPattern(pattern, targetLocale);
+          const targetPattern = replaceLocaleInPattern(pattern, config.locale.source, targetLocale);
           
           // Find all files matching the target pattern
           const files = await glob(targetPattern);
@@ -176,16 +176,41 @@ export async function resetCommand(): Promise<void> {
               // File might not exist, continue
             }
           }
+          
+          // Try to remove empty directories after deleting files
+          if (files.length > 0) {
+            try {
+              // Get unique directories from deleted files
+              const dirsToCheck = new Set<string>();
+              for (const file of files) {
+                let dir = path.dirname(file);
+                // Add all parent directories up to the locale directory
+                while (dir.includes(`/${targetLocale}/`) || dir.endsWith(`/${targetLocale}`)) {
+                  dirsToCheck.add(dir);
+                  dir = path.dirname(dir);
+                }
+              }
+              
+              // Sort directories by depth (deepest first) to remove from bottom up
+              const sortedDirs = Array.from(dirsToCheck).sort((a, b) => b.split('/').length - a.split('/').length);
+              
+              for (const dir of sortedDirs) {
+                try {
+                  await fs.rmdir(dir);
+                } catch {
+                  // Directory not empty or doesn't exist, continue
+                }
+              }
+            } catch {
+              // Error removing directories, continue
+            }
+          }
         }
       }
     }
     
-    // Clear translation status from lock file
-    for (const fileEntry of Object.values(lock.files)) {
-      if (fileEntry.translations) {
-        fileEntry.translations = {};
-      }
-    }
+    // Reset lock file to initial state
+    lock.files = {};
     
     await saveLock(lock);
     

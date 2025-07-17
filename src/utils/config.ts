@@ -18,6 +18,7 @@ export const ConfigSchema = z.object({
     skipPatterns: z.array(z.string()).default([]),
     // New fields for extensibility
     provider: z.string().default('anthropic'),
+    model: z.string().optional(), // Optional model specification
     rules: z.object({
       patternsToSkip: z.array(z.string()).default([]), // No default patterns - intelligent detection instead
     }).optional(),

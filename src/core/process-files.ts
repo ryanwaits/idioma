@@ -53,7 +53,8 @@ export async function processFiles(
   // Display total cost if enabled
   if (options.showCosts && totalUsage && totalUsage.totalTokens > 0) {
     const provider = config.translation?.provider || 'anthropic';
-    const cost = calculateCost(totalUsage, provider);
+    const model = config.translation?.model;
+    const cost = calculateCost(totalUsage, provider, model);
     console.log(`\nTotal cost: ${cost.formattedCost} (${formatTokenCount(totalUsage.totalTokens)} tokens)`);
   }
   

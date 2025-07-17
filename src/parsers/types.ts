@@ -18,7 +18,9 @@ export interface TranslationStrategy {
     source: string,
     target: string,
     config: Config,
-    aiClient: any
+    aiClient: any,
+    model?: string,
+    provider?: string
   ): Promise<StrategyTranslationResult>;
   
   // Optional: Get strategy name for logging

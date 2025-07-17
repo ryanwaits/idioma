@@ -1,7 +1,7 @@
 version: 1
 files:
   content/docs/en/test.mdx:
-    content: 2b7c1c210ad85ab529ddf2a3231eadb5
+    content: a150eedf8085d9ec1f7a038fc7241150
     translations:
       es: true
       fr: true

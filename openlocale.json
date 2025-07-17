@@ -2,25 +2,15 @@
   "projectId": "prj_53b8dc3dfc3160334916",
   "locale": {
     "source": "en",
-    "targets": [
-      "es",
-      "fr",
-      "zh"
-    ]
+    "targets": ["es", "fr", "zh"]
   },
   "files": {
     "mdx": {
-      "include": [
-        "content/docs/[locale]/**/*.mdx"
-      ]
+      "include": ["content/docs/[locale]/**/*.mdx"]
     }
   },
   "translation": {
-    "frontmatterFields": [
-      "title",
-      "description",
-      "sidebarTitle"
-    ],
+    "frontmatterFields": ["title", "description", "sidebarTitle"],
     "jsxAttributes": [
       "title",
       "description",
