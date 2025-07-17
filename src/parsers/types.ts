@@ -1,4 +1,11 @@
 import { Config } from '../utils/config';
+import { TokenUsage } from '../utils/cost';
+
+// Result of a translation strategy
+export interface StrategyTranslationResult {
+  content: string;
+  usage: TokenUsage;
+}
 
 // Strategy interface for translation parsers
 export interface TranslationStrategy {
@@ -12,7 +19,7 @@ export interface TranslationStrategy {
     target: string,
     config: Config,
     aiClient: any
-  ): Promise<string>;
+  ): Promise<StrategyTranslationResult>;
   
   // Optional: Get strategy name for logging
   getName?(): string;

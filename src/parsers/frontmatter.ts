@@ -1,5 +1,11 @@
 import { Config } from '../utils/config';
-import { translateText } from '../ai/translate';
+import { translateText, TranslationResult } from '../ai/translate';
+import { TokenUsage, aggregateUsage } from '../utils/cost';
+
+export interface FrontmatterTranslationResult {
+  content: string;
+  usage: TokenUsage;
+}
 
 // Translate frontmatter values only, not keys
 export async function translateFrontmatter(
@@ -8,9 +14,10 @@ export async function translateFrontmatter(
   target: string,
   config: Config,
   aiClient: any
-): Promise<string> {
+): Promise<FrontmatterTranslationResult> {
   const translatableFields = config.translation?.frontmatterFields || ['title', 'description', 'sidebarTitle'];
   const lines = frontmatter.split('\n');
+  const usages: TokenUsage[] = [];
   
   const translatedLines = await Promise.all(lines.map(async (line) => {
     const match = line.match(/^(\s*)([\w-]+):\s*(.+)$/);
@@ -24,11 +31,15 @@ export async function translateFrontmatter(
       if (value === 'true' || value === 'false' || !isNaN(Number(value))) {
         return line;
       }
-      const translatedValue = await translateText(value, source, target, aiClient);
-      return `${indent}${key}: ${translatedValue}`;
+      const result = await translateText(value, source, target, aiClient);
+      usages.push(result.usage);
+      return `${indent}${key}: ${result.text}`;
     }
     return line;
   }));
   
-  return translatedLines.join('\n');
+  return {
+    content: translatedLines.join('\n'),
+    usage: aggregateUsage(usages)
+  };
 }

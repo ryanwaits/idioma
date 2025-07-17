@@ -25,6 +25,7 @@ program
 program
   .command('translate')
   .description('Translate files based on configuration')
+  .option('--costs', 'Show translation costs based on token usage')
   .action(translateCommand);
 
 // Locale commands

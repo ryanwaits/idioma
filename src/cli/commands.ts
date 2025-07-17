@@ -43,7 +43,7 @@ export async function initCommand(): Promise<void> {
 }
 
 // Translate command - process all files
-export async function translateCommand(): Promise<void> {
+export async function translateCommand(options: { costs?: boolean }): Promise<void> {
   try {
     // Load configuration
     const config = await loadConfig();
@@ -51,10 +51,10 @@ export async function translateCommand(): Promise<void> {
     
     // Process all files
     console.log('Starting translation...');
-    const updatedLock = await processFiles(config, lock);
+    const result = await processFiles(config, lock, { showCosts: options.costs });
     
     // Save updated lock file
-    await saveLock(updatedLock);
+    await saveLock(result.lock);
     console.log('Translation complete. Lockfile updated.');
   } catch (error) {
     if (error instanceof Error) {

@@ -3,8 +3,9 @@ import remarkMdx from 'remark-mdx';
 import remarkDirective from 'remark-directive';
 import { visit } from 'unist-util-visit';
 import { Config } from '../utils/config';
-import { translateText, translateBatch } from '../ai/translate';
-import { TranslationStrategy } from './types';
+import { translateText, translateBatch, TranslationResult } from '../ai/translate';
+import { TranslationStrategy, StrategyTranslationResult } from './types';
+import { TokenUsage, aggregateUsage } from '../utils/cost';
 
 // Add parent references to all nodes in the tree
 function addParentReferences(tree: any) {
@@ -70,7 +71,7 @@ export class MDXStrategy implements TranslationStrategy {
     target: string,
     config: Config,
     aiClient: any
-  ): Promise<string> {
+  ): Promise<StrategyTranslationResult> {
     // Parse MDX content with directive support
     const tree = remark()
       .use(remarkMdx)
@@ -138,7 +139,7 @@ export class MDXStrategy implements TranslationStrategy {
     
     // Batch translate all texts for performance
     const textsToTranslateArray = textsToTranslate.map(item => item.originalText);
-    const translations = await translateBatch(
+    const translationResults = await translateBatch(
       textsToTranslateArray,
       source,
       target,
@@ -147,19 +148,28 @@ export class MDXStrategy implements TranslationStrategy {
     
     // Apply translations
     textsToTranslate.forEach((item, index) => {
+      const translatedText = translationResults[index].text;
       if (item.type === 'text') {
-        item.node.value = translations[index];
+        item.node.value = translatedText;
       } else if (item.type === 'imageAlt') {
-        item.node.alt = translations[index];
+        item.node.alt = translatedText;
       } else if (item.type === 'attribute') {
-        item.node.value = translations[index];
+        item.node.value = translatedText;
       }
     });
     
+    // Aggregate usage from all translations
+    const totalUsage = aggregateUsage(translationResults.map(r => r.usage));
+    
     // Stringify back to MDX with directive support
-    return remark()
+    const translatedContent = remark()
       .use(remarkMdx)
       .use(remarkDirective)
       .stringify(tree);
+      
+    return {
+      content: translatedContent,
+      usage: totalUsage
+    };
   }
 }
