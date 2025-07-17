@@ -2,22 +2,14 @@
   "projectId": "prj_53b8dc3dfc3160334916",
   "locale": {
     "source": "en",
-    "targets": [
-      "es"
-    ]
+    "targets": ["es"]
   },
   "files": {
     "mdx": {
-      "include": [
-        "content/docs/**/*.mdx"
-      ]
+      "include": ["content/docs/[locale]/**/*.mdx"]
     }
   },
   "translation": {
-    "frontmatterFields": [
-      "title",
-      "description",
-      "sidebarTitle"
-    ]
+    "frontmatterFields": ["title", "description", "sidebarTitle"]
   }
 }

@@ -2,7 +2,5 @@ version: 1
 files:
   content/docs/en/test.mdx:
     content: 2b7c1c210ad85ab529ddf2a3231eadb5
-  content/docs/es/test.mdx:
-    content: 7651d9deb2365cf2514d8339618d7cc9
   content/docs/en/tools/clarinet/index.mdx:
     content: 90d8c7441c095b156d922047f24fce00
