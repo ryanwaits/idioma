@@ -4,7 +4,10 @@ import yaml from 'js-yaml';
 
 export interface LockFile {
   version: number;
-  files: Record<string, { content: string }>;
+  files: Record<string, { 
+    content: string;
+    translations?: Record<string, boolean>; // Track which locales have been translated
+  }>;
 }
 
 const lockPath = path.resolve('openlocale.lock');
@@ -12,7 +15,22 @@ const lockPath = path.resolve('openlocale.lock');
 export async function loadLock(): Promise<LockFile> {
   try {
     const data = await fs.readFile(lockPath, 'utf-8');
-    return yaml.load(data) as LockFile;
+    const lock = yaml.load(data) as LockFile;
+    
+    // Migrate old lock files that don't have translations tracking
+    let needsMigration = false;
+    for (const [filePath, entry] of Object.entries(lock.files)) {
+      if (!entry.translations) {
+        entry.translations = {};
+        needsMigration = true;
+      }
+    }
+    
+    if (needsMigration) {
+      await saveLock(lock);
+    }
+    
+    return lock;
   } catch {
     return { version: 1, files: {} };
   }

@@ -24,8 +24,11 @@ export async function translateFile(
   const content = await fs.readFile(filePath, 'utf-8');
   const currentHash = generateHash(content);
 
-  // Check if file has changed
-  if (lock.files[filePath] && lock.files[filePath].content === currentHash) {
+  // Check if file has changed or if translation doesn't exist for target locale
+  const fileEntry = lock.files[filePath];
+  const hasTranslation = fileEntry?.translations?.[target];
+  
+  if (fileEntry && fileEntry.content === currentHash && hasTranslation) {
     console.log(`Skipped (unchanged): ${filePath} -> ${target}`);
     return { usage: undefined };
   }
@@ -94,8 +97,16 @@ export async function translateFile(
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
   await fs.writeFile(outputPath, translatedContent);
 
-  // Update lock file
-  lock.files[filePath] = { content: currentHash };
+  // Update lock file with translation status
+  if (!lock.files[filePath]) {
+    lock.files[filePath] = { content: currentHash, translations: {} };
+  } else {
+    lock.files[filePath].content = currentHash;
+    if (!lock.files[filePath].translations) {
+      lock.files[filePath].translations = {};
+    }
+  }
+  lock.files[filePath].translations![target] = true;
   
   // Calculate total usage and cost
   const totalUsage = aggregateUsage(usages);
