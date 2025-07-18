@@ -12,3 +12,17 @@ files:
       es: true
       fr: true
       zh: true
+  examples/content/en/guide.mdx:
+    content: f9ff656ac65e81e0d632774e75913b7abf2162de077d716f6739492f55faa7ec
+    translations:
+      es: true
+  /Users/ryanwaits/Code/projects/openlocale/examples/content/en/api.mdx:
+    content: 144767ea50771067dc225b3ba2c2c8c3
+    translations:
+      es: true
+      fr: true
+  /Users/ryanwaits/Code/projects/openlocale/examples/content/en/guide.mdx:
+    content: d17fee6592ad8fb0bd9b5829c91c5bed
+    translations:
+      es: true
+      fr: true

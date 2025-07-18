@@ -52,10 +52,17 @@ export async function translateText(
   text: string,
   source: string,
   target: string,
-  client: any,
+  clientOrProvider: any,
   model?: string,
   provider?: string,
 ): Promise<TranslationResult> {
+  // Handle both client instance and provider string
+  const client = typeof clientOrProvider === "string" 
+    ? createAiClient(clientOrProvider) 
+    : clientOrProvider;
+  const actualProvider = typeof clientOrProvider === "string" 
+    ? clientOrProvider 
+    : (provider || "anthropic");
   // Preserve leading/trailing whitespace
   const leadingWhitespace = text.match(/^\s*/)?.[0] || "";
   const trailingWhitespace = text.match(/\s*$/)?.[0] || "";
@@ -70,7 +77,7 @@ export async function translateText(
   }
 
   const result = await generateText({
-    model: client(model || getDefaultModel(provider || "anthropic")),
+    model: client(model || getDefaultModel(actualProvider)),
     system:
       'You are a translation assistant. You MUST return ONLY the translated text without any additional commentary, explanations, or phrases like "Here is the translation". Do not add any text before or after the translation.',
     prompt: `Translate the following text from ${source} to ${target}. Preserve exact formatting, tone, and structure (e.g., Markdown headers, links, code blocks).
@@ -94,13 +101,13 @@ export async function translateBatch(
   texts: string[],
   source: string,
   target: string,
-  client: any,
+  clientOrProvider: any,
   model?: string,
   provider?: string,
 ): Promise<TranslationResult[]> {
   // Process translations in parallel for better performance
   return Promise.all(
-    texts.map((text) => translateText(text, source, target, client, model, provider)),
+    texts.map((text) => translateText(text, source, target, clientOrProvider, model, provider)),
   );
 }
 
@@ -109,10 +116,10 @@ export async function translateTextSimple(
   text: string,
   source: string,
   target: string,
-  client: any,
+  clientOrProvider: any,
   model?: string,
   provider?: string,
 ): Promise<string> {
-  const result = await translateText(text, source, target, client, model, provider);
+  const result = await translateText(text, source, target, clientOrProvider, model, provider);
   return result.text;
 }

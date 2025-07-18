@@ -41,3 +41,26 @@ export async function loadConfig(): Promise<Config> {
 export async function saveConfig(config: Config): Promise<void> {
   await fs.writeFile(configPath, JSON.stringify(config, null, 2));
 }
+
+export function mergeConfig(base: Config, overrides: Partial<Config>): Config {
+  return {
+    ...base,
+    ...overrides,
+    locale: {
+      ...base.locale,
+      ...overrides.locale,
+    },
+    files: {
+      ...base.files,
+      ...overrides.files,
+    },
+    translation: {
+      ...base.translation,
+      ...overrides.translation,
+      rules: {
+        ...base.translation?.rules,
+        ...overrides.translation?.rules,
+      },
+    },
+  };
+}

@@ -1,0 +1,32 @@
+---
+title: API Reference
+description: Complete API documentation
+---
+
+# API Reference
+
+Our API provides programmatic access to all features.
+
+## Authentication
+
+All API requests require authentication using an API key:
+
+```typescript
+const client = new APIClient({
+  apiKey: process.env.API_KEY
+});
+```
+
+## Endpoints
+
+### POST /api/translate
+
+Translate content between languages.
+
+```json
+{
+  "content": "Hello World",
+  "sourceLocale": "en",
+  "targetLocale": "es"
+}
+```

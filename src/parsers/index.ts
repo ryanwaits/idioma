@@ -19,3 +19,6 @@ export const strategies: TranslationStrategy[] = [
 export function findStrategy(filePath: string): TranslationStrategy | undefined {
   return strategies.find(strategy => strategy.canHandle(filePath));
 }
+
+// Alias for SDK compatibility
+export const getFileStrategy = findStrategy;
