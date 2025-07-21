@@ -4,7 +4,7 @@ import { logger } from 'hono/logger';
 import { z } from 'zod';
 import { OpenLocale } from '../../sdk/src/OpenLocale';
 import type { OpenLocaleConfig } from '../../sdk/src/types';
-import { unkeyAuth, type AuthContext } from './middleware/auth';
+import { type AuthContext, unkeyAuth } from './middleware/auth';
 import { standardRateLimit, strictRateLimit } from './middleware/rate-limit';
 
 // Type for Hono context with auth
@@ -37,11 +37,14 @@ const app = new Hono<{ Variables: Variables }>();
 app.use('*', logger());
 
 // CORS for API routes
-app.use('/api/*', cors({
-  origin: '*',
-  allowHeaders: ['Content-Type', 'X-API-Key', 'Authorization'],
-  allowMethods: ['POST', 'GET', 'OPTIONS'],
-}));
+app.use(
+  '/api/*',
+  cors({
+    origin: '*',
+    allowHeaders: ['Content-Type', 'X-API-Key', 'Authorization'],
+    allowMethods: ['POST', 'GET', 'OPTIONS'],
+  })
+);
 
 // Public endpoints
 app.get('/', (c) => {
@@ -71,8 +74,8 @@ app.get('/', (c) => {
 });
 
 app.get('/api/health', (c) => {
-  return c.json({ 
-    status: 'ok', 
+  return c.json({
+    status: 'ok',
     timestamp: new Date().toISOString(),
     providers: {
       anthropic: !!process.env.ANTHROPIC_API_KEY,
@@ -95,7 +98,8 @@ app.post('/api/translate', async (c) => {
     const params = TranslateRequestSchema.parse(body);
 
     // Get provider preference from API key metadata or use default
-    const provider = (auth.meta?.provider as string) || process.env.TRANSLATION_PROVIDER || 'anthropic';
+    const provider =
+      (auth.meta?.provider as string) || process.env.TRANSLATION_PROVIDER || 'anthropic';
     const model = auth.meta?.model as string;
 
     // Initialize OpenLocale SDK
@@ -138,7 +142,6 @@ app.post('/api/translate', async (c) => {
       },
       ratelimit: auth.ratelimit,
     });
-
   } catch (error) {
     if (error instanceof z.ZodError) {
       return c.json(
@@ -169,7 +172,8 @@ app.post('/api/translate/batch', async (c) => {
     const body = await c.req.json();
     const params = BatchTranslateRequestSchema.parse(body);
 
-    const provider = (auth.meta?.provider as string) || process.env.TRANSLATION_PROVIDER || 'anthropic';
+    const provider =
+      (auth.meta?.provider as string) || process.env.TRANSLATION_PROVIDER || 'anthropic';
     const model = auth.meta?.model as string;
 
     const config: OpenLocaleConfig = {
@@ -183,7 +187,7 @@ app.post('/api/translate/batch', async (c) => {
     // Translate to all target languages
     const startTime = Date.now();
     const translations: Record<string, any> = {};
-    let totalUsage = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
+    const totalUsage = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
     let totalCost = 0;
 
     for (const targetLocale of params.targetLocales) {
@@ -229,7 +233,6 @@ app.post('/api/translate/batch', async (c) => {
       },
       ratelimit: auth.ratelimit,
     });
-
   } catch (error) {
     if (error instanceof z.ZodError) {
       return c.json(
@@ -290,6 +293,8 @@ if (import.meta.main) {
   console.log(`📝 API Documentation: http://localhost:${PORT}/`);
   console.log('\n⚙️  Configuration:');
   console.log(`   - Unkey API: ${process.env.UNKEY_API_ID ? '✓ Configured' : '✗ Not configured'}`);
-  console.log(`   - Anthropic: ${process.env.ANTHROPIC_API_KEY ? '✓ Available' : '✗ Not available'}`);
+  console.log(
+    `   - Anthropic: ${process.env.ANTHROPIC_API_KEY ? '✓ Available' : '✗ Not available'}`
+  );
   console.log(`   - OpenAI: ${process.env.OPENAI_API_KEY ? '✓ Available' : '✗ Not available'}`);
 }

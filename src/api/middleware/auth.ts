@@ -1,5 +1,5 @@
-import { Context, Next } from 'hono';
 import { Unkey } from '@unkey/api';
+import type { Context, Next } from 'hono';
 
 // Initialize Unkey client
 const unkey = new Unkey({
@@ -106,7 +106,7 @@ export async function unkeyAuth(c: Context, next: Next) {
 export function requirePermission(permission: string) {
   return async (c: Context, next: Next) => {
     const auth = c.get('auth') as AuthContext;
-    
+
     if (!auth) {
       return c.json(
         {
@@ -118,7 +118,7 @@ export function requirePermission(permission: string) {
     }
 
     // Check if user has required permission in meta
-    const permissions = auth.meta?.permissions as string[] || [];
+    const permissions = (auth.meta?.permissions as string[]) || [];
     if (!permissions.includes(permission)) {
       return c.json(
         {

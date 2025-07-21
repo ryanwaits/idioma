@@ -1,7 +1,7 @@
-import { generateText } from "ai";
-import { createAnthropic } from "@ai-sdk/anthropic";
-import { createOpenAI } from "@ai-sdk/openai";
-import type { TokenUsage } from "../utils/cost";
+import { createAnthropic } from '@ai-sdk/anthropic';
+import { createOpenAI } from '@ai-sdk/openai';
+import { generateText } from 'ai';
+import type { TokenUsage } from '../utils/cost';
 
 // Result types that include usage metadata
 export interface TranslationResult {
@@ -12,35 +12,33 @@ export interface TranslationResult {
 // Get default model for each provider
 export function getDefaultModel(provider: string): string {
   switch (provider) {
-    case "anthropic":
-      return "claude-3-5-sonnet-20240620";
-    case "openai":
-      return "gpt-4o-2024-08-06";
+    case 'anthropic':
+      return 'claude-3-5-sonnet-20240620';
+    case 'openai':
+      return 'gpt-4o-2024-08-06';
     default:
-      return "claude-3-5-sonnet-20240620";
+      return 'claude-3-5-sonnet-20240620';
   }
 }
 
 // AI Provider factory - returns configured AI client
 export function createAiClient(provider: string, apiKey?: string): any {
   switch (provider) {
-    case "anthropic":
+    case 'anthropic': {
       const anthropicKey = apiKey || process.env.ANTHROPIC_API_KEY;
       if (!anthropicKey) {
-        throw new Error(
-          "Anthropic API key not found. Set ANTHROPIC_API_KEY environment variable.",
-        );
+        throw new Error('Anthropic API key not found. Set ANTHROPIC_API_KEY environment variable.');
       }
       return createAnthropic({ apiKey: anthropicKey });
+    }
 
-    case "openai":
+    case 'openai': {
       const openaiKey = apiKey || process.env.OPENAI_API_KEY;
       if (!openaiKey) {
-        throw new Error(
-          "OpenAI API key not found. Set OPENAI_API_KEY environment variable.",
-        );
+        throw new Error('OpenAI API key not found. Set OPENAI_API_KEY environment variable.');
       }
       return createOpenAI({ apiKey: openaiKey });
+    }
 
     default:
       throw new Error(`Unsupported AI provider: ${provider}`);
@@ -54,18 +52,16 @@ export async function translateText(
   target: string,
   clientOrProvider: any,
   model?: string,
-  provider?: string,
+  provider?: string
 ): Promise<TranslationResult> {
   // Handle both client instance and provider string
-  const client = typeof clientOrProvider === "string" 
-    ? createAiClient(clientOrProvider) 
-    : clientOrProvider;
-  const actualProvider = typeof clientOrProvider === "string" 
-    ? clientOrProvider 
-    : (provider || "anthropic");
+  const client =
+    typeof clientOrProvider === 'string' ? createAiClient(clientOrProvider) : clientOrProvider;
+  const actualProvider =
+    typeof clientOrProvider === 'string' ? clientOrProvider : provider || 'anthropic';
   // Preserve leading/trailing whitespace
-  const leadingWhitespace = text.match(/^\s*/)?.[0] || "";
-  const trailingWhitespace = text.match(/\s*$/)?.[0] || "";
+  const leadingWhitespace = text.match(/^\s*/)?.[0] || '';
+  const trailingWhitespace = text.match(/\s*$/)?.[0] || '';
   const trimmedText = text.trim();
 
   // Skip empty text
@@ -87,8 +83,7 @@ ${trimmedText}`,
   });
 
   // Re-apply the original whitespace
-  const translatedText =
-    leadingWhitespace + result.text.trim() + trailingWhitespace;
+  const translatedText = leadingWhitespace + result.text.trim() + trailingWhitespace;
 
   return {
     text: translatedText,
@@ -103,11 +98,11 @@ export async function translateBatch(
   target: string,
   clientOrProvider: any,
   model?: string,
-  provider?: string,
+  provider?: string
 ): Promise<TranslationResult[]> {
   // Process translations in parallel for better performance
   return Promise.all(
-    texts.map((text) => translateText(text, source, target, clientOrProvider, model, provider)),
+    texts.map((text) => translateText(text, source, target, clientOrProvider, model, provider))
   );
 }
 
@@ -118,7 +113,7 @@ export async function translateTextSimple(
   target: string,
   clientOrProvider: any,
   model?: string,
-  provider?: string,
+  provider?: string
 ): Promise<string> {
   const result = await translateText(text, source, target, clientOrProvider, model, provider);
   return result.text;

@@ -1,12 +1,12 @@
 #!/usr/bin/env bun
 import { Command } from 'commander';
-import { 
-  initCommand, 
-  translateCommand, 
-  localeAddCommand, 
-  localeRemoveCommand, 
+import {
+  initCommand,
+  localeAddCommand,
   localeListCommand,
-  resetCommand
+  localeRemoveCommand,
+  resetCommand,
+  translateCommand,
 } from './commands';
 
 const program = new Command();
@@ -17,10 +17,7 @@ program
   .version('0.1.0');
 
 // Init command
-program
-  .command('init')
-  .description('Initialize OpenLocale configuration')
-  .action(initCommand);
+program.command('init').description('Initialize OpenLocale configuration').action(initCommand);
 
 // Translate command
 program
@@ -40,10 +37,7 @@ program
   .description('Remove target locale(s) - supports comma-separated values (e.g., pt,fr)')
   .action(localeRemoveCommand);
 
-program
-  .command('list')
-  .description('List all configured locales')
-  .action(localeListCommand);
+program.command('list').description('List all configured locales').action(localeListCommand);
 
 // Reset command
 program

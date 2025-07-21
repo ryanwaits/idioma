@@ -1,14 +1,21 @@
-import fs from 'fs/promises';
-import path from 'path';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { glob } from 'glob';
-import { Config, loadConfig, saveConfig, loadLock, saveLock, replaceLocaleInPattern } from '../utils';
 import { processFiles } from '../core';
+import {
+  type Config,
+  loadConfig,
+  loadLock,
+  replaceLocaleInPattern,
+  saveConfig,
+  saveLock,
+} from '../utils';
 
 // Init command - create config file
 export async function initCommand(): Promise<void> {
   const configPath = path.resolve('openlocale.json');
-  
+
   try {
     await fs.access(configPath);
     console.log('Configuration file already exists.');
@@ -34,7 +41,7 @@ export async function initCommand(): Promise<void> {
         },
       },
     };
-    
+
     await saveConfig(defaultConfig);
     console.log('✓ Created openlocale.json');
     console.log('\nNext steps:');
@@ -50,10 +57,10 @@ export async function translateCommand(options: { costs?: boolean }): Promise<vo
     // Load configuration
     const config = await loadConfig();
     const lock = await loadLock();
-    
+
     // Process all files
     const result = await processFiles(config, lock, { showCosts: options.costs });
-    
+
     // Save updated lock file
     await saveLock(result.lock);
     console.log('Translation complete. Lockfile updated.');
@@ -71,16 +78,16 @@ export async function translateCommand(options: { costs?: boolean }): Promise<vo
 export async function localeAddCommand(locales: string): Promise<void> {
   try {
     const config = await loadConfig();
-    const localeList = locales.split(',').map(l => l.trim());
+    const localeList = locales.split(',').map((l) => l.trim());
     const added: string[] = [];
-    
+
     for (const locale of localeList) {
       if (!config.locale.targets.includes(locale)) {
         config.locale.targets.push(locale);
         added.push(locale);
       }
     }
-    
+
     if (added.length > 0) {
       await saveConfig(config);
       console.log(`✓ Added locales: ${added.join(', ')}`);
@@ -101,9 +108,9 @@ export async function localeAddCommand(locales: string): Promise<void> {
 export async function localeRemoveCommand(locales: string): Promise<void> {
   try {
     const config = await loadConfig();
-    const localeList = locales.split(',').map(l => l.trim());
+    const localeList = locales.split(',').map((l) => l.trim());
     const removed: string[] = [];
-    
+
     for (const locale of localeList) {
       const index = config.locale.targets.indexOf(locale);
       if (index !== -1) {
@@ -111,7 +118,7 @@ export async function localeRemoveCommand(locales: string): Promise<void> {
         removed.push(locale);
       }
     }
-    
+
     if (removed.length > 0) {
       await saveConfig(config);
       console.log(`✓ Removed locales: ${removed.join(', ')}`);
@@ -132,9 +139,12 @@ export async function localeRemoveCommand(locales: string): Promise<void> {
 export async function localeListCommand(): Promise<void> {
   try {
     const config = await loadConfig();
-    
+
     console.log('Source locale:', config.locale.source);
-    console.log('Target locales:', config.locale.targets.length ? config.locale.targets.join(', ') : 'None');
+    console.log(
+      'Target locales:',
+      config.locale.targets.length ? config.locale.targets.join(', ') : 'None'
+    );
   } catch (error) {
     if (error instanceof Error) {
       console.error('Error:', error.message);
@@ -150,33 +160,33 @@ export async function resetCommand(): Promise<void> {
   try {
     const config = await loadConfig();
     const lock = await loadLock();
-    
+
     if (config.locale.targets.length === 0) {
       console.log('No target locales configured.');
       return;
     }
-    
+
     const deletedFiles: string[] = [];
-    
+
     // Process each file type and pattern
-    for (const [fileType, fileConfig] of Object.entries(config.files)) {
+    for (const [_fileType, fileConfig] of Object.entries(config.files)) {
       for (const pattern of fileConfig.include) {
         for (const targetLocale of config.locale.targets) {
           // Replace [locale] placeholder with target locale
           const targetPattern = replaceLocaleInPattern(pattern, config.locale.source, targetLocale);
-          
+
           // Find all files matching the target pattern
           const files = await glob(targetPattern);
-          
+
           for (const file of files) {
             try {
               await fs.unlink(file);
               deletedFiles.push(file);
-            } catch (error) {
+            } catch (_error) {
               // File might not exist, continue
             }
           }
-          
+
           // Try to remove empty directories after deleting files
           if (files.length > 0) {
             try {
@@ -190,10 +200,12 @@ export async function resetCommand(): Promise<void> {
                   dir = path.dirname(dir);
                 }
               }
-              
+
               // Sort directories by depth (deepest first) to remove from bottom up
-              const sortedDirs = Array.from(dirsToCheck).sort((a, b) => b.split('/').length - a.split('/').length);
-              
+              const sortedDirs = Array.from(dirsToCheck).sort(
+                (a, b) => b.split('/').length - a.split('/').length
+              );
+
               for (const dir of sortedDirs) {
                 try {
                   await fs.rmdir(dir);
@@ -208,16 +220,18 @@ export async function resetCommand(): Promise<void> {
         }
       }
     }
-    
+
     // Reset lock file to initial state
     lock.files = {};
-    
+
     await saveLock(lock);
-    
+
     if (deletedFiles.length > 0) {
       console.log(`✓ Reset complete. Removed ${deletedFiles.length} generated translation files:`);
-      deletedFiles.forEach(file => console.log(`  - ${file}`));
-      console.log('\nTranslation status cleared. Run "openlocale translate" to regenerate translations.');
+      deletedFiles.forEach((file) => console.log(`  - ${file}`));
+      console.log(
+        '\nTranslation status cleared. Run "openlocale translate" to regenerate translations.'
+      );
     } else {
       console.log('No translation files found. Lock file has been reset.');
     }

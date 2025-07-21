@@ -15,10 +15,7 @@ export class OpenLocaleClient {
   /**
    * Make an API request
    */
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const response = await fetch(`${this.apiUrl}${endpoint}`, {
       ...options,
       headers: {
@@ -84,7 +81,7 @@ export class OpenLocaleClient {
 }
 
 // Example usage:
-async function example() {
+async function _example() {
   const client = new OpenLocaleClient('your_api_key');
 
   // Simple translation
@@ -100,7 +97,7 @@ async function example() {
     targetLocales: ['es', 'fr', 'de'],
     format: 'md',
   });
-  
+
   for (const [locale, translation] of Object.entries(batchResult.data.translations)) {
     console.log(`${locale}: ${translation.content}`);
   }

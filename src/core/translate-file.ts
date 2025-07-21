@@ -1,9 +1,17 @@
-import fs from 'fs/promises';
-import path from 'path';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import ora from 'ora';
-import { Config, LockFile, generateHash, generateOutputPath, TokenUsage, aggregateUsage, calculateCost, formatCost } from '../utils';
 import { createAiClient } from '../ai';
 import { findStrategy, translateFrontmatter } from '../parsers';
+import {
+  aggregateUsage,
+  type Config,
+  calculateCost,
+  generateHash,
+  generateOutputPath,
+  type LockFile,
+  type TokenUsage,
+} from '../utils';
 
 export interface TranslateFileOptions {
   showCosts?: boolean;
@@ -29,19 +37,19 @@ export async function translateFile(
   // Check if file has changed or if translation doesn't exist for target locale
   const fileEntry = lock.files[filePath];
   const fileChanged = fileEntry && fileEntry.content !== currentHash;
-  
+
   // If source file changed, clear all translation flags
   if (fileChanged && fileEntry.translations) {
     fileEntry.translations = {};
   }
-  
+
   const hasTranslation = fileEntry?.translations?.[target];
-  
+
   if (fileEntry && fileEntry.content === currentHash && hasTranslation) {
     console.log(`Skipped (unchanged): ${filePath} -> ${target}`);
     return { usage: undefined };
   }
-  
+
   // Create spinner for active translation
   spinner = ora(`Translating ${path.basename(filePath)} -> ${target}`).start();
 
@@ -56,60 +64,60 @@ export async function translateFile(
 
     // Check if content has frontmatter
     const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-    
+
     if (frontmatterMatch) {
-    const frontmatter = frontmatterMatch[1];
-    const mainContent = frontmatterMatch[2];
-    
-    // Translate frontmatter
-    const frontmatterResult = await translateFrontmatter(
-      frontmatter,
-      source,
-      target,
-      config,
-      aiClient,
-      model,
-      provider
-    );
-    usages.push(frontmatterResult.usage);
-    
-    // Find appropriate strategy for the file type
-    const strategy = findStrategy(filePath);
-    if (!strategy) {
-      throw new Error(`No translation strategy found for file: ${filePath}`);
-    }
-    
-    // Translate main content using strategy
-    const mainResult = await strategy.translate(
-      mainContent,
-      source,
-      target,
-      config,
-      aiClient,
-      model,
-      provider
-    );
-    usages.push(mainResult.usage);
-    
-    translatedContent = `---\n${frontmatterResult.content}\n---\n${mainResult.content}`;
-  } else {
-    // No frontmatter, translate entire content
-    const strategy = findStrategy(filePath);
-    if (!strategy) {
-      throw new Error(`No translation strategy found for file: ${filePath}`);
-    }
-    
-    const result = await strategy.translate(
-      content,
-      source,
-      target,
-      config,
-      aiClient,
-      model,
-      provider
-    );
-    usages.push(result.usage);
-    translatedContent = result.content;
+      const frontmatter = frontmatterMatch[1];
+      const mainContent = frontmatterMatch[2];
+
+      // Translate frontmatter
+      const frontmatterResult = await translateFrontmatter(
+        frontmatter,
+        source,
+        target,
+        config,
+        aiClient,
+        model,
+        provider
+      );
+      usages.push(frontmatterResult.usage);
+
+      // Find appropriate strategy for the file type
+      const strategy = findStrategy(filePath);
+      if (!strategy) {
+        throw new Error(`No translation strategy found for file: ${filePath}`);
+      }
+
+      // Translate main content using strategy
+      const mainResult = await strategy.translate(
+        mainContent,
+        source,
+        target,
+        config,
+        aiClient,
+        model,
+        provider
+      );
+      usages.push(mainResult.usage);
+
+      translatedContent = `---\n${frontmatterResult.content}\n---\n${mainResult.content}`;
+    } else {
+      // No frontmatter, translate entire content
+      const strategy = findStrategy(filePath);
+      if (!strategy) {
+        throw new Error(`No translation strategy found for file: ${filePath}`);
+      }
+
+      const result = await strategy.translate(
+        content,
+        source,
+        target,
+        config,
+        aiClient,
+        model,
+        provider
+      );
+      usages.push(result.usage);
+      translatedContent = result.content;
     }
 
     // Generate output path and write translated content
@@ -127,10 +135,10 @@ export async function translateFile(
       }
     }
     lock.files[filePath].translations![target] = true;
-    
+
     // Calculate total usage and cost
     const totalUsage = aggregateUsage(usages);
-    
+
     // Stop spinner and show success
     if (options.showCosts && totalUsage.totalTokens > 0) {
       const cost = calculateCost(totalUsage, provider, model);
@@ -138,7 +146,7 @@ export async function translateFile(
     } else {
       spinner.succeed(`${path.basename(filePath)} -> ${target}`);
     }
-    
+
     return { usage: totalUsage };
   } catch (error) {
     // Stop spinner with error

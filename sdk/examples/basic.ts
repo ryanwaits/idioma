@@ -45,7 +45,7 @@ This is a **powerful** translation tool that:
   console.log(markdownContent);
   console.log('\nTranslated to French:');
   console.log(mdResult.translatedContent);
-  
+
   if (mdResult.cost) {
     console.log(`\nCost: ${mdResult.cost.formattedCost}`);
     console.log(`Tokens: ${mdResult.usage?.totalTokens}`);
@@ -99,8 +99,8 @@ const result = await openlocale.translateContent({
   });
 
   console.log('Translated MDX to Chinese:');
-  console.log(mdxResult.translatedContent.split('\n').slice(0, 10).join('\n') + '...');
-  
+  console.log(`${mdxResult.translatedContent.split('\n').slice(0, 10).join('\n')}...`);
+
   if (mdxResult.cost) {
     console.log(`\nCost: ${mdxResult.cost.formattedCost}`);
   }

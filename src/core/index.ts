@@ -1,2 +1,2 @@
-export * from './translate-file';
 export * from './process-files';
+export * from './translate-file';

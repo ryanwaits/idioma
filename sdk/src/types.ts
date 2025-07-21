@@ -1,10 +1,9 @@
-import type { z } from "zod";
-import type { TokenUsage, CostCalculation } from "@/utils/cost";
-import type { Config } from "@/utils/config";
+import type { Config } from '@/utils/config';
+import type { CostCalculation, TokenUsage } from '@/utils/cost';
 
 export interface TranslateContentParams {
   content: string;
-  format: "mdx" | "md" | "string";
+  format: 'mdx' | 'md' | 'string';
   sourceLocale: string;
   targetLocale: string;
   trackCosts?: boolean;
@@ -67,7 +66,7 @@ export interface CostEstimate {
 
 export interface OpenLocaleConfig extends Partial<Config> {
   apiKey?: string;
-  provider?: "anthropic" | "openai";
+  provider?: 'anthropic' | 'openai';
   model?: string;
   cachePath?: string;
 }

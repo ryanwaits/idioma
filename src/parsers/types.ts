@@ -1,5 +1,5 @@
-import { Config } from '../utils/config';
-import { TokenUsage } from '../utils/cost';
+import type { Config } from '../utils/config';
+import type { TokenUsage } from '../utils/cost';
 
 // Result of a translation strategy
 export interface StrategyTranslationResult {
@@ -11,7 +11,7 @@ export interface StrategyTranslationResult {
 export interface TranslationStrategy {
   // Check if this strategy can handle the given file
   canHandle(filePath: string): boolean;
-  
+
   // Translate the content using this strategy
   translate(
     content: string,
@@ -22,7 +22,7 @@ export interface TranslationStrategy {
     model?: string,
     provider?: string
   ): Promise<StrategyTranslationResult>;
-  
+
   // Optional: Get strategy name for logging
   getName?(): string;
 }

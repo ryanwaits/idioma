@@ -1,40 +1,40 @@
 // Cost calculation utilities for AI translation services
-import { getDefaultModel } from "../ai/translate";
+import { getDefaultModel } from '../ai/translate';
 
 // Pricing per million tokens (as of 2024)
 export const PRICING = {
   anthropic: {
-    "claude-3-5-sonnet-20240620": {
+    'claude-3-5-sonnet-20240620': {
       input: 3.0, // $3 per million input tokens
       output: 15.0, // $15 per million output tokens
     },
-    "claude-3-7-sonnet-20250219": {
+    'claude-3-7-sonnet-20250219': {
       input: 3.0, // $3 per million input tokens
       output: 15.0, // $15 per million output tokens
     },
-    "claude-4-sonnet-20250514": {
+    'claude-4-sonnet-20250514': {
       input: 3.0, // $3 per million input tokens
       output: 15.0, // $15 per million output tokens
     },
-    "claude-4-opus-20250514": {
+    'claude-4-opus-20250514': {
       input: 15.0, // $15 per million input tokens
       output: 75.0, // $75 per million output tokens
     },
   },
   openai: {
-    "gpt-4o": {
+    'gpt-4o': {
       input: 5.0, // $5 per million input tokens
       output: 15.0, // $15 per million output tokens
     },
-    "gpt-4o-2024-08-06": {
+    'gpt-4o-2024-08-06': {
       input: 5.0, // $5 per million input tokens
       output: 15.0, // $15 per million output tokens
     },
-    "gpt-4o-mini": {
+    'gpt-4o-mini': {
       input: 0.15, // $0.15 per million input tokens
       output: 0.6, // $0.60 per million output tokens
     },
-    "o3-mini": {
+    'o3-mini': {
       input: 1.1, // $1.10 per million input tokens
       output: 4.4, // $4.40 per million output tokens
     },
@@ -44,7 +44,7 @@ export const PRICING = {
     },
   },
   moonshot: {
-    "kimi-k2": {
+    'kimi-k2': {
       input: 0.14, // $0.14 per million input tokens
       output: 2.49, // $2.49 per million output tokens
     },
@@ -69,19 +69,18 @@ export interface CostCalculation {
  */
 export function calculateCost(
   usage: TokenUsage,
-  provider: string = "anthropic",
-  model?: string,
+  provider: string = 'anthropic',
+  model?: string
 ): CostCalculation {
   const actualModel = model || getDefaultModel(provider);
   const providerPricing = PRICING[provider as keyof typeof PRICING];
-  const pricing =
-    providerPricing?.[actualModel as keyof typeof providerPricing];
+  const pricing = providerPricing?.[actualModel as keyof typeof providerPricing];
 
   if (!pricing) {
     console.warn(
-      `No pricing found for ${provider}/${actualModel}, using default Anthropic pricing`,
+      `No pricing found for ${provider}/${actualModel}, using default Anthropic pricing`
     );
-    const defaultPricing = PRICING.anthropic["claude-3-5-sonnet-20240620"];
+    const defaultPricing = PRICING.anthropic['claude-3-5-sonnet-20240620'];
     return calculateCostWithPricing(usage, defaultPricing);
   }
 
@@ -90,7 +89,7 @@ export function calculateCost(
 
 function calculateCostWithPricing(
   usage: TokenUsage,
-  pricing: { input: number; output: number },
+  pricing: { input: number; output: number }
 ): CostCalculation {
   // Convert from per-million to per-token pricing
   const inputCostPerToken = pricing.input / 1_000_000;
@@ -113,7 +112,7 @@ function calculateCostWithPricing(
  */
 export function formatCost(cost: number): string {
   if (cost < 0.01) {
-    return "< $0.01";
+    return '< $0.01';
   }
   return `$${cost.toFixed(2)}`;
 }
@@ -128,7 +127,7 @@ export function aggregateUsage(usages: TokenUsage[]): TokenUsage {
       completionTokens: total.completionTokens + usage.completionTokens,
       totalTokens: total.totalTokens + usage.totalTokens,
     }),
-    { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+    { promptTokens: 0, completionTokens: 0, totalTokens: 0 }
   );
 }
 

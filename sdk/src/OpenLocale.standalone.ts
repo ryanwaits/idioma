@@ -1,16 +1,16 @@
-import { resolve } from "path";
-import { ConfigError, TranslationError, FileError } from "./errors";
+import { resolve } from 'node:path';
+import { ConfigError } from './errors';
 import type {
+  CostEstimate,
+  CostEstimateParams,
   OpenLocaleConfig,
+  ProcessFilesResult,
   TranslateContentParams,
   TranslateContentResult,
   TranslateFileParams,
   TranslateFileResult,
   TranslateFilesParams,
-  ProcessFilesResult,
-  CostEstimateParams,
-  CostEstimate,
-} from "./types";
+} from './types';
 
 /**
  * Standalone OpenLocale SDK that can be published independently
@@ -21,25 +21,25 @@ export class OpenLocale {
 
   constructor(options: OpenLocaleConfig = {}) {
     // Validate API key
-    const provider = options.provider || "anthropic";
-    
-    if (provider === "anthropic" && !options.apiKey && !process.env.ANTHROPIC_API_KEY) {
-      throw new ConfigError("Anthropic API key not found in environment or config");
+    const provider = options.provider || 'anthropic';
+
+    if (provider === 'anthropic' && !options.apiKey && !process.env.ANTHROPIC_API_KEY) {
+      throw new ConfigError('Anthropic API key not found in environment or config');
     }
-    
-    if (provider === "openai" && !options.apiKey && !process.env.OPENAI_API_KEY) {
-      throw new ConfigError("OpenAI API key not found in environment or config");
+
+    if (provider === 'openai' && !options.apiKey && !process.env.OPENAI_API_KEY) {
+      throw new ConfigError('OpenAI API key not found in environment or config');
     }
 
     this.config = {
       apiKey: options.apiKey,
       provider: provider,
       model: options.model,
-      cachePath: options.cachePath || resolve(process.cwd(), "openlocale.lock"),
-      locale: options.locale || { source: "en", targets: [] },
+      cachePath: options.cachePath || resolve(process.cwd(), 'openlocale.lock'),
+      locale: options.locale || { source: 'en', targets: [] },
       translation: {
-        frontmatterFields: options.translation?.frontmatterFields || ["title", "description"],
-        jsxAttributes: options.translation?.jsxAttributes || ["alt", "title", "placeholder"],
+        frontmatterFields: options.translation?.frontmatterFields || ['title', 'description'],
+        jsxAttributes: options.translation?.jsxAttributes || ['alt', 'title', 'placeholder'],
         skipPatterns: options.translation?.skipPatterns || [],
         ...options.translation,
       },
@@ -56,20 +56,24 @@ export class OpenLocale {
     // 2. Parse content based on format (MDX, MD, string)
     // 3. Apply translation rules
     // 4. Track costs if requested
-    
+
     return {
       translatedContent: `[Translated ${params.format}] ${params.content}`,
-      usage: params.trackCosts ? {
-        promptTokens: 100,
-        completionTokens: 50,
-        totalTokens: 150,
-      } : undefined,
-      cost: params.trackCosts ? {
-        inputCost: 0.0003,
-        outputCost: 0.00075,
-        totalCost: 0.00105,
-        formattedCost: "< $0.01",
-      } : undefined,
+      usage: params.trackCosts
+        ? {
+            promptTokens: 100,
+            completionTokens: 50,
+            totalTokens: 150,
+          }
+        : undefined,
+      cost: params.trackCosts
+        ? {
+            inputCost: 0.0003,
+            outputCost: 0.00075,
+            totalCost: 0.00105,
+            formattedCost: '< $0.01',
+          }
+        : undefined,
     };
   }
 
@@ -80,17 +84,16 @@ export class OpenLocale {
     // Placeholder implementation
     return {
       success: true,
-      outputPath: params.outputPath || params.filePath.replace(
-        `/${params.sourceLocale}/`,
-        `/${params.targetLocale}/`
-      ),
+      outputPath:
+        params.outputPath ||
+        params.filePath.replace(`/${params.sourceLocale}/`, `/${params.targetLocale}/`),
     };
   }
 
   /**
    * Batch translate multiple files
    */
-  async translateFiles(params: TranslateFilesParams): Promise<ProcessFilesResult> {
+  async translateFiles(_params: TranslateFilesParams): Promise<ProcessFilesResult> {
     // Placeholder implementation
     return {
       totalFiles: 10,
@@ -104,7 +107,7 @@ export class OpenLocale {
    * Get available file format strategies
    */
   getAvailableFormats(): string[] {
-    return ["mdx", "md", "string"];
+    return ['mdx', 'md', 'string'];
   }
 
   /**
@@ -114,7 +117,7 @@ export class OpenLocale {
     // Placeholder implementation
     const estimatedFiles = 10;
     const estimatedTokens = 10000;
-    
+
     return {
       estimatedFiles,
       estimatedTokens,
@@ -122,9 +125,9 @@ export class OpenLocale {
         inputCost: 0.03,
         outputCost: 0.15,
         totalCost: 0.18,
-        formattedCost: "$0.18",
+        formattedCost: '$0.18',
       },
-      breakdown: params.targetLocales.map(locale => ({
+      breakdown: params.targetLocales.map((locale) => ({
         locale,
         files: estimatedFiles,
         estimatedTokens: estimatedTokens / params.targetLocales.length,
@@ -138,9 +141,9 @@ export class OpenLocale {
    */
   updateConfig(config: Partial<OpenLocaleConfig>): void {
     this.config = { ...this.config, ...config };
-    
+
     if (config.apiKey) {
-      const envKey = this.config.provider === "openai" ? "OPENAI_API_KEY" : "ANTHROPIC_API_KEY";
+      const envKey = this.config.provider === 'openai' ? 'OPENAI_API_KEY' : 'ANTHROPIC_API_KEY';
       process.env[envKey] = config.apiKey;
     }
   }

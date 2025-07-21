@@ -1,6 +1,6 @@
-import type { Config } from "../utils/config";
-import { translateText, type TranslationResult } from "../ai/translate";
-import { type TokenUsage, aggregateUsage } from "../utils/cost";
+import { translateText } from '../ai/translate';
+import type { Config } from '../utils/config';
+import { aggregateUsage, type TokenUsage } from '../utils/cost';
 
 export interface FrontmatterTranslationResult {
   content: string;
@@ -15,14 +15,14 @@ export async function translateFrontmatter(
   config: Config,
   aiClient: any,
   model?: string,
-  provider?: string,
+  provider?: string
 ): Promise<FrontmatterTranslationResult> {
   const translatableFields = config.translation?.frontmatterFields || [
-    "title",
-    "description",
-    "sidebarTitle",
+    'title',
+    'description',
+    'sidebarTitle',
   ];
-  const lines = frontmatter.split("\n");
+  const lines = frontmatter.split('\n');
   const usages: TokenUsage[] = [];
 
   const translatedLines = await Promise.all(
@@ -35,7 +35,7 @@ export async function translateFrontmatter(
           return line;
         }
         // Don't translate boolean values or numbers
-        if (value === "true" || value === "false" || !isNaN(Number(value))) {
+        if (value === 'true' || value === 'false' || !Number.isNaN(Number(value))) {
           return line;
         }
         const result = await translateText(value!, source, target, aiClient, model, provider);
@@ -43,11 +43,11 @@ export async function translateFrontmatter(
         return `${indent}${key}: ${result.text}`;
       }
       return line;
-    }),
+    })
   );
 
   return {
-    content: translatedLines.join("\n"),
+    content: translatedLines.join('\n'),
     usage: aggregateUsage(usages),
   };
 }

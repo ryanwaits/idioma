@@ -11,14 +11,7 @@
   },
   "translation": {
     "frontmatterFields": ["title", "description", "sidebarTitle"],
-    "jsxAttributes": [
-      "title",
-      "description",
-      "tag",
-      "alt",
-      "placeholder",
-      "label"
-    ],
+    "jsxAttributes": ["title", "description", "tag", "alt", "placeholder", "label"],
     "skipPatterns": [],
     "provider": "anthropic"
   }

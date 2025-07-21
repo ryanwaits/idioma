@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname } from 'node:path';
 import { OpenLocale } from '../src';
-import { writeFile, mkdir } from 'fs/promises';
-import { dirname } from 'path';
 
 async function main() {
   // Initialize SDK
@@ -49,7 +49,7 @@ async function main() {
   console.log(`- Total files: ${batchResult.totalFiles}`);
   console.log(`- Successful: ${batchResult.successCount}`);
   console.log(`- Failed: ${batchResult.errorCount}`);
-  
+
   if (batchResult.totalCost) {
     console.log(`- Total cost: ${batchResult.totalCost.formattedCost}`);
     console.log(`- Total tokens: ${batchResult.totalUsage?.totalTokens}`);
@@ -123,7 +123,7 @@ Ready to dive deeper? Check out these resources:
 1. [API Reference](/docs/api)
 2. [Examples](/docs/examples)
 3. [Best Practices](/docs/best-practices)
-`
+`,
     },
     {
       path: 'examples/content/en/api.mdx',
@@ -159,8 +159,8 @@ Translate content between languages.
   "targetLocale": "es"
 }
 \`\`\`
-`
-    }
+`,
+    },
   ];
 
   for (const file of files) {
