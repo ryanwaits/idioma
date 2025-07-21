@@ -21,6 +21,8 @@ async function main() {
     translation: {
       frontmatterFields: ["title", "description", "sidebarTitle"],
       jsxAttributes: ["alt", "title", "placeholder", "label"],
+      skipPatterns: [],
+      provider: "anthropic",
     },
   };
 
@@ -64,7 +66,7 @@ Install the SDK: \`npm install @openlocale/sdk\`
   console.log("Translation completed!");
   console.log("- Format: MDX");
   console.log("- Target: Spanish");
-  
+
   if (result.cost) {
     console.log("- Cost:", result.cost.formattedCost);
     console.log("- Tokens:", result.usage?.totalTokens);
@@ -91,11 +93,12 @@ Install the SDK: \`npm install @openlocale/sdk\`
   console.log("- Total files:", batchResult.totalFiles);
   console.log("- Successful:", batchResult.successCount);
   console.log("- Failed:", batchResult.errorCount);
-  
+
   if (batchResult.totalCost) {
     console.log("- Total cost:", batchResult.totalCost.formattedCost);
-    console.log("- Average per file:", 
-      `$${(batchResult.totalCost.totalCost / batchResult.successCount).toFixed(3)}`
+    console.log(
+      "- Average per file:",
+      `$${(batchResult.totalCost.totalCost / batchResult.successCount).toFixed(3)}`,
     );
   }
 
@@ -113,7 +116,7 @@ Install the SDK: \`npm install @openlocale/sdk\`
   console.log("- Target languages:", estimate.breakdown.length);
   console.log("- Total estimated cost:", estimate.estimatedCost.formattedCost);
   console.log("\nPer-language breakdown:");
-  
+
   estimate.breakdown.forEach(({ locale, files, estimatedCost }) => {
     console.log(`  ${locale}: ${files} files, ~$${estimatedCost.toFixed(2)}`);
   });
@@ -123,14 +126,18 @@ Install the SDK: \`npm install @openlocale/sdk\`
   console.log("------------------------------\n");
 
   const providers = [
-    { name: "Anthropic Claude 3.5", provider: "anthropic", model: "claude-3-5-sonnet-20240620" },
+    {
+      name: "Anthropic Claude 3.5",
+      provider: "anthropic",
+      model: "claude-3-5-sonnet-20240620",
+    },
     { name: "OpenAI GPT-4o", provider: "openai", model: "gpt-4o-2024-08-06" },
     { name: "OpenAI GPT-4o-mini", provider: "openai", model: "gpt-4o-mini" },
   ];
 
   for (const { name, provider, model } of providers) {
     openlocale.updateConfig({ provider: provider as any, model });
-    
+
     const testResult = await openlocale.translateContent({
       content: "This is a test sentence for cost comparison.",
       format: "string",
