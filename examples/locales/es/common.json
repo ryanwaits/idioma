@@ -1,0 +1,38 @@
+{
+  "navigation": {
+    "home": "Inicio",
+    "about": "Sobre Nosotros",
+    "products": "Productos",
+    "contact": "Contacto",
+    "services": "Nuestros Servicios",
+    "blog": "Blog"
+  },
+  "buttons": {
+    "submit": "Enviar",
+    "cancel": "Cancelar",
+    "save": "Guardar Cambios",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "learn_more": "Aprende Más"
+  },
+  "messages": {
+    "welcome": "Bienvenido a nuestra aplicación",
+    "success": "Operación completada con éxito",
+    "error": "Se produjo un error. Por favor, inténtelo de nuevo.",
+    "loading": "Cargando, por favor espere...",
+    "no_results": "No se encontraron resultados",
+    "required_field": "Este campo es obligatorio"
+  },
+  "footer": {
+    "copyright": "© 2024 Su Empresa. Todos los derechos reservados.",
+    "privacy": "Política de Privacidad",
+    "terms": "Términos de Servicio",
+    "follow_us": "Síguenos en las redes sociales"
+  },
+  "metadata": {
+    "api_key": "sk-1234567890",
+    "version": "1.0.0",
+    "build_id": "550e8400-e29b-41d4-a716-446655440000",
+    "environment": "production"
+  }
+}

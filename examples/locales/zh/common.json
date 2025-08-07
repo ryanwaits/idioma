@@ -1,0 +1,38 @@
+{
+  "navigation": {
+    "home": "主页",
+    "about": "关于我们",
+    "products": "产品",
+    "contact": "联系我们",
+    "services": "我们的服务",
+    "blog": "博客"
+  },
+  "buttons": {
+    "submit": "提交",
+    "cancel": "取消",
+    "save": "保存更改",
+    "delete": "删除",
+    "confirm": "确认",
+    "learn_more": "了解更多"
+  },
+  "messages": {
+    "welcome": "欢迎使用我们的应用程序",
+    "success": "操作成功完成",
+    "error": "发生错误。请重试。",
+    "loading": "正在加载，请稍候...",
+    "no_results": "未找到结果",
+    "required_field": "此字段为必填项"
+  },
+  "footer": {
+    "copyright": "© 2024 贵公司。保留所有权利。",
+    "privacy": "隐私政策",
+    "terms": "服务条款",
+    "follow_us": "在社交媒体上关注我们"
+  },
+  "metadata": {
+    "api_key": "sk-1234567890",
+    "version": "1.0.0",
+    "build_id": "550e8400-e29b-41d4-a716-446655440000",
+    "environment": "production"
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "dashboard": {
+    "title": "Tableau de bord",
+    "subtitle": "Bon retour ! Voici votre aperçu.",
+    "stats": {
+      "total_users": "Nombre total d'utilisateurs",
+      "active_sessions": "Sessions actives",
+      "revenue": "Revenus mensuels",
+      "growth": "Taux de croissance"
+    },
+    "charts": {
+      "user_activity": "Activité de l'utilisateur au fil du temps",
+      "sales_trend": "Tendance des ventes",
+      "geographic_distribution": "Répartition géographique"
+    }
+  },
+  "user_profile": {
+    "title": "Profil de l'utilisateur",
+    "personal_info": {
+      "heading": "Informations personnelles",
+      "name": "Nom complet",
+      "email": "Adresse e-mail",
+      "phone": "Numéro de téléphone",
+      "bio": "Biographie"
+    },
+    "settings": {
+      "heading": "Paramètres du compte",
+      "language": "Préférence de langue",
+      "timezone": "Fuseau horaire",
+      "notifications": "Notifications par e-mail",
+      "two_factor": "Authentification à deux facteurs"
+    },
+    "actions": {
+      "edit_profile": "Modifier le profil",
+      "change_password": "Changer le mot de passe",
+      "delete_account": "Supprimer le compte"
+    }
+  },
+  "forms": {
+    "labels": {
+      "first_name": "Prénom",
+      "last_name": "Nom de famille",
+      "company": "Nom de l'entreprise",
+      "message": "Votre Message"
+    },
+    "placeholders": {
+      "enter_email": "Saisissez votre adresse e-mail",
+      "enter_password": "Entrez votre mot de passe",
+      "search": "Rechercher des articles...",
+      "comments": "Ajoutez vos commentaires ici"
+    },
+    "validation": {
+      "email_invalid": "Veuillez saisir une adresse e-mail valide",
+      "password_short": "Le mot de passe doit comporter au moins 8 caractères",
+      "field_required": "Ce champ est obligatoire",
+      "phone_invalid": "Veuillez saisir un numéro de téléphone valide"
+    }
+  },
+  "config": {
+    "api_endpoint": "https://api.example.com",
+    "max_retries": 3,
+    "timeout": 5000,
+    "debug_mode": false
+  }
+}

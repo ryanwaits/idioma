@@ -1,0 +1,38 @@
+{
+  "navigation": {
+    "home": "Home",
+    "about": "About Us",
+    "products": "Products",
+    "contact": "Contact",
+    "services": "Our Services",
+    "blog": "Blog"
+  },
+  "buttons": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save Changes",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "learn_more": "Learn More"
+  },
+  "messages": {
+    "welcome": "Welcome to our application",
+    "success": "Operation completed successfully",
+    "error": "An error occurred. Please try again.",
+    "loading": "Loading, please wait...",
+    "no_results": "No results found",
+    "required_field": "This field is required"
+  },
+  "footer": {
+    "copyright": "© 2024 Your Company. All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "follow_us": "Follow us on social media"
+  },
+  "metadata": {
+    "api_key": "sk-1234567890",
+    "version": "1.0.0",
+    "build_id": "550e8400-e29b-41d4-a716-446655440000",
+    "environment": "production"
+  }
+}

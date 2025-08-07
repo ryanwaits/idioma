@@ -1,0 +1,65 @@
+{
+  "dashboard": {
+    "title": "Panel de control",
+    "subtitle": "¡Bienvenido de nuevo! Aquí está tu resumen.",
+    "stats": {
+      "total_users": "Usuarios Totales",
+      "active_sessions": "Sesiones Activas",
+      "revenue": "Ingresos Mensuales",
+      "growth": "Tasa de Crecimiento"
+    },
+    "charts": {
+      "user_activity": "Actividad del Usuario a lo Largo del Tiempo",
+      "sales_trend": "Tendencia de Ventas",
+      "geographic_distribution": "Distribución Geográfica"
+    }
+  },
+  "user_profile": {
+    "title": "Perfil de Usuario",
+    "personal_info": {
+      "heading": "Información Personal",
+      "name": "Nombre Completo",
+      "email": "Dirección de correo electrónico",
+      "phone": "Número de Teléfono",
+      "bio": "Biografía"
+    },
+    "settings": {
+      "heading": "Configuración de la cuenta",
+      "language": "Preferencia de idioma",
+      "timezone": "Zona horaria",
+      "notifications": "Notificaciones por correo electrónico",
+      "two_factor": "Autenticación de Dos Factores"
+    },
+    "actions": {
+      "edit_profile": "Editar Perfil",
+      "change_password": "Cambiar Contraseña",
+      "delete_account": "Eliminar Cuenta"
+    }
+  },
+  "forms": {
+    "labels": {
+      "first_name": "Nombre",
+      "last_name": "Apellido",
+      "company": "Nombre de la Empresa",
+      "message": "Tu Mensaje"
+    },
+    "placeholders": {
+      "enter_email": "Ingrese su dirección de correo electrónico",
+      "enter_password": "Ingrese su contraseña",
+      "search": "Buscar artículos...",
+      "comments": "Agregue sus comentarios aquí"
+    },
+    "validation": {
+      "email_invalid": "Por favor, ingrese una dirección de correo electrónico válida",
+      "password_short": "La contraseña debe tener al menos 8 caracteres",
+      "field_required": "Este campo es obligatorio",
+      "phone_invalid": "Por favor, ingrese un número de teléfono válido"
+    }
+  },
+  "config": {
+    "api_endpoint": "https://api.example.com",
+    "max_retries": 3,
+    "timeout": 5000,
+    "debug_mode": false
+  }
+}

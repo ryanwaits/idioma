@@ -14,3 +14,38 @@ files:
       fr: true
       zh: true
       de: true
+  examples/locales/en/common.json:
+    content: 01b4e5466e4772d8dbf46041dc06aec9
+    translations:
+      es: true
+      fr: true
+      zh: true
+      de: true
+  examples/locales/en/app.json:
+    content: 633f6abcf4d27785800d642b47438def
+    translations:
+      es: true
+      fr: true
+      zh: true
+      de: true
+  examples/locales/en/nested.json:
+    content: 66d3ea9998f10d8405fcd02a4ed97980
+    translations:
+      es: true
+      fr: true
+      zh: true
+      de: true
+  examples/locales/en/features.json:
+    content: 1d838d60ecfe9c6d12d23001a6a8db52
+    translations:
+      es: true
+      fr: true
+      zh: true
+      de: true
+  examples/locales/en/config.yaml:
+    content: d0ae91df86d44e042d270c9a83761a19
+    translations:
+      es: true
+      fr: true
+      zh: true
+      de: true

@@ -1,0 +1,65 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Welcome back! Here's your overview.",
+    "stats": {
+      "total_users": "Total Users",
+      "active_sessions": "Active Sessions",
+      "revenue": "Monthly Revenue",
+      "growth": "Growth Rate"
+    },
+    "charts": {
+      "user_activity": "User Activity Over Time",
+      "sales_trend": "Sales Trend",
+      "geographic_distribution": "Geographic Distribution"
+    }
+  },
+  "user_profile": {
+    "title": "User Profile",
+    "personal_info": {
+      "heading": "Personal Information",
+      "name": "Full Name",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "bio": "Biography"
+    },
+    "settings": {
+      "heading": "Account Settings",
+      "language": "Language Preference",
+      "timezone": "Time Zone",
+      "notifications": "Email Notifications",
+      "two_factor": "Two-Factor Authentication"
+    },
+    "actions": {
+      "edit_profile": "Edit Profile",
+      "change_password": "Change Password",
+      "delete_account": "Delete Account"
+    }
+  },
+  "forms": {
+    "labels": {
+      "first_name": "First Name",
+      "last_name": "Last Name",
+      "company": "Company Name",
+      "message": "Your Message"
+    },
+    "placeholders": {
+      "enter_email": "Enter your email address",
+      "enter_password": "Enter your password",
+      "search": "Search for items...",
+      "comments": "Add your comments here"
+    },
+    "validation": {
+      "email_invalid": "Please enter a valid email address",
+      "password_short": "Password must be at least 8 characters",
+      "field_required": "This field is required",
+      "phone_invalid": "Please enter a valid phone number"
+    }
+  },
+  "config": {
+    "api_endpoint": "https://api.example.com",
+    "max_retries": 3,
+    "timeout": 5000,
+    "debug_mode": false
+  }
+}

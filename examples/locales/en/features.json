@@ -1,0 +1,81 @@
+{
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome to Our Platform",
+      "description": "Let's get you started with a quick tour of the main features.",
+      "skip": "Skip Tour",
+      "next": "Next Step"
+    },
+    "steps": [
+      {
+        "title": "Create Your First Project",
+        "description": "Start by creating a new project to organize your work.",
+        "action": "Create Project"
+      },
+      {
+        "title": "Invite Team Members",
+        "description": "Collaborate with your team by inviting them to your project.",
+        "action": "Invite Members"
+      },
+      {
+        "title": "Explore Features",
+        "description": "Discover all the powerful features available to you.",
+        "action": "Explore Now"
+      }
+    ]
+  },
+  "pricing": {
+    "title": "Choose Your Plan",
+    "subtitle": "Select the plan that best fits your needs",
+    "plans": {
+      "free": {
+        "name": "Free",
+        "price": "$0",
+        "period": "per month",
+        "features": [
+          "Up to 3 projects",
+          "Basic support",
+          "1GB storage"
+        ],
+        "cta": "Get Started"
+      },
+      "pro": {
+        "name": "Professional",
+        "price": "$29",
+        "period": "per month",
+        "features": [
+          "Unlimited projects",
+          "Priority support",
+          "100GB storage",
+          "Advanced analytics"
+        ],
+        "cta": "Start Free Trial"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "price": "Custom",
+        "period": "contact sales",
+        "features": [
+          "Custom solutions",
+          "Dedicated support",
+          "Unlimited storage",
+          "SLA guarantee"
+        ],
+        "cta": "Contact Sales"
+      }
+    }
+  },
+  "technical": {
+    "api_version": "v2.0.1",
+    "endpoints": {
+      "auth": "/api/auth",
+      "users": "/api/users",
+      "data": "/api/data"
+    },
+    "constants": {
+      "MAX_FILE_SIZE": 10485760,
+      "SESSION_TIMEOUT": 3600,
+      "RATE_LIMIT": 100
+    }
+  }
+}

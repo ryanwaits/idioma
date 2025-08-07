@@ -1,0 +1,81 @@
+{
+  "onboarding": {
+    "welcome": {
+      "title": "Bienvenido a Nuestra Plataforma",
+      "description": "Comencemos con un recorrido rápido por las características principales.",
+      "skip": "Omitir recorrido",
+      "next": "Siguiente Paso"
+    },
+    "steps": [
+      {
+        "title": "Crea Tu Primer Proyecto",
+        "description": "Comienza creando un nuevo proyecto para organizar tu trabajo.",
+        "action": "Crear Proyecto"
+      },
+      {
+        "title": "Invitar a miembros del equipo",
+        "description": "Colabora con tu equipo invitándolos a tu proyecto.",
+        "action": "Invitar Miembros"
+      },
+      {
+        "title": "Explorar Características",
+        "description": "Descubre todas las potentes funciones disponibles para ti.",
+        "action": "Explorar ahora"
+      }
+    ]
+  },
+  "pricing": {
+    "title": "Elija Su Plan",
+    "subtitle": "Selecciona el plan que mejor se adapte a tus necesidades",
+    "plans": {
+      "free": {
+        "name": "Gratis",
+        "price": "$0",
+        "period": "por mes",
+        "features": [
+          "Hasta 3 proyectos",
+          "Soporte básico",
+          "1GB de almacenamiento"
+        ],
+        "cta": "Empezar"
+      },
+      "pro": {
+        "name": "Profesional",
+        "price": "$29",
+        "period": "al mes",
+        "features": [
+          "Proyectos ilimitados",
+          "Soporte prioritario",
+          "100GB de almacenamiento",
+          "Análisis avanzado"
+        ],
+        "cta": "Comenzar Prueba Gratuita"
+      },
+      "enterprise": {
+        "name": "Empresa",
+        "price": "Personalizado",
+        "period": "contactar con ventas",
+        "features": [
+          "Soluciones personalizadas",
+          "Soporte dedicado",
+          "Almacenamiento ilimitado",
+          "Garantía de SLA"
+        ],
+        "cta": "Contactar con ventas"
+      }
+    }
+  },
+  "technical": {
+    "api_version": "v2.0.1",
+    "endpoints": {
+      "auth": "/api/auth",
+      "users": "/api/users",
+      "data": "/api/data"
+    },
+    "constants": {
+      "MAX_FILE_SIZE": 10485760,
+      "SESSION_TIMEOUT": 3600,
+      "RATE_LIMIT": 100
+    }
+  }
+}

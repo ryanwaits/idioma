@@ -1,0 +1,38 @@
+{
+  "navigation": {
+    "home": "Accueil",
+    "about": "À propos de nous",
+    "products": "Produits",
+    "contact": "Contact",
+    "services": "Nos Services",
+    "blog": "Blog"
+  },
+  "buttons": {
+    "submit": "Soumettre",
+    "cancel": "Annuler",
+    "save": "Enregistrer les modifications",
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "learn_more": "En savoir plus"
+  },
+  "messages": {
+    "welcome": "Bienvenue dans notre application",
+    "success": "Opération terminée avec succès",
+    "error": "Une erreur s'est produite. Veuillez réessayer.",
+    "loading": "Chargement en cours, veuillez patienter...",
+    "no_results": "Aucun résultat trouvé",
+    "required_field": "Ce champ est obligatoire"
+  },
+  "footer": {
+    "copyright": "© 2024 Votre Entreprise. Tous droits réservés.",
+    "privacy": "Politique de Confidentialité",
+    "terms": "Conditions d'utilisation",
+    "follow_us": "Suivez-nous sur les réseaux sociaux"
+  },
+  "metadata": {
+    "api_key": "sk-1234567890",
+    "version": "1.0.0",
+    "build_id": "550e8400-e29b-41d4-a716-446655440000",
+    "environment": "production"
+  }
+}
