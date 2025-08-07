@@ -7,6 +7,8 @@
 import { JsonStrategy } from './json';
 import { YamlStrategy } from './yaml';
 import { MdxStrategy } from './mdx';
+import { HtmlStrategy } from './html';
+import { XmlStrategy } from './xml';
 import type { BaseTranslationStrategy } from './base';
 
 // Export base class and types for extending
@@ -16,15 +18,17 @@ export { BaseTranslationStrategy, type TranslationResult, type ParseResult, type
 export { JsonStrategy } from './json';
 export { YamlStrategy } from './yaml';
 export { MdxStrategy } from './mdx';
+export { HtmlStrategy } from './html';
+export { XmlStrategy } from './xml';
 
 // Strategy registry - all strategies in one place
 export const strategies: BaseTranslationStrategy[] = [
   new MdxStrategy(),
   new JsonStrategy({ skipEmptyStrings: true }),
   new YamlStrategy({ preserveComments: true, skipEmptyStrings: true }),
+  new HtmlStrategy(),
+  new XmlStrategy(),
   // Future strategies:
-  // new HtmlStrategy(),
-  // new XmlStrategy(),
   // new CsvStrategy(),
   // new JavaScriptStrategy(),
 ];

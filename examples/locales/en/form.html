@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Contact Form - Get in Touch</title>
+    <meta name="description" content="Contact us with your questions, feedback, or support requests">
+</head>
+<body>
+    <div class="container">
+        <h1>Contact Us</h1>
+        <p>We'd love to hear from you. Please fill out the form below and we'll get back to you as soon as possible.</p>
+        
+        <form id="contact-form">
+            <fieldset>
+                <legend>Personal Information</legend>
+                
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input type="text" id="firstName" name="firstName" placeholder="Enter your first name" required aria-label="Your first name">
+                    <span class="help-text">Please enter your first name as it appears on official documents.</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input type="text" id="lastName" name="lastName" placeholder="Enter your last name" required aria-label="Your last name">
+                    <span class="help-text">Please enter your last name as it appears on official documents.</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="your.email@example.com" required aria-label="Your email address">
+                    <span class="help-text">We'll use this email to respond to your inquiry.</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number (Optional)</label>
+                    <input type="tel" id="phone" name="phone" placeholder="+1 (555) 123-4567" aria-label="Your phone number">
+                    <span class="help-text">Include country code for international numbers.</span>
+                </div>
+            </fieldset>
+            
+            <fieldset>
+                <legend>Your Message</legend>
+                
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <select id="subject" name="subject" required aria-label="Message subject">
+                        <option value="" disabled selected>Choose a subject</option>
+                        <option value="general">General Inquiry</option>
+                        <option value="support">Technical Support</option>
+                        <option value="billing">Billing Question</option>
+                        <option value="feedback">Feedback</option>
+                        <option value="partnership">Partnership Opportunity</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" rows="6" placeholder="Tell us how we can help you..." required aria-label="Your message"></textarea>
+                    <span class="help-text">Please provide as much detail as possible.</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="priority">Priority Level</label>
+                    <select id="priority" name="priority" aria-label="Message priority">
+                        <option value="low">Low - General question</option>
+                        <option value="medium" selected>Medium - Standard request</option>
+                        <option value="high">High - Urgent issue</option>
+                    </select>
+                </div>
+            </fieldset>
+            
+            <fieldset>
+                <legend>Additional Options</legend>
+                
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="newsletter" name="newsletter">
+                    <label for="newsletter">Subscribe to our newsletter for updates and special offers</label>
+                </div>
+                
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="copy" name="copy">
+                    <label for="copy">Send me a copy of this message</label>
+                </div>
+                
+                <div class="form-group">
+                    <p class="terms-text">
+                        By submitting this form, you agree to our <a href="/privacy" title="Read our privacy policy">Privacy Policy</a> 
+                        and <a href="/terms" title="Read our terms of service">Terms of Service</a>.
+                    </p>
+                </div>
+            </fieldset>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-primary" title="Send your message">Send Message</button>
+                <button type="reset" class="btn-secondary" title="Clear the form">Clear Form</button>
+                <button type="button" class="btn-link" title="Cancel and go back">Cancel</button>
+            </div>
+            
+            <div class="form-messages">
+                <div class="success-message" hidden aria-live="polite">
+                    <h3>Thank you for contacting us!</h3>
+                    <p>Your message has been successfully sent. We'll respond within 24-48 hours.</p>
+                </div>
+                
+                <div class="error-message" hidden aria-live="assertive">
+                    <h3>Oops! Something went wrong</h3>
+                    <p>We couldn't send your message. Please check your connection and try again.</p>
+                </div>
+            </div>
+        </form>
+        
+        <aside class="contact-info">
+            <h2>Other Ways to Reach Us</h2>
+            <div class="info-section">
+                <h3>Email</h3>
+                <p>For general inquiries: <a href="mailto:info@example.com" title="Send us an email">info@example.com</a></p>
+                <p>For support: <a href="mailto:support@example.com" title="Email our support team">support@example.com</a></p>
+            </div>
+            
+            <div class="info-section">
+                <h3>Phone</h3>
+                <p>Main office: +1 (555) 123-4567</p>
+                <p>Support hotline: +1 (555) 987-6543</p>
+                <p>Hours: Monday-Friday, 9:00 AM - 6:00 PM EST</p>
+            </div>
+            
+            <div class="info-section">
+                <h3>Address</h3>
+                <address>
+                    Example Company<br>
+                    123 Business Street<br>
+                    Suite 456<br>
+                    New York, NY 10001<br>
+                    United States
+                </address>
+            </div>
+        </aside>
+    </div>
+</body>
+</html>

@@ -19,6 +19,24 @@
         "examples/locales/[locale]/**/*.yml"
       ],
       "preserveComments": true
+    },
+    "html": {
+      "include": [
+        "examples/locales/[locale]/**/*.html",
+        "examples/locales/[locale]/**/*.htm"
+      ],
+      "translatableAttributes": [
+        "alt", "title", "placeholder", "aria-label", "aria-description",
+        "data-tooltip", "data-title", "data-description"
+      ],
+      "skipTags": ["script", "style", "code", "pre", "svg", "math"]
+    },
+    "xml": {
+      "include": ["examples/locales/[locale]/**/*.xml"],
+      "translatableAttributes": [
+        "label", "title", "description", "tooltip", "help", "message", "text"
+      ],
+      "skipTags": ["script", "style", "code"]
     }
   },
   "translation": {
