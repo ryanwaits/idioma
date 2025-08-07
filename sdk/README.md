@@ -16,7 +16,7 @@ bun add idioma
 import { Idioma } from 'idioma';
 
 // Initialize the SDK
-const idioma = new Idioma({
+const idioma = await Idioma.create({
   provider: 'anthropic',
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
@@ -34,7 +34,14 @@ console.log(result.translatedContent); // "Hola Mundo"
 
 ## API Reference
 
-### Constructor Options
+### Initialization
+
+```typescript
+// Create an instance using the async factory method
+const idioma = await Idioma.create(config);
+```
+
+### Configuration Options
 
 ```typescript
 interface IdiomaConfig {
@@ -161,7 +168,7 @@ idioma.updateConfig({
 ```typescript
 import { Idioma } from 'idioma';
 
-const idioma = new Idioma({
+const idioma = await Idioma.create({
   provider: 'anthropic',
   translation: {
     frontmatterFields: ['title', 'description'],
@@ -223,7 +230,7 @@ try {
 ### Anthropic (Default)
 
 ```typescript
-const idioma = new Idioma({
+const idioma = await Idioma.create({
   provider: 'anthropic',
   model: 'claude-3-5-sonnet-20240620',  // Optional, uses default
 });
@@ -232,7 +239,7 @@ const idioma = new Idioma({
 ### OpenAI
 
 ```typescript
-const idioma = new Idioma({
+const idioma = await Idioma.create({
   provider: 'openai',
   model: 'gpt-4o-2024-08-06',  // Optional, uses default
   apiKey: process.env.OPENAI_API_KEY,

@@ -10,13 +10,13 @@ beforeEach(() => {
 
 describe('Idioma SDK', () => {
   describe('Constructor', () => {
-    test('should create instance with default config', () => {
-      const sdk = new Idioma();
+    test('should create instance with default config', async () => {
+      const sdk = await Idioma.create();
       expect(sdk).toBeInstanceOf(Idioma);
       expect(sdk.getConfig()).toHaveProperty('locale');
     });
 
-    test('should accept custom config', () => {
+    test('should accept custom config', async () => {
       const config: IdiomaConfig = {
         locale: {
           source: 'en',
@@ -24,26 +24,28 @@ describe('Idioma SDK', () => {
         },
         provider: 'openai',
         model: 'gpt-4o-2024-08-06',
+        apiKey: 'test-openai-key',
       };
 
-      const sdk = new Idioma(config);
+      const sdk = await Idioma.create(config);
       const sdkConfig = sdk.getConfig();
       expect(sdkConfig.locale.targets).toEqual(['es', 'fr']);
-      expect(sdkConfig.translation.provider).toBe('openai');
+      expect(sdkConfig.translation?.provider).toBe('openai');
     });
 
-    test('should throw error if API key is missing', () => {
+    test('should throw error if API key is missing', async () => {
       delete process.env.ANTHROPIC_API_KEY;
-      expect(() => new Idioma({ provider: 'anthropic' })).toThrow(ConfigError);
+      await expect(Idioma.create({ provider: 'anthropic' })).rejects.toThrow(ConfigError);
     });
   });
 
   describe('translateContent', () => {
     test('should translate string content', async () => {
-      const _sdk = new Idioma();
+      const sdk = await Idioma.create();
 
-      // Mock the translation function
-      const mockTranslate = mock(() =>
+      // Mock the translateContent method
+      const originalMethod = sdk.translateContent.bind(sdk);
+      sdk.translateContent = mock(() =>
         Promise.resolve({
           translatedContent: 'Hola Mundo',
           usage: {
@@ -54,8 +56,7 @@ describe('Idioma SDK', () => {
         })
       );
 
-      // This is a simplified test - in real implementation, we'd need to mock the AI client
-      const result = await mockTranslate({
+      const result = await sdk.translateContent({
         content: 'Hello World',
         format: 'string',
         sourceLocale: 'en',
@@ -64,10 +65,13 @@ describe('Idioma SDK', () => {
 
       expect(result.translatedContent).toBe('Hola Mundo');
       expect(result.usage).toBeDefined();
+      
+      // Restore original method
+      sdk.translateContent = originalMethod;
     });
 
     test('should translate MDX content', async () => {
-      const _sdk = new Idioma();
+      const sdk = await Idioma.create();
 
       const mdxContent = `
 ---
@@ -80,8 +84,9 @@ description: World
 This is a test.
       `.trim();
 
-      // This would need proper mocking of the MDX parser
-      const mockTranslate = mock(() =>
+      // Mock the translateContent method for MDX
+      const originalMethod = sdk.translateContent.bind(sdk);
+      sdk.translateContent = mock(() =>
         Promise.resolve({
           translatedContent: `
 ---
@@ -96,7 +101,7 @@ Esto es una prueba.
         })
       );
 
-      const result = await mockTranslate({
+      const result = await sdk.translateContent({
         content: mdxContent,
         format: 'mdx',
         sourceLocale: 'en',
@@ -104,12 +109,17 @@ Esto es una prueba.
       });
 
       expect(result.translatedContent).toContain('Hola Mundo');
+      
+      // Restore original method
+      sdk.translateContent = originalMethod;
     });
 
     test('should include cost calculation when requested', async () => {
-      const _sdk = new Idioma();
+      const sdk = await Idioma.create();
 
-      const mockTranslate = mock(() =>
+      // Mock the translateContent method with costs
+      const originalMethod = sdk.translateContent.bind(sdk);
+      sdk.translateContent = mock(() =>
         Promise.resolve({
           translatedContent: 'Translated text',
           usage: {
@@ -126,7 +136,7 @@ Esto es una prueba.
         })
       );
 
-      const result = await mockTranslate({
+      const result = await sdk.translateContent({
         content: 'Test',
         format: 'string',
         sourceLocale: 'en',
@@ -136,12 +146,15 @@ Esto es una prueba.
 
       expect(result.cost).toBeDefined();
       expect(result.cost?.formattedCost).toBe('< $0.01');
+      
+      // Restore original method
+      sdk.translateContent = originalMethod;
     });
   });
 
   describe('translateFile', () => {
     test('should handle file not found error', async () => {
-      const sdk = new Idioma();
+      const sdk = await Idioma.create();
 
       const result = await sdk.translateFile({
         filePath: '/non/existent/file.md',
@@ -155,8 +168,8 @@ Esto es una prueba.
   });
 
   describe('getAvailableFormats', () => {
-    test('should return supported formats', () => {
-      const sdk = new Idioma();
+    test('should return supported formats', async () => {
+      const sdk = await Idioma.create();
       const formats = sdk.getAvailableFormats();
 
       expect(formats).toContain('mdx');
@@ -167,10 +180,11 @@ Esto es una prueba.
 
   describe('estimateCost', () => {
     test('should estimate translation costs', async () => {
-      const _sdk = new Idioma();
+      const sdk = await Idioma.create();
 
-      // Mock file resolution
-      const mockEstimate = mock(() =>
+      // Mock the estimateCost method
+      const originalMethod = sdk.estimateCost.bind(sdk);
+      sdk.estimateCost = mock(() =>
         Promise.resolve({
           estimatedFiles: 10,
           estimatedTokens: 10000,
@@ -197,7 +211,7 @@ Esto es una prueba.
         })
       );
 
-      const estimate = await mockEstimate({
+      const estimate = await sdk.estimateCost({
         patterns: ['content/**/*.mdx'],
         targetLocales: ['es', 'fr'],
       });
@@ -205,12 +219,15 @@ Esto es una prueba.
       expect(estimate.estimatedFiles).toBe(10);
       expect(estimate.breakdown).toHaveLength(2);
       expect(estimate.estimatedCost.formattedCost).toBe('$0.18');
+      
+      // Restore original method
+      sdk.estimateCost = originalMethod;
     });
   });
 
   describe('updateConfig', () => {
-    test('should update configuration', () => {
-      const sdk = new Idioma();
+    test('should update configuration', async () => {
+      const sdk = await Idioma.create();
 
       sdk.updateConfig({
         provider: 'openai',
@@ -218,8 +235,8 @@ Esto es una prueba.
       });
 
       const config = sdk.getConfig();
-      expect(config.translation.provider).toBe('openai');
-      expect(config.translation.model).toBe('gpt-4o-mini');
+      expect(config.translation?.provider).toBe('openai');
+      expect(config.translation?.model).toBe('gpt-4o-mini');
     });
   });
 

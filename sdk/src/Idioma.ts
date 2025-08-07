@@ -48,7 +48,16 @@ export class Idioma {
     let config: Config;
     try {
       const baseConfig = await loadConfig();
-      config = mergeConfig(baseConfig, options as Partial<Config>);
+      // Map top-level provider/model to translation.provider/model
+      const configOverrides: Partial<Config> = {
+        ...options,
+        translation: {
+          ...options.translation,
+          provider: options.provider || options.translation?.provider,
+          model: options.model || options.translation?.model,
+        },
+      };
+      config = mergeConfig(baseConfig, configOverrides);
     } catch (_error) {
       // If no config file exists, create a minimal config
       config = {
@@ -367,12 +376,24 @@ export class Idioma {
    * Update configuration
    */
   updateConfig(config: Partial<IdiomaConfig>): void {
-    this.config = mergeConfig(this.config, config as Partial<Config>);
+    // Map top-level provider/model to translation.provider/model
+    const configOverrides: Partial<Config> = {
+      ...config,
+      translation: {
+        ...config.translation,
+        provider: config.provider || config.translation?.provider,
+        model: config.model || config.translation?.model,
+      },
+    };
+    this.config = mergeConfig(this.config, configOverrides);
 
     // Update API key if provided
     if (config.apiKey) {
       this.apiKey = config.apiKey;
-      process.env.ANTHROPIC_API_KEY = config.apiKey;
+      const envKey = (config.provider || this.config.translation?.provider) === 'openai' 
+        ? 'OPENAI_API_KEY' 
+        : 'ANTHROPIC_API_KEY';
+      process.env[envKey] = config.apiKey;
     }
   }
 

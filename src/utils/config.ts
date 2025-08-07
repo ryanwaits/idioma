@@ -11,9 +11,56 @@ export const ConfigSchema: z.ZodSchema = z.object({
   }),
   files: z.record(
     z.string(),
-    z.object({
-      include: z.array(z.string()),
-    })
+    z.union([
+      z.object({
+        include: z.array(z.string()),
+        exclude: z.array(z.string()).optional(),
+      }),
+      z.object({
+        include: z.array(z.string()),
+        exclude: z.array(z.string()).optional(),
+        // JSON-specific options
+        includePaths: z.array(z.string()).optional(),
+        excludePaths: z.array(z.string()).optional(),
+        preserveArrayOrder: z.boolean().optional(),
+        skipEmptyStrings: z.boolean().optional(),
+      }),
+      z.object({
+        include: z.array(z.string()),
+        exclude: z.array(z.string()).optional(),
+        // YAML-specific options
+        preserveComments: z.boolean().optional(),
+      }),
+      z.object({
+        include: z.array(z.string()),
+        exclude: z.array(z.string()).optional(),
+        // HTML-specific options
+        translatableAttributes: z.array(z.string()).optional(),
+      }),
+      z.object({
+        include: z.array(z.string()),
+        exclude: z.array(z.string()).optional(),
+        // CSV-specific options
+        columns: z.array(z.string()).optional(),
+        skipHeader: z.boolean().optional(),
+        delimiter: z.string().optional(),
+      }),
+      z.object({
+        include: z.array(z.string()),
+        exclude: z.array(z.string()).optional(),
+        // XML-specific options
+        translatableElements: z.array(z.string()).optional(),
+        preserveNamespaces: z.boolean().optional(),
+      }),
+      z.object({
+        include: z.array(z.string()),
+        exclude: z.array(z.string()).optional(),
+        // JavaScript-specific options
+        translateJSDoc: z.boolean().optional(),
+        translateComments: z.boolean().optional(),
+        translateStringLiterals: z.boolean().optional(),
+      }),
+    ])
   ),
   translation: z
     .object({
@@ -54,9 +101,9 @@ export async function saveConfig(config: Config): Promise<void> {
 export function mergeConfig(base: Config, overrides: Partial<Config>): Config {
   const mergedTranslation = {
     frontmatterFields: overrides.translation?.frontmatterFields ||
-      base.translation?.frontmatterFields || ['title', 'description', 'sidebarTitle'],
+      base?.translation?.frontmatterFields || ['title', 'description', 'sidebarTitle'],
     jsxAttributes: overrides.translation?.jsxAttributes ||
-      base.translation?.jsxAttributes || [
+      base?.translation?.jsxAttributes || [
         'title',
         'description',
         'tag',
@@ -64,12 +111,12 @@ export function mergeConfig(base: Config, overrides: Partial<Config>): Config {
         'placeholder',
         'label',
       ],
-    skipPatterns: overrides.translation?.skipPatterns || base.translation?.skipPatterns || [],
-    provider: overrides.translation?.provider || base.translation?.provider || 'anthropic',
-    model: overrides.translation?.model || base.translation?.model,
+    skipPatterns: overrides.translation?.skipPatterns || base?.translation?.skipPatterns || [],
+    provider: overrides.translation?.provider || base?.translation?.provider || 'anthropic',
+    model: overrides.translation?.model || base?.translation?.model,
     rules: {
       patternsToSkip: [
-        ...(base.translation?.rules?.patternsToSkip || []),
+        ...(base?.translation?.rules?.patternsToSkip || []),
         ...(overrides.translation?.rules?.patternsToSkip || []),
       ],
     },
@@ -79,12 +126,12 @@ export function mergeConfig(base: Config, overrides: Partial<Config>): Config {
     ...base,
     ...overrides,
     locale: {
-      ...base.locale,
-      ...overrides.locale,
+      ...(base?.locale || {}),
+      ...(overrides.locale || {}),
     },
     files: {
-      ...base.files,
-      ...overrides.files,
+      ...(base?.files || {}),
+      ...(overrides.files || {}),
     },
     translation: mergedTranslation,
   };
