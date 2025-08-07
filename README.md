@@ -1,333 +1,346 @@
-Below is a comprehensive **Product Requirements Document (PRD) and Implementation Plan** for building "OpenLocale" — an open-source, Languine-like localization tool. OpenLocale will provide automated, AI-powered translations for files (focusing on documentation like Markdown/HTML for your use case of 400+ pages), with support for multiple languages, format preservation, caching, and overrides. It will be 90% cheaper by leveraging self-hosted AI calls (e.g., via Anthropic) instead of a SaaS subscription, with costs primarily from AI API usage (~$0.01-0.05 per page translation, scaling to ~$20-50 one-time for 400 pages × 2-3 languages).
+# OpenLocale
 
-To keep this structured and actionable, I've broken it into **3 distinct parts** (CLI, SDK, API), as you suggested. Each part functions as a mini-PRD with:
-- **High-Level Requirements**: What it needs to do (MVP scope).
-- **Step-by-Step Implementation Instructions**: Detailed, code-inclusive guide to build a working prototype. These are designed to be followed sequentially in a Bun/TypeScript project.
-- **Assumptions and MVP Focus**: For simplicity, MVP targets Markdown docs (using Remark for parsing to extract/translat text while preserving structure). Expandable later to other formats (e.g., JSON, HTML via additional parsers like Rehype). We'll use a `openlocale.json` config file (mirroring Languine's `languine.json`), with fields like `{ "sourceLocale": "en", "targetLocales": ["es", "fr"], "files": ["docs/**/*.md"], "apiKey": "your_anthropic_key" }`.
-- **Tech Stack Integration**:
-  - **Bun**: For fast runtime, CLI scripting, and potential server (for API).
-  - **Remark**: For parsing Markdown AST (Abstract Syntax Tree) to translate text nodes without breaking formatting.
-  - **AI/SDK (Vercel)**: For AI integration with Anthropic (Claude) as the default model for context-aware translations. We'll use `generateText` for simple translations, `tool` if needed for advanced (e.g., structured output), and Zod for schema validation (e.g., ensuring translation outputs match expected formats).
-  - **Other Libs**: Glob for file matching, Node's fs for I/O, a simple cache (JSON file-based).
+AI-powered internationalization for MDX documentation - 90% cheaper than SaaS alternatives.
 
-**Project Setup (Common to All Parts)**:
-- Create a new directory: `mkdir openlocale && cd openlocale`.
-- Initialize Bun project: `bun init -y`.
-- Install dependencies: `bun add remark remark-parse remark-stringify glob zod ai @ai-sdk/anthropic`.
-- Add types: `bun add -D @types/node @types/glob`.
-- For AI: Set `ANTHROPIC_API_KEY` in `.env` (load via `process.env`).
+## Overview
 
-By the end of Part 1 (CLI), you'll have a working MVP prototype: Run CLI commands to init config, translate files, and generate localized versions (e.g., duplicate `docs/en/page.md` to `docs/es/page.md` with translated content).
+OpenLocale is an open-source localization tool that provides automated, AI-powered translations for documentation files. It offers a complete solution with CLI, SDK, and API components, making it suitable for various integration scenarios.
 
----
+### Key Features
 
-### Part 1: CLI Implementation Plan
+- 🚀 **90% cheaper** than SaaS alternatives - pay only for AI API usage
+- 🤖 **AI-powered translations** using Claude (Anthropic) or GPT-4 (OpenAI)
+- 📝 **MDX/Markdown support** with format preservation
+- 💰 **Cost tracking** - monitor translation costs in real-time
+- 🔄 **Smart caching** - only retranslate changed content
+- 🛠️ **Multiple integration options** - CLI, SDK, or REST API
+- 🎯 **Intelligent content detection** - automatically skips non-translatable content
 
-#### High-Level Requirements (MVP)
-- A command-line interface (CLI) binary named `openlocale` (runnable via `bun run cli.ts` or globally via symlinks).
-- Commands mirroring Languine: `init` (create config), `translate` (scan files, translate to targets, save outputs), `locale add/remove` (update config), `overrides pull` (stub for future dashboard integration; MVP uses local JSON overrides).
-- Config: `openlocale.json` with source/target locales, file globs, API key.
-- Translation Logic: Parse files (e.g., MD via Remark), extract translatable text, call AI to translate (with context like "preserve Markdown format and brand tone"), reassemble, cache results (file-hash based).
-- MVP Scope: Translate Markdown docs to 2-3 languages; handle 400+ files via batching; no auth (local only); basic caching.
+## Installation
 
-#### Step-by-Step Implementation Instructions
-1. **Create CLI Entry File**:
-   - Create `src/cli.ts`.
-   - Parse args using Bun's built-in (or add `commander` if needed: `bun add commander`).
-   - Code:
-     ```typescript
-     import { Command } from 'commander';
-     import fs from 'fs/promises';
-     import path from 'path';
-     import glob from 'glob';
-     import { remark } from 'remark';
-     import { visit } from 'unist-util-visit'; // Add: bun add unist-util-visit
-     import { generateText } from 'ai';
-     import { createAnthropic } from '@ai-sdk/anthropic';
-     import { z } from 'zod';
+```bash
+# Using Bun (recommended)
+bun add openlocale
 
-     const program = new Command();
-     const configPath = path.resolve('openlocale.json');
-     const cachePath = path.resolve('.openlocale-cache.json');
-     const anthropic = createAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+# Using npm
+npm install openlocale
 
-     // Config Schema (Zod for validation)
-     const ConfigSchema = z.object({
-       sourceLocale: z.string().default('en'),
-       targetLocales: z.array(z.string()).default([]),
-       files: z.array(z.string()).default([]),
-       apiKey: z.string().optional(), // For overrides or future
-     });
-     type Config = z.infer<typeof ConfigSchema>;
+# Using yarn
+yarn add openlocale
+```
 
-     async function loadConfig(): Promise<Config> {
-       try {
-         const data = await fs.readFile(configPath, 'utf-8');
-         return ConfigSchema.parse(JSON.parse(data));
-       } catch {
-         throw new Error('Config not found. Run "openlocale init" first.');
-       }
-     }
+## Quick Start
 
-     async function saveConfig(config: Config) {
-       await fs.writeFile(configPath, JSON.stringify(config, null, 2));
-     }
+### 1. Initialize Configuration
 
-     // Cache Functions
-     async function loadCache(): Promise<Record<string, Record<string, string>>> {
-       try {
-         const data = await fs.readFile(cachePath, 'utf-8');
-         return JSON.parse(data);
-       } catch {
-         return {};
-       }
-     }
+```bash
+openlocale init
+```
 
-     async function saveCache(cache: Record<string, Record<string, string>>) {
-       await fs.writeFile(cachePath, JSON.stringify(cache));
-     }
+This creates an `openlocale.json` configuration file with default settings.
 
-     // Translation Function (using AI/SDK and Zod for output validation)
-     async function translateText(text: string, source: string, target: string): Promise<string> {
-       const { text: translated } = await generateText({
-         model: anthropic('claude-3-5-sonnet-20240620'),
-         prompt: `Translate this text from ${source} to ${target}. Preserve exact formatting, tone, and structure (e.g., Markdown headers, links). Text: ${text}`,
-       });
-       // Validate with Zod (simple string for MVP)
-       return z.string().parse(translated);
-     }
+### 2. Add Target Languages
 
-     // File Translation with Remark
-     async function translateFile(filePath: string, source: string, target: string, cache: Record<string, Record<string, string>>) {
-       const content = await fs.readFile(filePath, 'utf-8');
-       const fileHash = content; // Simple hash for MVP (use crypto later)
-       const cacheKey = `${filePath}-${target}`;
-       if (cache[cacheKey] && cache[cacheKey] === fileHash) {
-         console.log(`Cached: ${filePath} -> ${target}`);
-         return; // Assume output already exists; MVP skips re-write
-       }
+```bash
+# Add single language
+openlocale add es
 
-       const tree = remark().parse(content);
-       visit(tree, 'text', (node) => {
-         // Translate text nodes asynchronously? For MVP, collect and batch
-         // But simple: Replace in-place (note: async visit not default, so collect first)
-       });
+# Add multiple languages
+openlocale add es,fr,de
+```
 
-       // Collect translatable texts
-       const texts: string[] = [];
-       visit(tree, 'text', (node) => texts.push(node.value));
+### 3. Configure Your Files
 
-       // Batch translate (for efficiency)
-       const translatedTexts = await Promise.all(texts.map(t => translateText(t, source, target)));
-       let index = 0;
-       visit(tree, 'text', (node) => { node.value = translatedTexts[index++]; });
+Edit `openlocale.json` to specify which files to translate:
 
-       const translatedContent = remark().stringify(tree);
-       const outputPath = filePath.replace(`/${source}/`, `/${target}/`); // Assume structure like docs/en/page.md
-       await fs.mkdir(path.dirname(outputPath), { recursive: true });
-       await fs.writeFile(outputPath, translatedContent);
+```json
+{
+  "locale": {
+    "source": "en",
+    "targets": ["es", "fr", "de"]
+  },
+  "files": {
+    "mdx": {
+      "include": ["content/docs/**/*.mdx"]
+    }
+  }
+}
+```
 
-       cache[cacheKey] = fileHash;
-     }
+### 4. Set Your API Key
 
-     // Commands
-     program.command('init').action(async () => {
-       const defaultConfig: Config = { sourceLocale: 'en', targetLocales: [], files: [] };
-       await saveConfig(defaultConfig);
-       console.log('Config initialized at openlocale.json');
-     });
+```bash
+export ANTHROPIC_API_KEY="your-api-key"
+# or
+export OPENAI_API_KEY="your-api-key"
+```
 
-     program.command('translate').action(async () => {
-       const config = await loadConfig();
-       const cache = await loadCache();
-       const files = (await Promise.all(config.files.map(pattern => glob(pattern)))).flat();
-       for (const file of files) {
-         for (const target of config.targetLocales) {
-           await translateFile(file, config.sourceLocale, target, cache);
-         }
-       }
-       await saveCache(cache);
-       console.log('Translation complete');
-     });
+### 5. Run Translation
 
-     program.command('locale').command('add').argument('<locales>', 'Comma-separated locales').action(async (localesStr) => {
-       const config = await loadConfig();
-       const newLocales = localesStr.split(',');
-       config.targetLocales = [...new Set([...config.targetLocales, ...newLocales])];
-       await saveConfig(config);
-     });
+```bash
+# Basic translation
+openlocale translate
 
-     // Similar for remove, overrides (stub: console.log for MVP)
+# With cost tracking
+openlocale translate --costs
+```
 
-     program.parse();
-     ```
+## CLI Commands
 
-2. **Run and Test MVP**:
-   - Run `bun src/cli.ts init` to create `openlocale.json`.
-   - Edit `openlocale.json`: Add `"targetLocales": ["es"]`, `"files": ["docs/**/*.md"]`.
-   - Create sample file: `mkdir -p docs/en && echo "# Hello\nWorld" > docs/en/test.md`.
-   - Run `bun src/cli.ts translate` — it should create `docs/es/test.md` with translated content (e.g., "# Hola\nMundo").
-   - For 400+ files: It batches automatically; add parallelism with `Promise.all` if slow.
+### `openlocale init`
+Initialize a new OpenLocale configuration file.
 
-3. **Polish for Prototype**:
-   - Add error handling (e.g., Zod validation errors).
-   - Make global: `bun link` or package as bin in package.json.
-   - Test with caching: Change file, re-run (should re-translate only changed).
+### `openlocale translate [--costs]`
+Translate all configured files to target languages.
+- `--costs`: Display translation costs based on token usage
 
-This gives a working CLI MVP. Expand to more commands/formats later.
+### `openlocale add <locales>`
+Add target locale(s). Supports comma-separated values.
+```bash
+openlocale add pt,fr,ja
+```
 
----
+### `openlocale remove <locales>`
+Remove target locale(s). Supports comma-separated values.
 
-### Part 2: SDK Implementation Plan
+### `openlocale list`
+List all configured locales.
 
-#### High-Level Requirements (MVP)
-- An NPM-publishable package `@openlocale/sdk` with TypeScript support.
-- Core class: `OpenLocale` initialized with API key (for AI).
-- Methods: `translate({ sourceText, sourceLocale, targetLocale, format })` — mirrors Languine, with caching.
-- Supports 'md' format via Remark; returns translated text.
-- Zod for input/output validation.
-- MVP Scope: Programmatic translation for single strings/files; integrate into apps/scripts for batching 400+ pages.
+### `openlocale reset`
+Reset translation status and remove generated translation files.
 
-#### Step-by-Step Implementation Instructions
-1. **Setup Package**:
-   - Create `sdk` subdir: `mkdir sdk && cd sdk && bun init -y`.
-   - Update package.json: `"name": "@openlocale/sdk", "main": "dist/index.js", "types": "dist/index.d.ts"`.
-   - Install deps: Same as CLI (remark, ai, etc.).
-   - Build: Add `tsc` or Bun build script.
+## Configuration
 
-2. **Implement Core SDK**:
-   - Create `src/index.ts`.
-   - Code:
-     ```typescript
-     import { generateText } from 'ai';
-     import { createAnthropic } from '@ai-sdk/anthropic';
-     import { z } from 'zod';
-     import { remark } from 'remark';
-     import { visit } from 'unist-util-visit';
+### Complete Configuration Example
 
-     const TranslateSchema = z.object({
-       sourceText: z.string(),
-       sourceLocale: z.string(),
-       targetLocale: z.string(),
-       format: z.enum(['md', 'string']).default('string'),
-       cache: z.boolean().default(true),
-     });
+```json
+{
+  "projectId": "prj_xxxxxxxxxxxxxxxxxxxx",
+  "locale": {
+    "source": "en",
+    "targets": ["es", "fr", "de", "ja", "pt"]
+  },
+  "files": {
+    "mdx": {
+      "include": ["content/docs/**/*.mdx", "pages/**/*.md"]
+    }
+  },
+  "translation": {
+    "provider": "anthropic",
+    "model": "claude-3-5-sonnet-20240620",
+    "frontmatterFields": ["title", "description", "sidebarTitle"],
+    "jsxAttributes": ["title", "description", "tag", "alt", "placeholder", "label"],
+    "rules": {
+      "patternsToSkip": ["^type:\\s*\\w+$", "^TODO:.*"]
+    }
+  }
+}
+```
 
-     export class OpenLocale {
-       private anthropic;
-       private cache: Map<string, string> = new Map(); // In-memory for MVP
+### Configuration Options
 
-       constructor({ apiKey }: { apiKey: string }) {
-         this.anthropic = createAnthropic({ apiKey });
-       }
+- **`locale.source`**: Source language code (default: "en")
+- **`locale.targets`**: Array of target language codes
+- **`files`**: File patterns to translate (supports glob patterns)
+- **`translation.provider`**: AI provider ("anthropic" or "openai")
+- **`translation.model`**: Specific model to use (optional)
+- **`translation.frontmatterFields`**: Frontmatter fields to translate
+- **`translation.jsxAttributes`**: JSX attributes to translate
+- **`translation.rules.patternsToSkip`**: Regex patterns for content to skip
 
-       async translate(params: z.infer<typeof TranslateSchema>) {
-         const validated = TranslateSchema.parse(params);
-         const cacheKey = `${validated.sourceText}-${validated.targetLocale}`;
-         if (validated.cache && this.cache.has(cacheKey)) {
-           return { translatedText: this.cache.get(cacheKey)!, cached: true };
-         }
+## SDK Usage
 
-         let translated: string;
-         if (validated.format === 'md') {
-           const tree = remark().parse(validated.sourceText);
-           const texts: string[] = [];
-           visit(tree, 'text', (node) => texts.push(node.value));
-           const translatedTexts = await Promise.all(texts.map(t => this.translateText(t, validated.sourceLocale, validated.targetLocale)));
-           let index = 0;
-           visit(tree, 'text', (node) => { node.value = translatedTexts[index++]; });
-           translated = remark().stringify(tree);
-         } else {
-           translated = await this.translateText(validated.sourceText, validated.sourceLocale, validated.targetLocale);
-         }
+### Basic Translation
 
-         this.cache.set(cacheKey, translated);
-         return { translatedText: translated, cached: false };
-       }
+```typescript
+import { OpenLocale } from 'openlocale/sdk';
 
-       private async translateText(text: string, source: string, target: string) {
-         const { text: result } = await generateText({
-           model: this.anthropic('claude-3-5-sonnet-20240620'),
-           prompt: `Translate from ${source} to ${target}, preserve tone: ${text}`,
-         });
-         return z.string().parse(result);
-       }
-     }
-     ```
+const openlocale = await OpenLocale.create({
+  apiKey: 'your-api-key',
+  provider: 'anthropic'
+});
 
-3. **Test MVP**:
-   - Build: `bun build src/index.ts --outdir dist`.
-   - In a test script: `import { OpenLocale } from './dist/index'; const ol = new OpenLocale({ apiKey: process.env.ANTHROPIC_API_KEY }); const res = await ol.translate({ sourceText: '# Hello', format: 'md', sourceLocale: 'en', targetLocale: 'es' }); console.log(res);`.
-   - For batch: Loop over files, call `translate` for each.
+// Translate content
+const result = await openlocale.translateContent({
+  content: '# Hello World',
+  sourceLocale: 'en',
+  targetLocale: 'es',
+  format: 'md'
+});
 
-This SDK can be used in scripts for custom workflows.
+console.log(result.content); // # Hola Mundo
+console.log(result.usage);   // Token usage statistics
+```
 
----
+### File Translation
 
-### Part 3: API Implementation Plan
+```typescript
+// Translate a single file
+const fileResult = await openlocale.translateFile({
+  filePath: 'docs/intro.mdx',
+  sourceLocale: 'en',
+  targetLocale: 'fr'
+});
 
-#### High-Level Requirements (MVP)
-- A REST API server (using Bun's built-in HTTP) at e.g., `http://localhost:3000/api/translate`.
-- Endpoint: POST /api/translate with body mirroring SDK (sourceText, locales, format).
-- Auth: Simple API key header (validate with Zod).
-- Returns JSON { success, translatedText, cached }.
-- MVP Scope: Server-side translation for remote calls; no database, in-memory cache; integrate Remark/AI as above.
+// Translate multiple files
+const batchResult = await openlocale.translateFiles({
+  files: ['docs/**/*.mdx'],
+  sourceLocale: 'en',
+  targetLocales: ['es', 'fr', 'de']
+});
 
-#### Step-by-Step Implementation Instructions
-1. **Setup Server**:
-   - Create `src/api.ts`.
-   - Use Bun.serve for HTTP.
+console.log(batchResult.totalCost); // Total cost estimate
+```
 
-2. **Implement API**:
-   - Code (reuse SDK logic where possible; for MVP, embed):
-     ```typescript
-     import { serve } from 'bun'; // Bun built-in
-     import { z } from 'zod';
-     import { OpenLocale } from '../sdk/dist/index'; // Reuse SDK if built, or inline
+## API Server
 
-     const ApiKeySchema = z.string().startsWith('org_'); // Mirror Languine
+### Starting the Server
 
-     const server = serve({
-       port: 3000,
-       async fetch(req) {
-         if (req.method !== 'POST' || new URL(req.url).pathname !== '/api/translate') {
-           return new Response('Not Found', { status: 404 });
-         }
+```bash
+# Start the API server
+bun run src/api/index.ts
 
-         const apiKey = req.headers.get('x-api-key');
-         try {
-           ApiKeySchema.parse(apiKey);
-         } catch {
-           return new Response(JSON.stringify({ success: false, error: 'Invalid API key' }), { status: 401 });
-         }
+# With custom port
+PORT=8080 bun run src/api/index.ts
+```
 
-         const body = await req.json();
-         // Validate body with TranslateSchema from SDK
-         // Assume OpenLocale instance
-         const ol = new OpenLocale({ apiKey: process.env.ANTHROPIC_API_KEY }); // Or pass client key
-         const result = await ol.translate(body);
+### API Endpoints
 
-         return new Response(JSON.stringify({ success: true, ...result }), { status: 200 });
-       },
-     });
+#### POST /api/translate
+Translate content to a single target language.
 
-     console.log('API running on http://localhost:3000');
-     ```
+```bash
+curl -X POST http://localhost:3000/api/translate \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "# Hello World",
+    "sourceLocale": "en",
+    "targetLocale": "es",
+    "format": "md"
+  }'
+```
 
-3. **Run and Test MVP**:
-   - Run `bun src/api.ts`.
-   - Test with curl: `curl -X POST http://localhost:3000/api/translate -H "x-api-key: org_test" -H "Content-Type: application/json" -d '{"sourceText": "Hello", "sourceLocale": "en", "targetLocale": "es", "format": "string"}'`.
-   - For docs: Send full MD as sourceText.
+#### POST /api/translate/batch
+Translate content to multiple target languages.
 
-This completes the API prototype. For production, add rate limiting, persistent cache (e.g., Redis).
+```bash
+curl -X POST http://localhost:3000/api/translate/batch \
+  -H "X-API-Key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "# Hello World",
+    "sourceLocale": "en",
+    "targetLocales": ["es", "fr", "de"],
+    "format": "md"
+  }'
+```
 
----
+## Cost Estimation
 
-**Next Steps for Full Product**:
-- Integrate all parts (e.g., CLI uses SDK internally).
-- Add more formats (e.g., HTML via Rehype).
-- GitHub repo for open-sourcing.
-- Cost Validation: Use code_execution tool if needed to estimate AI tokens.
-- If issues, refine with tools (e.g., web_search for AI/SDK updates). 
+OpenLocale provides transparent cost tracking:
 
-This plan gets you to a working MVP quickly—let me know if you need code tweaks!
+- **Anthropic Claude 3.5 Sonnet**: ~$3 per million input tokens, ~$15 per million output tokens
+- **OpenAI GPT-4**: ~$10 per million input tokens, ~$30 per million output tokens
+
+### Example Costs
+
+For a typical documentation site with 400 pages:
+- Initial translation to 3 languages: ~$20-50 (one-time)
+- Incremental updates: Only changed content is retranslated
+- Compared to SaaS: Save 90%+ on monthly subscriptions
+
+## File Structure Convention
+
+OpenLocale expects a locale-based file structure:
+
+```
+content/
+├── docs/
+│   ├── en/          # Source files
+│   │   ├── intro.mdx
+│   │   └── guide.mdx
+│   ├── es/          # Spanish translations (generated)
+│   │   ├── intro.mdx
+│   │   └── guide.mdx
+│   └── fr/          # French translations (generated)
+│       ├── intro.mdx
+│       └── guide.mdx
+```
+
+## Advanced Features
+
+### Custom Skip Patterns
+
+Skip specific content patterns during translation:
+
+```json
+{
+  "translation": {
+    "rules": {
+      "patternsToSkip": [
+        "^type:\\s*\\w+$",     // Skip directive attributes
+        "^TODO:.*",            // Skip TODO comments
+        "^FIXME:.*"            // Skip FIXME comments
+      ]
+    }
+  }
+}
+```
+
+### Lockfile Management
+
+OpenLocale maintains a `openlocale.lock` file to track:
+- File content hashes
+- Translation status per locale
+- Prevents unnecessary retranslation
+
+### Provider Switching
+
+Easily switch between AI providers:
+
+```json
+{
+  "translation": {
+    "provider": "openai",
+    "model": "gpt-4o-2024-08-06"
+  }
+}
+```
+
+## Architecture
+
+OpenLocale follows a modular architecture with clear separation of concerns:
+
+- **CLI**: Command-line interface for interactive use
+- **Core**: Business logic for file processing and translation
+- **Parsers**: Strategy pattern for handling different file formats
+- **AI**: Factory pattern for multiple AI provider support
+- **SDK**: Programmatic access to all features
+- **API**: RESTful server for remote integration
+
+For detailed architecture information, see [ARCHITECTURE.md](./ARCHITECTURE.md).
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+MIT
+
+## Comparison with Alternatives
+
+| Feature | OpenLocale | Languine | Traditional i18n |
+|---------|------------|----------|------------------|
+| Cost | ~$0.01-0.05/page | $100+/month | Manual labor |
+| AI-Powered | ✅ | ✅ | ❌ |
+| Open Source | ✅ | ❌ | Varies |
+| Self-Hosted | ✅ | ❌ | ✅ |
+| Format Preservation | ✅ | ✅ | ❌ |
+| MDX Support | ✅ | Limited | ❌ |
+| Cost Tracking | ✅ | ❌ | N/A |
+
+## Support
+
+For issues, questions, or suggestions, please open an issue on GitHub.

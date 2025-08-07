@@ -8,23 +8,41 @@ OpenLocale follows a modular architecture with clear separation of concerns. The
 
 ```
 src/
+├── cli.ts         # Main CLI entry point
 ├── cli/           # Command-line interface
-│   ├── index.ts   # CLI entry point and command definitions
+│   ├── index.ts   # CLI command definitions
 │   └── commands.ts # Command implementations
 ├── core/          # Core business logic
+│   ├── index.ts   # Core module exports
 │   ├── translate-file.ts  # Single file translation orchestration
 │   └── process-files.ts   # Batch file processing
 ├── parsers/       # File format parsers (Strategy Pattern)
+│   ├── index.ts   # Parser registry and exports
 │   ├── types.ts   # TranslationStrategy interface
 │   ├── mdx.ts     # MDX/Markdown strategy implementation
 │   └── frontmatter.ts # Frontmatter translation logic
 ├── ai/            # AI provider integration (Factory Pattern)
+│   ├── index.ts   # AI module exports
 │   └── translate.ts # Translation service with provider factory
+├── api/           # REST API server
+│   ├── index.ts   # Hono server setup
+│   ├── middleware/ # API middleware
+│   │   ├── auth.ts # Authentication with Unkey
+│   │   └── rate-limit.ts # Rate limiting
+│   └── examples/  # API usage examples
 └── utils/         # Shared utilities
+    ├── index.ts   # Utility exports
     ├── config.ts  # Configuration management
     ├── lockfile.ts # Lock file operations
     ├── paths.ts   # Path manipulation utilities
-    └── crypto.ts  # Hashing utilities
+    ├── crypto.ts  # Hashing utilities
+    └── cost.ts    # Token usage and cost calculation
+
+sdk/               # SDK package (separate from CLI)
+├── src/
+│   ├── OpenLocale.ts # Main SDK class
+│   ├── types.ts   # SDK type definitions
+│   └── errors.ts  # Custom error classes
 ```
 
 ## Design Patterns
@@ -44,7 +62,26 @@ src/
 ### Configurable Translation Rules
 - Skip patterns can be defined in `openlocale.json`
 - Rules are applied during parsing to exclude specific content
-- Default pattern: `^type:\\s*\\w+$` (for backward compatibility)
+- Intelligent detection of directive pseudo-attributes (e.g., `type: help`)
+- Customizable patterns via `translation.rules.patternsToSkip`
+
+### Cost Tracking
+- Real-time token usage tracking
+- Per-file and total cost calculation
+- Support for multiple AI provider pricing models
+- Optional cost display with `--costs` flag
+
+### API Server
+- RESTful API with Hono framework
+- Authentication via Unkey
+- Rate limiting (standard and strict tiers)
+- Batch translation support
+
+### SDK
+- Programmatic access to translation features
+- TypeScript-first with full type safety
+- File and content translation methods
+- Caching and lockfile management
 
 ### Extensibility Points
 1. **New File Formats**: Implement `TranslationStrategy` and register in `parsers/index.ts`
@@ -55,13 +92,24 @@ src/
 
 ```json
 {
+  "projectId": "prj_xxxxxxxxxxxxxxxxxxxx",
+  "locale": {
+    "source": "en",
+    "targets": ["es", "fr", "de"]
+  },
+  "files": {
+    "mdx": {
+      "include": ["content/docs/**/*.mdx"]
+    }
+  },
   "translation": {
-    "provider": "anthropic",  // AI provider selection
+    "provider": "anthropic",  // or "openai"
+    "model": "claude-3-5-sonnet-20240620",  // optional, uses defaults
     "rules": {
       "patternsToSkip": ["^type:\\s*\\w+$"]  // Regex patterns to skip
     },
-    "frontmatterFields": ["title", "description"],
-    "jsxAttributes": ["alt", "title", "placeholder"]
+    "frontmatterFields": ["title", "description", "sidebarTitle"],
+    "jsxAttributes": ["title", "description", "tag", "alt", "placeholder", "label"]
   }
 }
 ```
