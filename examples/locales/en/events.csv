@@ -1,0 +1,6 @@
+event_name,date,location,description,capacity,registration_url
+"Annual Tech Conference","2024-06-15","San Francisco, CA","Join us for the biggest tech conference of the year featuring industry leaders",500,https://example.com/register/tech-conf
+"Product Launch Webinar","2024-03-20","Online","Introducing our revolutionary new product line with live demonstrations",unlimited,https://example.com/webinar/product-launch
+"Developer Workshop","2024-04-10","New York, NY","Hands-on workshop covering modern development practices and tools",50,https://example.com/workshop/dev
+"Customer Appreciation Day","2024-05-01","Multiple Locations","Special discounts and exclusive previews for our valued customers",1000,https://example.com/events/customer-day
+"Training Bootcamp","2024-07-22","Austin, TX","Intensive 3-day training program for beginners and intermediates",30,https://example.com/bootcamp/summer

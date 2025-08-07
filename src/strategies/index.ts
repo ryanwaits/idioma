@@ -9,6 +9,7 @@ import { YamlStrategy } from './yaml';
 import { MdxStrategy } from './mdx';
 import { HtmlStrategy } from './html';
 import { XmlStrategy } from './xml';
+import { CSVTranslationStrategy } from './csv';
 import type { BaseTranslationStrategy } from './base';
 
 // Export base class and types for extending
@@ -20,6 +21,7 @@ export { YamlStrategy } from './yaml';
 export { MdxStrategy } from './mdx';
 export { HtmlStrategy } from './html';
 export { XmlStrategy } from './xml';
+export { CSVTranslationStrategy } from './csv';
 
 // Strategy registry - all strategies in one place
 export const strategies: BaseTranslationStrategy[] = [
@@ -28,8 +30,8 @@ export const strategies: BaseTranslationStrategy[] = [
   new YamlStrategy({ preserveComments: true, skipEmptyStrings: true }),
   new HtmlStrategy(),
   new XmlStrategy(),
+  new CSVTranslationStrategy(),
   // Future strategies:
-  // new CsvStrategy(),
   // new JavaScriptStrategy(),
 ];
 

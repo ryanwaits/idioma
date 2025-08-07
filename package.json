@@ -1,8 +1,8 @@
 {
   "name": "idioma",
   "version": "0.1.0",
-  "description": "AI-powered internationalization for MDX documentation",
-  "keywords": ["i18n", "localization", "translation", "mdx", "ai", "claude", "openai"],
+  "description": "AI-powered internationalization with smart defaults for MDX, JSON, YAML, HTML, and XML",
+  "keywords": ["i18n", "localization", "translation", "mdx", "json", "yaml", "html", "xml", "ai", "claude", "openai", "convention-over-configuration"],
   "homepage": "https://github.com/idioma/idioma",
   "repository": {
     "type": "git",
