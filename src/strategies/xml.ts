@@ -342,11 +342,15 @@ export class XmlStrategy extends BaseTranslationStrategy {
       return obj;
     };
     
-    // Don't unwrap arrays at the root level - preserve the structure
+    // Transform the root value's content
     const transformedRoot: any = {};
     for (const [key, value] of Object.entries(rootValue)) {
       transformedRoot[key] = transformForBuilder(value);
     }
+    
+    // Wrap the transformed content in the root element
+    // xml2js.Builder's rootName doesn't actually wrap - it expects the data to already have the root
+    const wrappedData = { [rootName]: transformedRoot };
     
     // Use xml2js builder
     const builder = new xml2js.Builder({
@@ -357,12 +361,11 @@ export class XmlStrategy extends BaseTranslationStrategy {
       },
       headless: true, // We already added the declaration
       charkey: '_',
-      attrkey: '$',
-      rootName: rootName
+      attrkey: '$'
     });
     
-    // Builder expects the object value, not the root object itself
-    xmlString += builder.buildObject(transformedRoot);
+    // Build with the properly wrapped data
+    xmlString += builder.buildObject(wrappedData);
     
     return xmlString;
   }
