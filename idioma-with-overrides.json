@@ -1,0 +1,21 @@
+{
+  "projectId": "prj_53b8dc3dfc3160334916",
+  "locale": {
+    "source": "en",
+    "targets": ["es", "fr"]
+  },
+  "files": {
+    "mdx": {
+      "include": ["content/docs/[locale]/**/*.mdx"],
+      // Only override what you need - everything else uses smart defaults
+      "translatableAttributes": ["customProp", "myAttribute"]  // These will be ADDED to defaults
+    },
+    "json": {
+      "include": ["examples/locales/[locale]/**/*.json"],
+      // Can still exclude specific files
+      "exclude": ["**/internal.json"]
+    },
+    "html": ["examples/locales/[locale]/**/*.html"],  // Can use simple array when no overrides needed
+    "xml": ["examples/locales/[locale]/**/*.xml"]
+  }
+}

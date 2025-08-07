@@ -3,7 +3,7 @@
     "welcome": {
       "title": "Bienvenido a Nuestra Plataforma",
       "description": "Comencemos con un rápido recorrido por las principales características.",
-      "skip": "Omitir recorrido",
+      "skip": "Saltar recorrido",
       "next": "Siguiente Paso"
     },
     "steps": [
@@ -31,7 +31,7 @@
       "free": {
         "name": "Gratis",
         "price": "$0",
-        "period": "por mes",
+        "period": "al mes",
         "features": [
           "Hasta 3 proyectos",
           "Soporte básico",
@@ -42,7 +42,7 @@
       "pro": {
         "name": "Profesional",
         "price": "$29",
-        "period": "por mes",
+        "period": "al mes",
         "features": [
           "Proyectos ilimitados",
           "Soporte prioritario",
@@ -61,7 +61,7 @@
           "Almacenamiento ilimitado",
           "Garantía de SLA"
         ],
-        "cta": "Contactar con ventas"
+        "cta": "Contactar con Ventas"
       }
     }
   },

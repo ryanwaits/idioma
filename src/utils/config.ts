@@ -9,62 +9,52 @@ export const ConfigSchema: z.ZodSchema = z.object({
     source: z.string().default('en'),
     targets: z.array(z.string()).default([]),
   }),
-  files: z.record(
-    z.string(),
-    z.union([
-      z.object({
-        include: z.array(z.string()),
-        exclude: z.array(z.string()).optional(),
-        // MDX-specific options
+  files: z.union([
+    // Ultra-minimal: just an array of patterns
+    z.array(z.string()),
+    
+    // Object with global patterns and format-specific overrides
+    z.object({
+      // Global include patterns (matches any format)
+      include: z.array(z.string()),
+      exclude: z.array(z.string()).optional(),
+      
+      // Format-specific overrides (optional)
+      mdx: z.object({
+        translatableAttributes: z.array(z.string()).optional(),
         frontmatterFields: z.array(z.string()).optional(),
         jsxAttributes: z.array(z.string()).optional(),
-      }),
-      z.object({
-        include: z.array(z.string()),
-        exclude: z.array(z.string()).optional(),
-        // JSON-specific options
+        skipTags: z.array(z.string()).optional(),
+      }).optional(),
+      
+      json: z.object({
         includePaths: z.array(z.string()).optional(),
         excludePaths: z.array(z.string()).optional(),
-        preserveArrayOrder: z.boolean().optional(),
         skipEmptyStrings: z.boolean().optional(),
-      }),
-      z.object({
-        include: z.array(z.string()),
-        exclude: z.array(z.string()).optional(),
-        // YAML-specific options
+        skipKeys: z.array(z.string()).optional(),
+      }).optional(),
+      
+      yaml: z.object({
+        includePaths: z.array(z.string()).optional(),
+        excludePaths: z.array(z.string()).optional(),
         preserveComments: z.boolean().optional(),
-      }),
-      z.object({
-        include: z.array(z.string()),
-        exclude: z.array(z.string()).optional(),
-        // HTML-specific options
+        skipEmptyStrings: z.boolean().optional(),
+      }).optional(),
+      
+      html: z.object({
         translatableAttributes: z.array(z.string()).optional(),
-      }),
-      z.object({
-        include: z.array(z.string()),
-        exclude: z.array(z.string()).optional(),
-        // CSV-specific options
-        columns: z.array(z.string()).optional(),
-        skipHeader: z.boolean().optional(),
-        delimiter: z.string().optional(),
-      }),
-      z.object({
-        include: z.array(z.string()),
-        exclude: z.array(z.string()).optional(),
-        // XML-specific options
-        translatableElements: z.array(z.string()).optional(),
+        skipTags: z.array(z.string()).optional(),
+        preserveWhitespace: z.boolean().optional(),
+      }).optional(),
+      
+      xml: z.object({
+        translatableAttributes: z.array(z.string()).optional(),
+        skipTags: z.array(z.string()).optional(),
+        preserveCDATA: z.boolean().optional(),
         preserveNamespaces: z.boolean().optional(),
-      }),
-      z.object({
-        include: z.array(z.string()),
-        exclude: z.array(z.string()).optional(),
-        // JavaScript-specific options
-        translateJSDoc: z.boolean().optional(),
-        translateComments: z.boolean().optional(),
-        translateStringLiterals: z.boolean().optional(),
-      }),
-    ])
-  ),
+      }).optional(),
+    }),
+  ]),
   translation: z
     .object({
       provider: z.string().default('anthropic'),

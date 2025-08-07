@@ -1,0 +1,30 @@
+{
+  "projectId": "prj_53b8dc3dfc3160334916",
+  "locale": {
+    "source": "en",
+    "targets": ["es", "fr"]
+  },
+  "files": {
+    "include": [
+      "content/docs/[locale]/**/*.{mdx,md}",
+      "examples/locales/[locale]/**/*.json",
+      "examples/locales/[locale]/**/*.{yaml,yml}",
+      "examples/locales/[locale]/**/*.{html,htm}",
+      "examples/locales/[locale]/**/*.xml"
+    ],
+    "exclude": [
+      "**/internal/**",
+      "**/*.config.json"
+    ],
+    "mdx": {
+      "translatableAttributes": ["customProp", "mySpecialAttr"],
+      "frontmatterFields": ["customMeta"]
+    },
+    "json": {
+      "skipKeys": ["internal_id", "debug_info"]
+    },
+    "html": {
+      "translatableAttributes": ["x-tooltip", "data-help"]
+    }
+  }
+}

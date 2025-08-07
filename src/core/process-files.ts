@@ -1,5 +1,6 @@
 import { glob } from 'glob';
 import * as path from 'path';
+import { minimatch } from 'minimatch';
 import {
   aggregateUsage,
   type Config,
@@ -8,11 +9,31 @@ import {
   type LockFile,
   type TokenUsage,
 } from '../utils';
+import { detectFormat } from '../utils/format-detector';
 import { type TranslateFileOptions, translateFile } from './translate-file';
 
 export interface ProcessFilesResult {
   lock: LockFile;
   totalUsage?: TokenUsage;
+}
+
+/**
+ * Filter files based on exclude patterns using minimatch
+ */
+async function filterExcludedFiles(
+  files: string[],
+  excludePatterns: string[],
+  sourceLocale: string
+): Promise<string[]> {
+  return files.filter(file => {
+    for (const excludePattern of excludePatterns) {
+      const excludeGlob = excludePattern.replace(/\[locale\]/g, sourceLocale);
+      if (minimatch(file, excludeGlob)) {
+        return false;
+      }
+    }
+    return true;
+  });
 }
 
 /**
@@ -81,17 +102,34 @@ export async function processFiles(
 
   const allUsages: TokenUsage[] = [];
 
-  // Process each file type defined in config
-  for (const [_fileType, fileConfig] of Object.entries(config.files)) {
-    for (const pattern of fileConfig.include) {
+  // Get the include patterns (handle both array and object formats)
+  const includePatterns = Array.isArray(config.files) 
+    ? config.files 
+    : config.files?.include || [];
+  const excludePatterns = !Array.isArray(config.files) 
+    ? config.files?.exclude || []
+    : [];
+
+  // Process files from the include patterns
+  if (includePatterns.length > 0) {
+    for (const pattern of includePatterns) {
       // Replace [locale] placeholder with source locale to find actual files
       const sourcePattern = pattern.replace(/\[locale\]/g, sourceLocale);
 
       // Get all files matching the source pattern
       const files = await glob(sourcePattern);
+      
+      // Filter out excluded files if exclude patterns are provided
+      const filteredFiles = excludePatterns.length > 0
+        ? await filterExcludedFiles(files, excludePatterns, sourceLocale)
+        : files;
 
       // Process each file for each target locale
-      for (const file of files) {
+      for (const file of filteredFiles) {
+        // Auto-detect format from file extension
+        const format = detectFormat(file);
+        if (!format) continue; // Skip unsupported formats
+        
         for (const targetLocale of targetLocales) {
           try {
             const result = await translateFile(
@@ -152,12 +190,14 @@ export async function getFilesToTranslate(config: Config, patterns?: string[]): 
       filesToProcess.push(...files);
     }
   } else {
-    // Use patterns from config
-    for (const [_fileType, fileConfig] of Object.entries(config.files)) {
-      for (const pattern of fileConfig.include) {
-        const files = await glob(pattern);
-        filesToProcess.push(...files);
-      }
+    // Use patterns from config (handle both array and object formats)
+    const includePatterns = Array.isArray(config.files) 
+      ? config.files 
+      : config.files?.include || [];
+    
+    for (const pattern of includePatterns) {
+      const files = await glob(pattern);
+      filesToProcess.push(...files);
     }
   }
 

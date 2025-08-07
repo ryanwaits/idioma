@@ -1,5 +1,6 @@
 import { translateText } from '../ai/translate';
 import type { Config } from '../utils/config';
+import { getEffectiveFileConfig } from '../utils/config-normalizer';
 import { aggregateUsage, type TokenUsage } from '../utils/cost';
 
 export interface FrontmatterTranslationResult {
@@ -17,13 +18,9 @@ export async function translateFrontmatter(
   model?: string,
   provider?: string
 ): Promise<FrontmatterTranslationResult> {
-  // Get frontmatter fields from MDX-specific config
-  const mdxConfig = config.files?.mdx;
-  const translatableFields = mdxConfig?.frontmatterFields || [
-    'title',
-    'description',
-    'sidebarTitle',
-  ];
+  // Get effective config with smart defaults
+  const effectiveConfig = getEffectiveFileConfig(config, 'mdx');
+  const translatableFields = effectiveConfig.frontmatterFields || [];
   const lines = frontmatter.split('\n');
   const usages: TokenUsage[] = [];
 

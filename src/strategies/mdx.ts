@@ -5,6 +5,7 @@ import { visit } from 'unist-util-visit';
 import { translateFrontmatter } from '../parsers/frontmatter';
 import { BaseTranslationStrategy, type ParseResult, type TranslatableNode, type ValidationResult, type TranslationResult } from './base';
 import type { Config } from '../utils/config';
+import { getEffectiveFileConfig } from '../utils/config-normalizer';
 import { translateBatch } from '../ai/translate';
 import { aggregateUsage } from '../utils/cost';
 
@@ -59,16 +60,9 @@ export class MdxStrategy extends BaseTranslationStrategy {
     // Add parent references to enable directive checking
     addParentReferences(tree);
     
-    // Get translatable attributes from MDX-specific config
-    const mdxConfig = config.files?.mdx;
-    const translatableAttrs = mdxConfig?.jsxAttributes || [
-      'title',
-      'description',
-      'tag',
-      'alt',
-      'placeholder',
-      'label',
-    ];
+    // Get effective config with smart defaults
+    const effectiveConfig = getEffectiveFileConfig(config, 'mdx');
+    const translatableAttrs = effectiveConfig.translatableAttributes || [];
     
     // Collect all translatable text
     const textsToTranslate: {
