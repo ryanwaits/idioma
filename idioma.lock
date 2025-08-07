@@ -35,3 +35,18 @@ files:
     translations:
       es: true
       fr: true
+  examples/locales/en/index.html:
+    content: 6929c92e951a9d94905729b7143787c3
+    translations:
+      es: true
+      fr: true
+  examples/locales/en/form.html:
+    content: a9236a10663d290fbd4d7bfb7129d6cc
+    translations:
+      es: true
+      fr: true
+  examples/locales/en/products.xml:
+    content: 0d9aaf9b4b7f8e84830de69c37697719
+    translations:
+      es: true
+      fr: true

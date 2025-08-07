@@ -77,7 +77,7 @@
             </products>
         </category>
         
-        <category id="home" label="Home & Garden" description="Everything for your home and garden">
+        <category id="home" label="Home &amp; Garden" description="Everything for your home and garden">
             <products>
                 <product sku="LAMP-001">
                     <name>Modern LED Desk Lamp</name>

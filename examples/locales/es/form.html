@@ -1,0 +1,140 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Formulario de Contacto - Ponte en Contacto</title>
+    <meta name="description" content="Contáctenos con sus preguntas, comentarios o solicitudes de soporte">
+</head>
+<body>
+    <div class="container">
+        <h1>Contáctenos</h1>
+        <p>Nos encantaría saber de usted. Por favor, complete el formulario a continuación y nos pondremos en contacto con usted lo antes posible.</p>
+        
+        <form id="contact-form">
+            <fieldset>
+                <legend>Información Personal</legend>
+                
+                <div class="form-group">
+                    <label for="firstName">Nombre</label>
+                    <input type="text" id="firstName" name="firstName" placeholder="Ingrese su nombre" required="" aria-label="Tu nombre de pila">
+                    <span class="help-text">Por favor, ingrese su nombre de pila tal como aparece en los documentos oficiales.</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="lastName">Apellido</label>
+                    <input type="text" id="lastName" name="lastName" placeholder="Ingrese su apellido" required="" aria-label="Tu apellido">
+                    <span class="help-text">Por favor, ingrese su apellido tal como aparece en los documentos oficiales.</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Dirección de correo electrónico</label>
+                    <input type="email" id="email" name="email" placeholder="tu.correo@ejemplo.com" required="" aria-label="Tu dirección de correo electrónico">
+                    <span class="help-text">Usaremos este correo electrónico para responder a su consulta.</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Número de Teléfono (Opcional)</label>
+                    <input type="tel" id="phone" name="phone" placeholder="+1 (555) 123-4567" aria-label="Tu número de teléfono">
+                    <span class="help-text">Incluya el código de país para números internacionales.</span>
+                </div>
+            </fieldset>
+            
+            <fieldset>
+                <legend>Tu Mensaje</legend>
+                
+                <div class="form-group">
+                    <label for="subject">Asunto</label>
+                    <select id="subject" name="subject" required="" aria-label="Asunto del mensaje">
+                        <option value="" disabled="" selected="">Elige un tema</option>
+                        <option value="general">Consulta General</option>
+                        <option value="support">Soporte Técnico</option>
+                        <option value="billing">Pregunta de Facturación</option>
+                        <option value="feedback">Comentarios</option>
+                        <option value="partnership">Oportunidad de Asociación</option>
+                        <option value="other">Otros</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Mensaje</label>
+                    <textarea id="message" name="message" rows="6" placeholder="Díganos cómo podemos ayudarle..." required="" aria-label="Tu mensaje"></textarea>
+                    <span class="help-text">Por favor, proporcione tantos detalles como sea posible.</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="priority">Nivel de Prioridad</label>
+                    <select id="priority" name="priority" aria-label="Prioridad del mensaje">
+                        <option value="low">Bajo - Pregunta general</option>
+                        <option value="medium" selected="">Medio - Solicitud estándar</option>
+                        <option value="high">Alto - Problema urgente</option>
+                    </select>
+                </div>
+            </fieldset>
+            
+            <fieldset>
+                <legend>Opciones Adicionales</legend>
+                
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="newsletter" name="newsletter">
+                    <label for="newsletter">Suscríbete a nuestro boletín para recibir actualizaciones y ofertas especiales</label>
+                </div>
+                
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="copy" name="copy">
+                    <label for="copy">Envíame una copia de este mensaje</label>
+                </div>
+                
+                <div class="form-group">
+                    <p class="terms-text">
+                        Al enviar este formulario, usted acepta nuestros <a href="/privacy" title="Lee nuestra política de privacidad">Política de Privacidad</a> 
+                        y <a href="/terms" title="Lea nuestros términos de servicio">Términos de Servicio</a>.
+                    </p>
+                </div>
+            </fieldset>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-primary" title="Send your message">Send Message</button>
+                <button type="reset" class="btn-secondary" title="Clear the form">Clear Form</button>
+                <button type="button" class="btn-link" title="Cancel and go back">Cancel</button>
+            </div>
+            
+            <div class="form-messages">
+                <div class="success-message" hidden="" aria-live="polite">
+                    <h3>Thank you for contacting us!</h3>
+                    <p>Your message has been successfully sent. We'll respond within 24-48 hours.</p>
+                </div>
+                
+                <div class="error-message" hidden="" aria-live="assertive">
+                    <h3>Oops! Something went wrong</h3>
+                    <p>We couldn't send your message. Please check your connection and try again.</p>
+                </div>
+            </div>
+        </form>
+        
+        <aside class="contact-info">
+            <h2>Other Ways to Reach Us</h2>
+            <div class="info-section">
+                <h3>Email</h3>
+                <p>For general inquiries: <a href="mailto:info@example.com" title="Send us an email">info@example.com</a></p>
+                <p>For support: <a href="mailto:support@example.com" title="Email our support team">support@example.com</a></p>
+            </div>
+            
+            <div class="info-section">
+                <h3>Phone</h3>
+                <p>Main office: +1 (555) 123-4567</p>
+                <p>Support hotline: +1 (555) 987-6543</p>
+                <p>Hours: Monday-Friday, 9:00 AM - 6:00 PM EST</p>
+            </div>
+            
+            <div class="info-section">
+                <h3>Address</h3>
+                <address>
+                    Example Company<br>
+                    123 Business Street<br>
+                    Suite 456<br>
+                    New York, NY 10001<br>
+                    United States
+                </address>
+            </div>
+        </aside>
+    </div>
+
+</body></html>
