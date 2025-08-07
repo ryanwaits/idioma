@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'bun:test';
-import { JsonTranslationStrategy } from '../../../src/core/strategies/json';
+import { JsonStrategy } from '../../../src/strategies/json';
 
-describe('JsonTranslationStrategy', () => {
+describe('JsonStrategy', () => {
   describe('parse', () => {
     it('should parse simple JSON object', async () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       const input = '{"title": "Hello World", "description": "A test"}';
       
       const result = await strategy.parse(input);
@@ -15,7 +15,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should handle nested objects', async () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       const input = JSON.stringify({
         menu: {
           title: 'File',
@@ -34,7 +34,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should handle arrays of strings', async () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       const input = JSON.stringify({
         labels: ['First', 'Second', 'Third']
       });
@@ -47,7 +47,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should handle arrays of objects', async () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       const input = JSON.stringify({
         items: [
           { name: 'Item 1', description: 'First item' },
@@ -63,7 +63,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should skip non-translatable strings', async () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       const input = JSON.stringify({
         id: '550e8400-e29b-41d4-a716-446655440000', // UUID
         url: 'https://example.com', // URL
@@ -86,7 +86,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should skip technical keys', async () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       const input = JSON.stringify({
         api_key: 'some value',
         user_token: 'token123',
@@ -105,8 +105,8 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should handle empty strings based on config', async () => {
-      const strategySkip = new JsonTranslationStrategy({ skipEmptyStrings: true });
-      const strategyInclude = new JsonTranslationStrategy({ skipEmptyStrings: false });
+      const strategySkip = new JsonStrategy({ skipEmptyStrings: true });
+      const strategyInclude = new JsonStrategy({ skipEmptyStrings: false });
       
       const input = JSON.stringify({
         empty: '',
@@ -126,7 +126,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should respect includePaths config', async () => {
-      const strategy = new JsonTranslationStrategy({
+      const strategy = new JsonStrategy({
         includePaths: ['ui.labels', 'messages']
       });
       
@@ -158,7 +158,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should respect excludePaths config', async () => {
-      const strategy = new JsonTranslationStrategy({
+      const strategy = new JsonStrategy({
         excludePaths: ['config', 'internal.debug']
       });
       
@@ -186,7 +186,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should detect formatting style', async () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       
       const minified = '{"title":"Test","description":"Desc"}';
       const pretty = `{
@@ -203,7 +203,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should handle null and undefined values', async () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       const input = JSON.stringify({
         nullValue: null,
         stringValue: 'Test',
@@ -218,7 +218,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should handle deep nesting', async () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       const input = JSON.stringify({
         level1: {
           level2: {
@@ -240,7 +240,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should throw on depth limit exceeded', async () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       
       // Create deeply nested object (101 levels)
       let obj: any = { message: 'Bottom' };
@@ -254,7 +254,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should throw on invalid JSON', async () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       const input = '{ invalid json }';
       
       await expect(strategy.parse(input)).rejects.toThrow('Failed to parse JSON');
@@ -263,7 +263,7 @@ describe('JsonTranslationStrategy', () => {
 
   describe('reconstruct', () => {
     it('should reconstruct simple object with translations', async () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       const input = '{"title": "Hello", "description": "World"}';
       
       const parsed = await strategy.parse(input);
@@ -280,7 +280,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should reconstruct nested objects', async () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       const input = JSON.stringify({
         menu: {
           file: {
@@ -304,7 +304,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should reconstruct arrays', async () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       const input = JSON.stringify({
         items: ['First', 'Second'],
         nested: [
@@ -331,7 +331,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should preserve formatting style', async () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       
       const minified = '{"title":"Test"}';
       const pretty = `{
@@ -352,7 +352,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should preserve untranslated values', async () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       const input = JSON.stringify({
         title: 'Hello',
         id: '123',
@@ -377,7 +377,7 @@ describe('JsonTranslationStrategy', () => {
 
   describe('validate', () => {
     it('should validate correct JSON', () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       
       const result = strategy.validate('{"valid": "json"}');
       
@@ -386,7 +386,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should detect invalid JSON', () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       
       const result = strategy.validate('{ invalid json }');
       
@@ -396,7 +396,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should detect trailing commas', () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       
       const result = strategy.validate('{"key": "value",}');
       
@@ -405,7 +405,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should detect unclosed brackets', () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       
       const result = strategy.validate('{"key": "value"');
       
@@ -416,7 +416,7 @@ describe('JsonTranslationStrategy', () => {
 
   describe('canHandle', () => {
     it('should handle .json files', () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       
       expect(strategy.canHandle('data.json')).toBe(true);
       expect(strategy.canHandle('/path/to/file.json')).toBe(true);
@@ -424,7 +424,7 @@ describe('JsonTranslationStrategy', () => {
     });
 
     it('should not handle non-json files', () => {
-      const strategy = new JsonTranslationStrategy();
+      const strategy = new JsonStrategy();
       
       expect(strategy.canHandle('data.yaml')).toBe(false);
       expect(strategy.canHandle('file.txt')).toBe(false);

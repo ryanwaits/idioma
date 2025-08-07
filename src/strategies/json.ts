@@ -7,7 +7,7 @@ export interface JsonConfig {
   skipEmptyStrings?: boolean;
 }
 
-export class JsonTranslationStrategy extends BaseTranslationStrategy {
+export class JsonStrategy extends BaseTranslationStrategy {
   private config: JsonConfig;
 
   constructor(config?: JsonConfig) {
@@ -18,13 +18,17 @@ export class JsonTranslationStrategy extends BaseTranslationStrategy {
   canHandle(filePath: string): boolean {
     return filePath.endsWith('.json');
   }
+  
+  getName(): string {
+    return 'JSON';
+  }
 
   async parse(content: string): Promise<ParseResult> {
     try {
       const data = JSON.parse(content);
       const translatableContent = new Map<string, TranslatableNode>();
       
-      // Detect formatting style
+      // Detect formatting style for preservation
       const hasNewlines = content.includes('\n');
       const indentMatch = content.match(/^\s+"/m);
       const indentSize = indentMatch ? indentMatch[0].length - 1 : 2;
@@ -140,7 +144,8 @@ export class JsonTranslationStrategy extends BaseTranslationStrategy {
     const result = JSON.parse(JSON.stringify(metadata.structure));
     
     for (const [path, translation] of translations) {
-      this.setValueByPath(result, path, translation);
+      const segments = path.split(/\.|\[|\]/).filter(s => s);
+      this.setValueByPath(result, segments, translation);
     }
     
     // Preserve original formatting style
@@ -148,45 +153,6 @@ export class JsonTranslationStrategy extends BaseTranslationStrategy {
       return JSON.stringify(result, null, metadata.indentSize || 2);
     }
     return JSON.stringify(result);
-  }
-
-  private setValueByPath(obj: any, path: string, value: string): void {
-    const segments = path.split(/\.|\[|\]/).filter(s => s);
-    let current = obj;
-    
-    for (let i = 0; i < segments.length - 1; i++) {
-      const segment = segments[i];
-      const isArrayIndex = /^\d+$/.test(segment);
-      
-      if (isArrayIndex) {
-        const index = parseInt(segment);
-        if (!Array.isArray(current)) {
-          throw new Error(`Expected array at path segment: ${segment}`);
-        }
-        current = current[index];
-      } else {
-        if (!current[segment]) {
-          // Determine if next segment is array index
-          const nextSegment = segments[i + 1];
-          const nextIsArray = /^\d+$/.test(nextSegment);
-          current[segment] = nextIsArray ? [] : {};
-        }
-        current = current[segment];
-      }
-    }
-    
-    const lastSegment = segments[segments.length - 1];
-    const isArrayIndex = /^\d+$/.test(lastSegment);
-    
-    if (isArrayIndex) {
-      const index = parseInt(lastSegment);
-      if (!Array.isArray(current)) {
-        throw new Error(`Expected array at path segment: ${lastSegment}`);
-      }
-      current[index] = value;
-    } else {
-      current[lastSegment] = value;
-    }
   }
 
   validate(content: string): ValidationResult {
@@ -206,16 +172,12 @@ export class JsonTranslationStrategy extends BaseTranslationStrategy {
   }
 
   private extractLineNumber(error: any): number | undefined {
-    // Try to extract line number from error message
     const match = error.message?.match(/line (\d+)/i);
     return match ? parseInt(match[1]) : undefined;
   }
 
   private extractColumnNumber(error: any): number | undefined {
-    // Try to extract column number from error message
     const match = error.message?.match(/column (\d+)|position (\d+)/i);
     return match ? parseInt(match[1] || match[2]) : undefined;
   }
 }
-
-export default JsonTranslationStrategy;

@@ -18,7 +18,7 @@ interface YamlMetadata {
   isMultiDocument: boolean;
 }
 
-export class YamlTranslationStrategy extends BaseTranslationStrategy {
+export class YamlStrategy extends BaseTranslationStrategy {
   private config: YamlConfig;
 
   constructor(config?: YamlConfig) {
@@ -29,6 +29,10 @@ export class YamlTranslationStrategy extends BaseTranslationStrategy {
   canHandle(filePath: string): boolean {
     return filePath.endsWith('.yaml') || filePath.endsWith('.yml');
   }
+  
+  getName(): string {
+    return 'YAML';
+  }
 
   async parse(content: string): Promise<ParseResult> {
     try {
@@ -36,7 +40,7 @@ export class YamlTranslationStrategy extends BaseTranslationStrategy {
       const documents = yaml.loadAll(content);
       const translatableContent = new Map<string, TranslatableNode>();
       
-      // Extract YAML metadata
+      // Extract YAML metadata for preservation
       const yamlMetadata: YamlMetadata = {
         hasAnchors: content.includes('&'),
         hasAliases: content.includes('*'),
@@ -231,10 +235,12 @@ export class YamlTranslationStrategy extends BaseTranslationStrategy {
         if (documents.length > 1) {
           if (path.startsWith(prefix)) {
             const docPath = path.substring(prefix.length);
-            this.setValueByPath(docCopy, docPath.split(/\.|\[|\]/).filter(s => s), translation);
+            const segments = docPath.split(/\.|\[|\]/).filter(s => s);
+            this.setValueByPath(docCopy, segments, translation);
           }
         } else {
-          this.setValueByPath(docCopy, path.split(/\.|\[|\]/).filter(s => s), translation);
+          const segments = path.split(/\.|\[|\]/).filter(s => s);
+          this.setValueByPath(docCopy, segments, translation);
         }
       }
       
@@ -330,5 +336,3 @@ export class YamlTranslationStrategy extends BaseTranslationStrategy {
     return undefined;
   }
 }
-
-export default YamlTranslationStrategy;

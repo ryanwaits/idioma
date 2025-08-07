@@ -2,7 +2,7 @@
   "onboarding": {
     "welcome": {
       "title": "Bienvenido a Nuestra Plataforma",
-      "description": "Comencemos con un recorrido rápido por las características principales.",
+      "description": "Comencemos con un rápido recorrido por las principales características.",
       "skip": "Omitir recorrido",
       "next": "Siguiente Paso"
     },
@@ -42,7 +42,7 @@
       "pro": {
         "name": "Profesional",
         "price": "$29",
-        "period": "al mes",
+        "period": "por mes",
         "features": [
           "Proyectos ilimitados",
           "Soporte prioritario",

@@ -1,28 +1,47 @@
-import { MDXStrategy } from './mdx';
-import type { TranslationStrategy } from './types';
-import { JsonStrategyAdapter } from './json-adapter';
-import { YamlStrategyAdapter } from './yaml-adapter';
+/**
+ * Parser module - maintains backward compatibility while using the new unified strategies
+ */
 
+// Re-export frontmatter utilities (still used directly)
 export * from './frontmatter';
-export * from './mdx';
-// Export all parser types and utilities
+
+// Export parser types for backward compatibility
 export * from './types';
 
-// Strategy registry - add new strategies here
-export const strategies: TranslationStrategy[] = [
-  new MDXStrategy(),
-  new JsonStrategyAdapter(),
-  new YamlStrategyAdapter(),
-  // Future strategies can be added here:
-  // new HTMLStrategy(),
-  // new XMLStrategy(),
-  // new CSVStrategy(),
-  // new JavaScriptStrategy(),
-];
+// Import and adapt the new unified strategies
+import { strategies as unifiedStrategies, findStrategy as findUnifiedStrategy } from '../strategies';
+import type { TranslationStrategy } from './types';
+
+// Convert unified strategies to parser interface for backward compatibility
+export const strategies: TranslationStrategy[] = unifiedStrategies.map(strategy => ({
+  canHandle: (filePath: string) => strategy.canHandle(filePath),
+  getName: () => strategy.getName(),
+  translate: async (content, source, target, config, aiClient, model, provider) => {
+    const result = await strategy.translate(content, source, target, config, aiClient, model, provider);
+    return {
+      content: result.content,
+      usage: result.usage
+    };
+  }
+}));
 
 // Helper to find appropriate strategy for a file
 export function findStrategy(filePath: string): TranslationStrategy | undefined {
-  return strategies.find((strategy) => strategy.canHandle(filePath));
+  const unifiedStrategy = findUnifiedStrategy(filePath);
+  if (!unifiedStrategy) return undefined;
+  
+  // Return adapter that matches the parser interface
+  return {
+    canHandle: (filePath: string) => unifiedStrategy.canHandle(filePath),
+    getName: () => unifiedStrategy.getName(),
+    translate: async (content, source, target, config, aiClient, model, provider) => {
+      const result = await unifiedStrategy.translate(content, source, target, config, aiClient, model, provider);
+      return {
+        content: result.content,
+        usage: result.usage
+      };
+    }
+  };
 }
 
 // Alias for SDK compatibility

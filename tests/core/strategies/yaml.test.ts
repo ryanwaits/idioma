@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'bun:test';
-import { YamlTranslationStrategy } from '../../../src/core/strategies/yaml';
+import { YamlStrategy } from '../../../src/strategies/yaml';
 
-describe('YamlTranslationStrategy', () => {
+describe('YamlStrategy', () => {
   describe('parse', () => {
     it('should parse simple YAML', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       const input = `
 title: Hello World
 description: A test description
@@ -18,7 +18,7 @@ description: A test description
     });
 
     it('should handle nested YAML', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       const input = `
 menu:
   title: File Menu
@@ -35,7 +35,7 @@ menu:
     });
 
     it('should handle arrays in YAML', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       const input = `
 items:
   - First item
@@ -51,7 +51,7 @@ items:
     });
 
     it('should handle multi-document YAML', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       const input = `---
 title: Document 1
 description: First document
@@ -69,7 +69,7 @@ description: Second document`;
     });
 
     it('should skip environment variables', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       const input = `
 database_url: \${DATABASE_URL}
 api_key: $API_KEY
@@ -86,7 +86,7 @@ port: $PORT
     });
 
     it('should skip file paths', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       const input = `
 config_file: ./config/app.yaml
 home_dir: ~/documents
@@ -103,7 +103,7 @@ app_title: Application Title
     });
 
     it('should skip shell commands', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       const input = `
 script: npm run build
 command: docker compose up
@@ -120,7 +120,7 @@ message: Build completed successfully
     });
 
     it('should detect YAML metadata', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       const input = `
 defaults: &defaults
   name: Application Name
@@ -144,7 +144,7 @@ text: |
     });
 
     it('should detect and preserve comments', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       const input = `
 # Main configuration
 title: Application # The app title
@@ -159,7 +159,7 @@ description: Description # The app description
     });
 
     it('should respect includePaths config', async () => {
-      const strategy = new YamlTranslationStrategy({
+      const strategy = new YamlStrategy({
         includePaths: ['ui.labels', 'messages']
       });
       
@@ -186,7 +186,7 @@ data:
     });
 
     it('should respect excludePaths config', async () => {
-      const strategy = new YamlTranslationStrategy({
+      const strategy = new YamlStrategy({
         excludePaths: ['config', 'internal.debug']
       });
       
@@ -211,7 +211,7 @@ internal:
     });
 
     it('should handle Rails i18n format', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       const input = `
 en:
   activerecord:
@@ -236,7 +236,7 @@ en:
     });
 
     it('should handle complex nested structures', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       const input = `
 database:
   connections:
@@ -258,7 +258,7 @@ database:
     });
 
     it('should detect indentation size', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       
       const twoSpaces = `
 parent:
@@ -276,7 +276,7 @@ parent:
     });
 
     it('should throw on depth limit exceeded', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       
       // Create deeply nested object (101 levels)
       let obj: any = { message: 'Bottom' };
@@ -291,7 +291,7 @@ parent:
     });
 
     it('should throw on invalid YAML', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       const input = `
 title: Invalid
   description: Bad indentation
@@ -303,7 +303,7 @@ title: Invalid
 
   describe('reconstruct', () => {
     it('should reconstruct simple YAML with translations', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       const input = `
 title: Hello
 description: World
@@ -324,7 +324,7 @@ description: World
     });
 
     it('should reconstruct nested YAML', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       const input = `
 menu:
   file:
@@ -347,7 +347,7 @@ menu:
     });
 
     it('should reconstruct arrays', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       const input = `
 items:
   - First
@@ -376,7 +376,7 @@ nested:
     });
 
     it('should reconstruct multi-document YAML', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       const input = `---
 title: Document 1
 ---
@@ -398,7 +398,7 @@ title: Document 2`;
     });
 
     it('should preserve untranslated values', async () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       const input = `
 title: Hello
 id: "123"
@@ -424,7 +424,7 @@ active: true
 
   describe('validate', () => {
     it('should validate correct YAML', () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       
       const result = strategy.validate('title: Valid YAML\ndescription: Test');
       
@@ -433,7 +433,7 @@ active: true
     });
 
     it('should detect invalid YAML', () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       
       const result = strategy.validate('title: Invalid\n  description: Bad indentation');
       
@@ -443,7 +443,7 @@ active: true
     });
 
     it('should detect duplicate keys', () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       
       const result = strategy.validate(`
 title: First
@@ -455,7 +455,7 @@ title: Second
     });
 
     it('should validate multi-document YAML', () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       
       const result = strategy.validate(`---
 title: Doc 1
@@ -468,7 +468,7 @@ title: Doc 2`);
 
   describe('canHandle', () => {
     it('should handle .yaml and .yml files', () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       
       expect(strategy.canHandle('config.yaml')).toBe(true);
       expect(strategy.canHandle('settings.yml')).toBe(true);
@@ -477,7 +477,7 @@ title: Doc 2`);
     });
 
     it('should not handle non-yaml files', () => {
-      const strategy = new YamlTranslationStrategy();
+      const strategy = new YamlStrategy();
       
       expect(strategy.canHandle('data.json')).toBe(false);
       expect(strategy.canHandle('file.txt')).toBe(false);
