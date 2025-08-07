@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data>
+    <users>
+        <user id="1">
+            <name>John Doe</name>
+            <email>john@example.com</email>
+            <!-- Mismatched closing tag -->
+            <address>123 Main St</adress>
+        </user>
+        <user id="2">
+            <name>Jane Smith</name>
+            <email>jane@example.com</email>
+            <!-- Unclosed tag -->
+            <phone>555-1234
+        </user>
+        <user id="3">
+            <name>Bob & Alice</name>
+            <!-- Special characters that need escaping -->
+            <notes>User likes <programming> and "coding" tutorials</notes>
+            <status active="yes" level="5>3">Premium</status>
+        </user>
+    </users>
+</data>

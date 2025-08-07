@@ -17,7 +17,9 @@ export async function translateFrontmatter(
   model?: string,
   provider?: string
 ): Promise<FrontmatterTranslationResult> {
-  const translatableFields = config.translation?.frontmatterFields || [
+  // Get frontmatter fields from MDX-specific config
+  const mdxConfig = config.files?.mdx;
+  const translatableFields = mdxConfig?.frontmatterFields || [
     'title',
     'description',
     'sidebarTitle',

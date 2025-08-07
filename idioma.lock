@@ -50,3 +50,8 @@ files:
     translations:
       es: true
       fr: true
+  examples/invalid/locales/en/page-invalid.html:
+    content: f310f7c1ecd88fade2ed251b7e1e4856
+    translations:
+      es: true
+      fr: true

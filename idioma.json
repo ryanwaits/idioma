@@ -6,7 +6,16 @@
   },
   "files": {
     "mdx": {
-      "include": ["content/docs/[locale]/**/*.mdx"]
+      "include": ["content/docs/[locale]/**/*.mdx"],
+      "frontmatterFields": ["title", "description", "sidebarTitle"],
+      "jsxAttributes": [
+        "title",
+        "description",
+        "tag",
+        "alt",
+        "placeholder",
+        "label"
+      ]
     },
     "json": {
       "include": ["examples/locales/[locale]/**/*.json"],
@@ -26,30 +35,32 @@
         "examples/locales/[locale]/**/*.htm"
       ],
       "translatableAttributes": [
-        "alt", "title", "placeholder", "aria-label", "aria-description",
-        "data-tooltip", "data-title", "data-description"
+        "alt",
+        "title",
+        "placeholder",
+        "aria-label",
+        "aria-description",
+        "data-tooltip",
+        "data-title",
+        "data-description"
       ],
       "skipTags": ["script", "style", "code", "pre", "svg", "math"]
     },
     "xml": {
       "include": ["examples/locales/[locale]/**/*.xml"],
       "translatableAttributes": [
-        "label", "title", "description", "tooltip", "help", "message", "text"
+        "label",
+        "title",
+        "description",
+        "tooltip",
+        "help",
+        "message",
+        "text"
       ],
       "skipTags": ["script", "style", "code"]
     }
   },
   "translation": {
-    "frontmatterFields": ["title", "description", "sidebarTitle"],
-    "jsxAttributes": [
-      "title",
-      "description",
-      "tag",
-      "alt",
-      "placeholder",
-      "label"
-    ],
-    "skipPatterns": [],
     "provider": "anthropic"
   }
 }

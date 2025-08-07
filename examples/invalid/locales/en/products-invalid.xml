@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog>
+    <metadata>
+        <title>Product Catalog</title>
+        <description>Our complete product catalog with invalid & unescaped ampersand</description>
+        <lastUpdated>2024-01-15</lastUpdated>
+        <version>2.0</version>
+    </metadata>
+    
+    <categories>
+        <!-- This will cause an error: unescaped & in attribute -->
+        <category id="home" label="Home & Garden" description="Everything for your home">
+            <products>
+                <product sku="LAMP-001">
+                    <name>Modern Desk Lamp</name>
+                    <!-- Another error: unescaped < and > -->
+                    <description>Adjustable lamp with <special> features & touch controls</description>
+                    <price currency="USD">79.99</price>
+                </product>
+            </products>
+        </category>
+    </categories>
+</catalog>

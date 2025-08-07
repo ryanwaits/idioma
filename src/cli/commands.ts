@@ -29,11 +29,11 @@ export async function initCommand(): Promise<void> {
       files: {
         mdx: {
           include: ['content/docs/**/*.mdx'],
+          frontmatterFields: ['title', 'description', 'sidebarTitle'],
+          jsxAttributes: ['title', 'description', 'tag', 'alt', 'placeholder', 'label'],
         },
       },
       translation: {
-        frontmatterFields: ['title', 'description', 'sidebarTitle'],
-        jsxAttributes: ['title', 'description', 'tag', 'alt', 'placeholder', 'label'],
         provider: 'anthropic',
         model: 'claude-3-5-sonnet-20240620',
         rules: {

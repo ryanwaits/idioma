@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invalid HTML Example</title>
+</head>
+<body>
+    <header>
+        <h1>Welcome to Our Store</h1>
+        <!-- Unclosed div tag -->
+        <div class="navigation">
+            <nav>
+                <ul>
+                    <li><a href="/home">Home</a></li>
+                    <li><a href="/products">Products & Services</a></li>
+                    <!-- Mismatched closing tag -->
+                    <li><a href="/contact">Contact</span></li>
+                </ul>
+            </nav>
+        <!-- Missing closing div for navigation -->
+    </header>
+
+    <main>
+        <section>
+            <h2>Our Latest Offers</h2>
+            <!-- Invalid nesting: p cannot contain div -->
+            <p>
+                Check out our amazing deals:
+                <div class="offer">
+                    50% off on all items!
+                </div>
+            </p>
+
+            <!-- Unclosed strong tag -->
+            <p>Limited time only! <strong>Act now and save!</p>
+        </section>
+
+        <!-- Missing closing main tag -->
+
+    <footer>
+        <p>© 2024 Our Store. All rights reserved.</p>
+    </footer>
+</body>
+</html>

@@ -15,6 +15,9 @@ export const ConfigSchema: z.ZodSchema = z.object({
       z.object({
         include: z.array(z.string()),
         exclude: z.array(z.string()).optional(),
+        // MDX-specific options
+        frontmatterFields: z.array(z.string()).optional(),
+        jsxAttributes: z.array(z.string()).optional(),
       }),
       z.object({
         include: z.array(z.string()),
@@ -64,14 +67,9 @@ export const ConfigSchema: z.ZodSchema = z.object({
   ),
   translation: z
     .object({
-      frontmatterFields: z.array(z.string()).default(['title', 'description', 'sidebarTitle']),
-      jsxAttributes: z
-        .array(z.string())
-        .default(['title', 'description', 'tag', 'alt', 'placeholder', 'label']),
-      skipPatterns: z.array(z.string()).default([]),
-      // New fields for extensibility
       provider: z.string().default('anthropic'),
       model: z.string().optional(), // Optional model specification
+      skipPatterns: z.array(z.string()).default([]),
       rules: z
         .object({
           patternsToSkip: z.array(z.string()).default([]), // No default patterns - intelligent detection instead
@@ -100,20 +98,9 @@ export async function saveConfig(config: Config): Promise<void> {
 
 export function mergeConfig(base: Config, overrides: Partial<Config>): Config {
   const mergedTranslation = {
-    frontmatterFields: overrides.translation?.frontmatterFields ||
-      base?.translation?.frontmatterFields || ['title', 'description', 'sidebarTitle'],
-    jsxAttributes: overrides.translation?.jsxAttributes ||
-      base?.translation?.jsxAttributes || [
-        'title',
-        'description',
-        'tag',
-        'alt',
-        'placeholder',
-        'label',
-      ],
-    skipPatterns: overrides.translation?.skipPatterns || base?.translation?.skipPatterns || [],
     provider: overrides.translation?.provider || base?.translation?.provider || 'anthropic',
     model: overrides.translation?.model || base?.translation?.model,
+    skipPatterns: overrides.translation?.skipPatterns || base?.translation?.skipPatterns || [],
     rules: {
       patternsToSkip: [
         ...(base?.translation?.rules?.patternsToSkip || []),

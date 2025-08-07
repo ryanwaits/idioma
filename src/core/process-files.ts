@@ -1,4 +1,5 @@
 import { glob } from 'glob';
+import * as path from 'path';
 import {
   aggregateUsage,
   type Config,
@@ -12,6 +13,58 @@ import { type TranslateFileOptions, translateFile } from './translate-file';
 export interface ProcessFilesResult {
   lock: LockFile;
   totalUsage?: TokenUsage;
+}
+
+/**
+ * Format syntax errors for XML/HTML files with helpful suggestions
+ */
+function formatSyntaxError(file: string, error: Error): string {
+  const fileName = path.basename(file);
+  const fileExt = path.extname(file).toLowerCase();
+  
+  // Extract line and column information from error message
+  const lineMatch = error.message.match(/[Ll]ine:\s*(\d+)/);
+  const columnMatch = error.message.match(/[Cc]olumn:\s*(\d+)/);
+  const charMatch = error.message.match(/[Cc]har:\s*(.)/);
+  
+  let errorMsg = `\n✖ Failed: ${fileName}\n`;
+  errorMsg += `  Syntax Error: ${error.message.split('\n')[0]}\n`;
+  
+  if (lineMatch && columnMatch) {
+    errorMsg += `  Location: Line ${lineMatch[1]}, Column ${columnMatch[1]}\n`;
+  }
+  
+  // Provide helpful suggestions based on error type
+  if (error.message.includes('Invalid character in entity name')) {
+    errorMsg += `\n  💡 Suggestion: Escape special characters in your ${fileExt} file:\n`;
+    errorMsg += '     • Replace & with &amp;\n';
+    errorMsg += '     • Replace < with &lt;\n';
+    errorMsg += '     • Replace > with &gt;\n';
+    errorMsg += '     • Replace " with &quot; (in attribute values)\n';
+    errorMsg += '     • Replace \' with &apos; (in attribute values)\n';
+    
+    if (charMatch && charMatch[1] === ' ') {
+      errorMsg += '\n  ⚠️  The error appears to be an unescaped "&" character.\n';
+      errorMsg += '     Check for phrases like "Home & Garden" and replace with "Home &amp; Garden"\n';
+    }
+  } else if (error.message.includes('Unclosed') || error.message.includes('unclosed')) {
+    errorMsg += `\n  💡 Suggestion: Check for unclosed tags in your ${fileExt} file.\n`;
+    errorMsg += '     Every opening tag needs a matching closing tag.\n';
+  } else if (error.message.includes('Unexpected end') || error.message.includes('unexpected end')) {
+    errorMsg += `\n  💡 Suggestion: Your ${fileExt} file appears to be incomplete.\n`;
+    errorMsg += '     Check that all tags are properly closed.\n';
+  } else if (error.message.includes('mismatch') || error.message.includes('Mismatch')) {
+    errorMsg += '\n  💡 Suggestion: Opening and closing tags don\'t match.\n';
+    errorMsg += '     Ensure <tagname> is closed with </tagname>\n';
+  }
+  
+  if (fileExt === '.xml') {
+    errorMsg += '\n  📝 You can validate your XML at: https://www.xmlvalidation.com/\n';
+  } else if (fileExt === '.html' || fileExt === '.htm') {
+    errorMsg += '\n  📝 You can validate your HTML at: https://validator.w3.org/\n';
+  }
+  
+  return errorMsg;
 }
 
 export async function processFiles(
@@ -53,7 +106,19 @@ export async function processFiles(
               allUsages.push(result.usage);
             }
           } catch (error) {
-            console.error(`Error translating ${file} to ${targetLocale}:`, error);
+            // Check if it's a parsing/syntax error for XML/HTML files
+            const fileExt = path.extname(file).toLowerCase();
+            if (error instanceof Error && 
+                (fileExt === '.xml' || fileExt === '.html' || fileExt === '.htm') &&
+                (error.message.includes('Failed to parse') || 
+                 error.message.includes('Invalid') ||
+                 error.message.includes('Unclosed') ||
+                 error.message.includes('mismatch'))) {
+              console.error(formatSyntaxError(file, error));
+            } else {
+              // Default error handling for other errors
+              console.error(`Error translating ${file} to ${targetLocale}:`, error);
+            }
             // Continue with other files
           }
         }

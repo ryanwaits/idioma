@@ -59,8 +59,9 @@ export class MdxStrategy extends BaseTranslationStrategy {
     // Add parent references to enable directive checking
     addParentReferences(tree);
     
-    // Get translatable attributes from config
-    const translatableAttrs = config.translation?.jsxAttributes || [
+    // Get translatable attributes from MDX-specific config
+    const mdxConfig = config.files?.mdx;
+    const translatableAttrs = mdxConfig?.jsxAttributes || [
       'title',
       'description',
       'tag',
