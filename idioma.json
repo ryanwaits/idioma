@@ -1,0 +1,36 @@
+{
+  "projectId": "prj_53b8dc3dfc3160334916",
+  "locale": {
+    "source": "en",
+    "targets": [
+      "es",
+      "fr",
+      "zh",
+      "de"
+    ]
+  },
+  "files": {
+    "mdx": {
+      "include": [
+        "content/docs/[locale]/**/*.mdx"
+      ]
+    }
+  },
+  "translation": {
+    "frontmatterFields": [
+      "title",
+      "description",
+      "sidebarTitle"
+    ],
+    "jsxAttributes": [
+      "title",
+      "description",
+      "tag",
+      "alt",
+      "placeholder",
+      "label"
+    ],
+    "skipPatterns": [],
+    "provider": "anthropic"
+  }
+}

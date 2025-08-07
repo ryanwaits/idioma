@@ -13,7 +13,7 @@ import { ConfigError, FileError, TranslationError } from './errors';
 import type {
   CostEstimate,
   CostEstimateParams,
-  OpenLocaleConfig,
+  IdiomaConfig,
   ProcessFilesResult,
   TranslateContentParams,
   TranslateContentResult,
@@ -22,7 +22,7 @@ import type {
   TranslateFilesParams,
 } from './types';
 
-export class OpenLocale {
+export class Idioma {
   private config: Config;
   private apiKey?: string;
   private lockFilePath: string;
@@ -30,10 +30,10 @@ export class OpenLocale {
   private constructor(config: Config, apiKey?: string, lockFilePath?: string) {
     this.config = config;
     this.apiKey = apiKey;
-    this.lockFilePath = lockFilePath || resolve(process.cwd(), 'openlocale.lock');
+    this.lockFilePath = lockFilePath || resolve(process.cwd(), 'idioma.lock');
   }
 
-  static async create(options: OpenLocaleConfig = {}): Promise<OpenLocale> {
+  static async create(options: IdiomaConfig = {}): Promise<Idioma> {
     // Set API key from options or environment
     const apiKey = options.apiKey;
     if (apiKey) {
@@ -71,8 +71,8 @@ export class OpenLocale {
       } as Config;
     }
 
-    const lockFilePath = options.cachePath || resolve(process.cwd(), 'openlocale.lock');
-    return new OpenLocale(config, apiKey, lockFilePath);
+    const lockFilePath = options.cachePath || resolve(process.cwd(), 'idioma.lock');
+    return new Idioma(config, apiKey, lockFilePath);
   }
 
   /**
@@ -366,7 +366,7 @@ export class OpenLocale {
   /**
    * Update configuration
    */
-  updateConfig(config: Partial<OpenLocaleConfig>): void {
+  updateConfig(config: Partial<IdiomaConfig>): void {
     this.config = mergeConfig(this.config, config as Partial<Config>);
 
     // Update API key if provided

@@ -1,23 +1,52 @@
 {
-  "name": "openlocale",
+  "name": "idioma",
   "version": "0.1.0",
-  "module": "index.ts",
+  "description": "AI-powered internationalization for MDX documentation",
+  "keywords": ["i18n", "localization", "translation", "mdx", "ai", "claude", "openai"],
+  "homepage": "https://github.com/idioma/idioma",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/idioma/idioma.git"
+  },
+  "license": "MIT",
+  "author": "Idioma Team",
   "type": "module",
+  "main": "./dist/src/index.js",
+  "module": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "bin": {
-    "openlocale": "./src/cli.ts"
+    "idioma": "./dist/src/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    },
+    "./sdk": {
+      "types": "./dist/sdk/src/index.d.ts",
+      "import": "./dist/sdk/src/index.js"
+    }
   },
   "scripts": {
-    "lint": "biome check .",
-    "lint:fix": "biome check --write .",
-    "format": "biome format --write .",
-    "check": "biome check --write ."
+    "build": "bunup",
+    "dev": "bunup --watch",
+    "lint": "biome check src/ sdk/src/",
+    "lint:fix": "biome check --write src/ sdk/src/",
+    "format": "biome format --write src/ sdk/src/",
+    "prepublishOnly": "bun run build"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.1.2",
     "@types/bun": "latest",
     "@types/glob": "^9.0.0",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^24.0.14"
+    "@types/node": "^24.0.14",
+    "bunup": "^0.9.2"
   },
   "peerDependencies": {
     "typescript": "^5"

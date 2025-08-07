@@ -12,12 +12,12 @@ import {
 const program = new Command();
 
 program
-  .name('openlocale')
+  .name('idioma')
   .description('AI-powered internationalization for MDX documentation')
   .version('0.1.0');
 
 // Init command
-program.command('init').description('Initialize OpenLocale configuration').action(initCommand);
+program.command('init').description('Initialize Idioma configuration').action(initCommand);
 
 // Translate command
 program

@@ -4,5 +4,5 @@ export type { CostCalculation, TokenUsage } from '@/utils/cost';
 // Re-export pricing info for reference
 export { PRICING } from '@/utils/cost';
 export * from './errors';
-export { OpenLocale } from './OpenLocale';
+export { Idioma } from './Idioma';
 export * from './types';

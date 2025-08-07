@@ -14,7 +14,7 @@ import {
 
 // Init command - create config file
 export async function initCommand(): Promise<void> {
-  const configPath = path.resolve('openlocale.json');
+  const configPath = path.resolve('idioma.json');
 
   try {
     await fs.access(configPath);
@@ -43,11 +43,11 @@ export async function initCommand(): Promise<void> {
     };
 
     await saveConfig(defaultConfig);
-    console.log('✓ Created openlocale.json');
+    console.log('✓ Created idioma.json');
     console.log('\nNext steps:');
-    console.log('1. Add target locales: openlocale add <locale>');
-    console.log('2. Configure your file patterns in openlocale.json');
-    console.log('3. Run translation: openlocale translate');
+    console.log('1. Add target locales: idioma add <locale>');
+    console.log('2. Configure your file patterns in idioma.json');
+    console.log('3. Run translation: idioma translate');
   }
 }
 
@@ -230,7 +230,7 @@ export async function resetCommand(): Promise<void> {
       console.log(`✓ Reset complete. Removed ${deletedFiles.length} generated translation files:`);
       deletedFiles.forEach((file) => console.log(`  - ${file}`));
       console.log(
-        '\nTranslation status cleared. Run "openlocale translate" to regenerate translations.'
+        '\nTranslation status cleared. Run "idioma translate" to regenerate translations.'
       );
     } else {
       console.log('No translation files found. Lock file has been reset.');

@@ -3,7 +3,7 @@ import path from 'node:path';
 import { z } from 'zod';
 
 // Extended config schema with provider and rules
-export const ConfigSchema = z.object({
+export const ConfigSchema: z.ZodSchema = z.object({
   projectId: z.string().optional(),
   locale: z.object({
     source: z.string().default('en'),
@@ -36,14 +36,14 @@ export const ConfigSchema = z.object({
 
 export type Config = z.infer<typeof ConfigSchema>;
 
-const configPath = path.resolve('openlocale.json');
+const configPath = path.resolve('idioma.json');
 
 export async function loadConfig(): Promise<Config> {
   try {
     const data = await fs.readFile(configPath, 'utf-8');
     return ConfigSchema.parse(JSON.parse(data));
   } catch {
-    throw new Error('Configuration file not found. Run "openlocale init" first.');
+    throw new Error('Configuration file not found. Run "idioma init" first.');
   }
 }
 

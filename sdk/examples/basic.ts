@@ -1,16 +1,16 @@
 #!/usr/bin/env bun
-import { OpenLocale } from '../src';
+import { Idioma } from '../src';
 
 async function main() {
   // Initialize SDK with Anthropic
-  const openlocale = await OpenLocale.create({
+  const idioma = await Idioma.create({
     provider: 'anthropic',
     apiKey: process.env.ANTHROPIC_API_KEY,
   });
 
   // Example 1: Translate simple string
   console.log('Example 1: Translating simple string...');
-  const stringResult = await openlocale.translateContent({
+  const stringResult = await idioma.translateContent({
     content: 'Hello, how are you today?',
     format: 'string',
     sourceLocale: 'en',
@@ -23,7 +23,7 @@ async function main() {
   // Example 2: Translate Markdown with cost tracking
   console.log('Example 2: Translating Markdown with cost tracking...');
   const markdownContent = `
-# Welcome to OpenLocale
+# Welcome to Idioma
 
 This is a **powerful** translation tool that:
 - Preserves formatting
@@ -33,7 +33,7 @@ This is a **powerful** translation tool that:
 > Built with AI for developers
   `.trim();
 
-  const mdResult = await openlocale.translateContent({
+  const mdResult = await idioma.translateContent({
     content: markdownContent,
     format: 'md',
     sourceLocale: 'en',
@@ -57,7 +57,7 @@ This is a **powerful** translation tool that:
   const mdxContent = `
 ---
 title: Getting Started
-description: Learn how to use OpenLocale
+description: Learn how to use Idioma
 ---
 
 import { Callout } from '@/components/Callout'
@@ -73,7 +73,7 @@ import { Callout } from '@/components/Callout'
 Install the SDK using your preferred package manager:
 
 \`\`\`bash
-npm install @openlocale/sdk
+npm install idioma
 \`\`\`
 
 ## Quick Example
@@ -81,7 +81,7 @@ npm install @openlocale/sdk
 Here's how to translate content:
 
 \`\`\`typescript
-const result = await openlocale.translateContent({
+const result = await idioma.translateContent({
   content: 'Hello World',
   format: 'string',
   sourceLocale: 'en',
@@ -90,7 +90,7 @@ const result = await openlocale.translateContent({
 \`\`\`
   `.trim();
 
-  const mdxResult = await openlocale.translateContent({
+  const mdxResult = await idioma.translateContent({
     content: mdxContent,
     format: 'mdx',
     sourceLocale: 'en',

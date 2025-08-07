@@ -1,0 +1,16 @@
+version: 1
+files:
+  content/docs/en/test.mdx:
+    content: a150eedf8085d9ec1f7a038fc7241150
+    translations:
+      es: true
+      fr: true
+      zh: true
+      de: true
+  content/docs/en/tools/clarinet/index.mdx:
+    content: 90d8c7441c095b156d922047f24fce00
+    translations:
+      es: true
+      fr: true
+      zh: true
+      de: true

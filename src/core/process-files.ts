@@ -23,7 +23,7 @@ export async function processFiles(
   const targetLocales = config.locale.targets;
 
   if (targetLocales.length === 0) {
-    throw new Error('No target locales configured. Run "openlocale locale add <locale>" first.');
+    throw new Error('No target locales configured. Run "idioma add <locale>" first.');
   }
 
   const allUsages: TokenUsage[] = [];

@@ -4,7 +4,7 @@
     "maxFileSize": 50000000
   },
   "output": {
-    "filePath": "openlocale.md",
+    "filePath": "idioma.md",
     "style": "markdown",
     "parsableStyle": false,
     "compress": false,

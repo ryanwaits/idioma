@@ -1,18 +1,18 @@
 #!/usr/bin/env bun
 
 /**
- * Example of using the OpenLocale SDK from within the main project
+ * Example of using the Idioma SDK from within the main project
  * This demonstrates how the SDK wraps the core functionality
  */
 
-import { OpenLocale } from '../sdk/src/OpenLocale';
-import type { OpenLocaleConfig } from '../sdk/src/types';
+import { Idioma } from '../sdk/src/Idioma';
+import type { IdiomaConfig } from '../sdk/src/types';
 
 async function main() {
-  console.log('OpenLocale SDK Integration Example\n');
+  console.log('Idioma SDK Integration Example\n');
 
   // Initialize the SDK using the existing config
-  const config: OpenLocaleConfig = {
+  const config: IdiomaConfig = {
     provider: 'anthropic',
     locale: {
       source: 'en',
@@ -26,7 +26,7 @@ async function main() {
     },
   };
 
-  const openlocale = await OpenLocale.create(config);
+  const idioma = await Idioma.create(config);
 
   // Example 1: Translate MDX content
   console.log('Example 1: Translating MDX content with the SDK');
@@ -34,7 +34,7 @@ async function main() {
 
   const mdxContent = `---
 title: SDK Integration Guide
-description: Learn how to use the OpenLocale SDK
+description: Learn how to use the Idioma SDK
 sidebarTitle: SDK Guide
 ---
 
@@ -42,10 +42,10 @@ import { Callout } from '@/components/Callout'
 
 # SDK Integration Guide
 
-The OpenLocale SDK provides a programmatic interface for translations.
+The Idioma SDK provides a programmatic interface for translations.
 
 <Callout type="info" title="Installation">
-Install the SDK: \`npm install @openlocale/sdk\`
+Install the SDK: \`npm install idioma\`
 </Callout>
 
 ## Key Features
@@ -55,7 +55,7 @@ Install the SDK: \`npm install @openlocale/sdk\`
 - **Batch processing**: Handle multiple files efficiently
 `;
 
-  const result = await openlocale.translateContent({
+  const result = await idioma.translateContent({
     content: mdxContent,
     format: 'mdx',
     sourceLocale: 'en',
@@ -82,7 +82,7 @@ Install the SDK: \`npm install @openlocale/sdk\`
   console.log('Example 2: Batch translating documentation files');
   console.log('-----------------------------------------------\n');
 
-  const batchResult = await openlocale.translateFiles({
+  const batchResult = await idioma.translateFiles({
     patterns: ['content/docs/[locale]/**/*.mdx'],
     sourceLocale: 'en',
     targetLocales: ['es', 'fr'],
@@ -106,7 +106,7 @@ Install the SDK: \`npm install @openlocale/sdk\`
   console.log('\nExample 3: Estimating costs for multiple languages');
   console.log('-------------------------------------------------\n');
 
-  const estimate = await openlocale.estimateCost({
+  const estimate = await idioma.estimateCost({
     patterns: ['content/docs/**/*.mdx'],
     targetLocales: ['es', 'fr', 'de', 'ja', 'zh', 'ko', 'pt', 'ru'],
   });
@@ -136,9 +136,9 @@ Install the SDK: \`npm install @openlocale/sdk\`
   ];
 
   for (const { name, provider, model } of providers) {
-    openlocale.updateConfig({ provider: provider as any, model });
+    idioma.updateConfig({ provider: provider as any, model });
 
-    const testResult = await openlocale.translateContent({
+    const testResult = await idioma.translateContent({
       content: 'This is a test sentence for cost comparison.',
       format: 'string',
       sourceLocale: 'en',

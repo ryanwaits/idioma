@@ -2,8 +2,8 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { z } from 'zod';
-import { OpenLocale } from '../../sdk/src/OpenLocale';
-import type { OpenLocaleConfig } from '../../sdk/src/types';
+import { Idioma } from '../../sdk/src/Idioma';
+import type { IdiomaConfig } from '../../sdk/src/types';
 import { type AuthContext, unkeyAuth } from './middleware/auth';
 import { standardRateLimit, strictRateLimit } from './middleware/rate-limit';
 
@@ -49,10 +49,10 @@ app.use(
 // Public endpoints
 app.get('/', (c) => {
   return c.json({
-    name: 'OpenLocale API',
+    name: 'Idioma API',
     version: '1.0.0',
     status: 'healthy',
-    documentation: 'https://github.com/openlocale/openlocale',
+    documentation: 'https://github.com/idioma/idioma',
     endpoints: {
       translate: {
         method: 'POST',
@@ -102,18 +102,18 @@ app.post('/api/translate', async (c) => {
       (auth.meta?.provider as string) || process.env.TRANSLATION_PROVIDER || 'anthropic';
     const model = auth.meta?.model as string;
 
-    // Initialize OpenLocale SDK
-    const config: OpenLocaleConfig = {
+    // Initialize Idioma SDK
+    const config: IdiomaConfig = {
       provider: provider as any,
       model,
       apiKey: process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY,
     };
 
-    const openlocale = await OpenLocale.create(config);
+    const idioma = await Idioma.create(config);
 
     // Perform translation
     const startTime = Date.now();
-    const result = await openlocale.translateContent({
+    const result = await idioma.translateContent({
       content: params.content,
       format: params.format,
       sourceLocale: params.sourceLocale,
@@ -176,13 +176,13 @@ app.post('/api/translate/batch', async (c) => {
       (auth.meta?.provider as string) || process.env.TRANSLATION_PROVIDER || 'anthropic';
     const model = auth.meta?.model as string;
 
-    const config: OpenLocaleConfig = {
+    const config: IdiomaConfig = {
       provider: provider as any,
       model,
       apiKey: process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY,
     };
 
-    const openlocale = await OpenLocale.create(config);
+    const idioma = await Idioma.create(config);
 
     // Translate to all target languages
     const startTime = Date.now();
@@ -191,7 +191,7 @@ app.post('/api/translate/batch', async (c) => {
     let totalCost = 0;
 
     for (const targetLocale of params.targetLocales) {
-      const result = await openlocale.translateContent({
+      const result = await idioma.translateContent({
         content: params.content,
         format: params.format,
         sourceLocale: params.sourceLocale,
@@ -289,7 +289,7 @@ export default {
 
 // Start server message if running directly
 if (import.meta.main) {
-  console.log(`🚀 OpenLocale API running on http://localhost:${PORT}`);
+  console.log(`🚀 Idioma API running on http://localhost:${PORT}`);
   console.log(`📝 API Documentation: http://localhost:${PORT}/`);
   console.log('\n⚙️  Configuration:');
   console.log(`   - Unkey API: ${process.env.UNKEY_API_ID ? '✓ Configured' : '✗ Not configured'}`);

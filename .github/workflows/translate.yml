@@ -6,7 +6,7 @@ on:
     paths:
       - "content/docs/en/**/*.mdx"
       - "content/docs/en/**/*.md"
-      - "openlocale.json"
+      - "idioma.json"
   workflow_dispatch:
     inputs:
       force_retranslate:
@@ -33,24 +33,24 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Cache OpenLocale
+      - name: Cache Idioma
         uses: actions/cache@v3
         with:
           path: ~/.bun/install/global
-          key: ${{ runner.os }}-openlocale-${{ hashFiles('**/openlocale.json') }}
+          key: ${{ runner.os }}-idioma-${{ hashFiles('**/idioma.json') }}
 
-      - name: Install OpenLocale CLI
+      - name: Install Idioma CLI
         run: |
-          bun install -g @openlocale/cli
-          openlocale --version
+          bun install -g idioma
+          idioma --version
 
       - name: Reset lock file (if forced)
         if: ${{ github.event.inputs.force_retranslate == 'true' }}
         run: |
           echo "Force retranslate requested - resetting lock file"
           # Get target locales from config
-          LOCALES=$(cat openlocale.json | jq -r '.locale.targets | join(",")')
-          openlocale reset --locales $LOCALES
+          LOCALES=$(cat idioma.json | jq -r '.locale.targets | join(",")')
+          idioma reset --locales $LOCALES
 
       - name: Run translations
         id: translate
@@ -62,7 +62,7 @@ jobs:
           echo "Starting translation process..."
 
           # Run translation and capture output
-          openlocale translate --costs | tee translation-output.log
+          idioma translate --costs | tee translation-output.log
 
           # Extract key metrics from output
           if grep -q "Total cost:" translation-output.log; then
@@ -110,7 +110,7 @@ jobs:
             - Translated ${{ steps.translate.outputs.translated_count }} files
             - Cost: ${{ steps.translate.outputs.total_cost }}
 
-            Co-authored-by: OpenLocale <noreply@openlocale.com>
+            Co-authored-by: Idioma <noreply@idioma.dev>
           branch: translations/auto-update-${{ github.run_number }}
           delete-branch: true
           title: "🌍 Update translations"
@@ -140,7 +140,7 @@ jobs:
             - [ ] No untranslated content remains
 
             ---
-            *🤖 Generated automatically by [OpenLocale](https://github.com/openlocale/openlocale)*
+            *🤖 Generated automatically by [Idioma](https://github.com/idioma/idioma)*
           labels: |
             translations
             automated

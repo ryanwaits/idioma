@@ -1,8 +1,8 @@
-# OpenLocale Architecture
+# Idioma Architecture
 
 ## Overview
 
-OpenLocale follows a modular architecture with clear separation of concerns. The codebase is organized into distinct modules that handle specific responsibilities.
+Idioma follows a modular architecture with clear separation of concerns. The codebase is organized into distinct modules that handle specific responsibilities.
 
 ## Directory Structure
 
@@ -40,7 +40,7 @@ src/
 
 sdk/               # SDK package (separate from CLI)
 ├── src/
-│   ├── OpenLocale.ts # Main SDK class
+│   ├── Idioma.ts # Main SDK class
 │   ├── types.ts   # SDK type definitions
 │   └── errors.ts  # Custom error classes
 ```
@@ -60,7 +60,7 @@ sdk/               # SDK package (separate from CLI)
 ## Key Features
 
 ### Configurable Translation Rules
-- Skip patterns can be defined in `openlocale.json`
+- Skip patterns can be defined in `idioma.json`
 - Rules are applied during parsing to exclude specific content
 - Intelligent detection of directive pseudo-attributes (e.g., `type: help`)
 - Customizable patterns via `translation.rules.patternsToSkip`

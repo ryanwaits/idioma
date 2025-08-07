@@ -1,6 +1,6 @@
-# OpenLocale API
+# Idioma API
 
-A REST API for AI-powered translations using the OpenLocale SDK.
+A REST API for AI-powered translations using the Idioma SDK.
 
 ## Features
 
@@ -251,7 +251,7 @@ curl -X POST http://localhost:3000/api/translate/batch \
   -H "Content-Type: application/json" \
   -H "X-API-Key: your_api_key" \
   -d '{
-    "content": "# Hello\n\nWelcome to OpenLocale!",
+    "content": "# Hello\n\nWelcome to Idioma!",
     "targetLocales": ["es", "fr", "ja"],
     "format": "md"
   }'
@@ -320,7 +320,7 @@ The API works with any platform that supports Bun/Node.js. Set your environment 
 
 ## Contributing
 
-See the main [OpenLocale repository](https://github.com/openlocale/openlocale) for contribution guidelines.
+See the main [Idioma repository](https://github.com/ryanwaits/idioma) for contribution guidelines.
 
 ## License
 

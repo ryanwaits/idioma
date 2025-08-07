@@ -1,9 +1,9 @@
 /**
- * OpenLocale API Client
- * A simple TypeScript client for the OpenLocale API
+ * Idioma API Client
+ * A simple TypeScript client for the Idioma API
  */
 
-export class OpenLocaleClient {
+export class IdiomaClient {
   private apiUrl: string;
   private apiKey: string;
 
@@ -82,7 +82,7 @@ export class OpenLocaleClient {
 
 // Example usage:
 async function _example() {
-  const client = new OpenLocaleClient('your_api_key');
+  const client = new IdiomaClient('your_api_key');
 
   // Simple translation
   const result = await client.translate({

@@ -1,14 +1,14 @@
 #!/usr/bin/env bun
-import { OpenLocale, PRICING } from '../src';
+import { Idioma, PRICING } from '../src';
 
 async function main() {
-  console.log('OpenLocale Provider Examples\n');
+  console.log('Idioma Provider Examples\n');
 
   // Example 1: Using Anthropic (default)
   console.log('Example 1: Anthropic Provider');
   console.log('-----------------------------');
 
-  const anthropicSDK = await OpenLocale.create({
+  const anthropicSDK = await Idioma.create({
     provider: 'anthropic',
     model: 'claude-3-5-sonnet-20240620',
   });
@@ -36,7 +36,7 @@ async function main() {
 
   // Note: Requires OPENAI_API_KEY in environment
   if (process.env.OPENAI_API_KEY) {
-    const openaiSDK = await OpenLocale.create({
+    const openaiSDK = await Idioma.create({
       provider: 'openai',
       model: 'gpt-4o-2024-08-06',
       apiKey: process.env.OPENAI_API_KEY,
@@ -66,7 +66,7 @@ async function main() {
   console.log('\n\nExample 3: Dynamic Provider Switching');
   console.log('------------------------------------');
 
-  const sdk = await OpenLocale.create({
+  const sdk = await Idioma.create({
     provider: 'anthropic',
   });
 
@@ -126,7 +126,7 @@ Our product is designed to be user-friendly while providing powerful features fo
   console.log('Estimating costs for translating sample documentation...\n');
 
   for (const { provider, model } of models) {
-    const _testSDK = await OpenLocale.create({ provider: provider as any, model: model as any });
+    const _testSDK = await Idioma.create({ provider: provider as any, model: model as any });
 
     // Mock estimate (in real usage, this would call the API)
     const avgTokens = 500; // Rough estimate for the sample

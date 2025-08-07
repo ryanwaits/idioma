@@ -1,23 +1,23 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test';
 import { ConfigError } from '../src/errors';
-import { OpenLocale } from '../src/OpenLocale';
-import type { OpenLocaleConfig } from '../src/types';
+import { Idioma } from '../src/Idioma';
+import type { IdiomaConfig } from '../src/types';
 
 // Mock environment variables
 beforeEach(() => {
   process.env.ANTHROPIC_API_KEY = 'test-api-key';
 });
 
-describe('OpenLocale SDK', () => {
+describe('Idioma SDK', () => {
   describe('Constructor', () => {
     test('should create instance with default config', () => {
-      const sdk = new OpenLocale();
-      expect(sdk).toBeInstanceOf(OpenLocale);
+      const sdk = new Idioma();
+      expect(sdk).toBeInstanceOf(Idioma);
       expect(sdk.getConfig()).toHaveProperty('locale');
     });
 
     test('should accept custom config', () => {
-      const config: OpenLocaleConfig = {
+      const config: IdiomaConfig = {
         locale: {
           source: 'en',
           targets: ['es', 'fr'],
@@ -26,7 +26,7 @@ describe('OpenLocale SDK', () => {
         model: 'gpt-4o-2024-08-06',
       };
 
-      const sdk = new OpenLocale(config);
+      const sdk = new Idioma(config);
       const sdkConfig = sdk.getConfig();
       expect(sdkConfig.locale.targets).toEqual(['es', 'fr']);
       expect(sdkConfig.translation.provider).toBe('openai');
@@ -34,13 +34,13 @@ describe('OpenLocale SDK', () => {
 
     test('should throw error if API key is missing', () => {
       delete process.env.ANTHROPIC_API_KEY;
-      expect(() => new OpenLocale({ provider: 'anthropic' })).toThrow(ConfigError);
+      expect(() => new Idioma({ provider: 'anthropic' })).toThrow(ConfigError);
     });
   });
 
   describe('translateContent', () => {
     test('should translate string content', async () => {
-      const _sdk = new OpenLocale();
+      const _sdk = new Idioma();
 
       // Mock the translation function
       const mockTranslate = mock(() =>
@@ -67,7 +67,7 @@ describe('OpenLocale SDK', () => {
     });
 
     test('should translate MDX content', async () => {
-      const _sdk = new OpenLocale();
+      const _sdk = new Idioma();
 
       const mdxContent = `
 ---
@@ -107,7 +107,7 @@ Esto es una prueba.
     });
 
     test('should include cost calculation when requested', async () => {
-      const _sdk = new OpenLocale();
+      const _sdk = new Idioma();
 
       const mockTranslate = mock(() =>
         Promise.resolve({
@@ -141,7 +141,7 @@ Esto es una prueba.
 
   describe('translateFile', () => {
     test('should handle file not found error', async () => {
-      const sdk = new OpenLocale();
+      const sdk = new Idioma();
 
       const result = await sdk.translateFile({
         filePath: '/non/existent/file.md',
@@ -156,7 +156,7 @@ Esto es una prueba.
 
   describe('getAvailableFormats', () => {
     test('should return supported formats', () => {
-      const sdk = new OpenLocale();
+      const sdk = new Idioma();
       const formats = sdk.getAvailableFormats();
 
       expect(formats).toContain('mdx');
@@ -167,7 +167,7 @@ Esto es una prueba.
 
   describe('estimateCost', () => {
     test('should estimate translation costs', async () => {
-      const _sdk = new OpenLocale();
+      const _sdk = new Idioma();
 
       // Mock file resolution
       const mockEstimate = mock(() =>
@@ -210,7 +210,7 @@ Esto es una prueba.
 
   describe('updateConfig', () => {
     test('should update configuration', () => {
-      const sdk = new OpenLocale();
+      const sdk = new Idioma();
 
       sdk.updateConfig({
         provider: 'openai',
@@ -225,14 +225,14 @@ Esto es una prueba.
 
   describe('Static factory', () => {
     test('should create instance using factory method', async () => {
-      const sdk = await OpenLocale.create({
+      const sdk = await Idioma.create({
         locale: {
           source: 'en',
           targets: ['de'],
         },
       });
 
-      expect(sdk).toBeInstanceOf(OpenLocale);
+      expect(sdk).toBeInstanceOf(Idioma);
       expect(sdk.getConfig().locale.targets).toContain('de');
     });
   });

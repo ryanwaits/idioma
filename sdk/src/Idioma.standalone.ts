@@ -3,7 +3,7 @@ import { ConfigError } from './errors';
 import type {
   CostEstimate,
   CostEstimateParams,
-  OpenLocaleConfig,
+  IdiomaConfig,
   ProcessFilesResult,
   TranslateContentParams,
   TranslateContentResult,
@@ -13,13 +13,13 @@ import type {
 } from './types';
 
 /**
- * Standalone OpenLocale SDK that can be published independently
+ * Standalone Idioma SDK that can be published independently
  * This is a simplified version for demonstration purposes
  */
-export class OpenLocale {
-  private config: OpenLocaleConfig;
+export class Idioma {
+  private config: IdiomaConfig;
 
-  constructor(options: OpenLocaleConfig = {}) {
+  constructor(options: IdiomaConfig = {}) {
     // Validate API key
     const provider = options.provider || 'anthropic';
 
@@ -35,7 +35,7 @@ export class OpenLocale {
       apiKey: options.apiKey,
       provider: provider,
       model: options.model,
-      cachePath: options.cachePath || resolve(process.cwd(), 'openlocale.lock'),
+      cachePath: options.cachePath || resolve(process.cwd(), 'idioma.lock'),
       locale: options.locale || { source: 'en', targets: [] },
       translation: {
         frontmatterFields: options.translation?.frontmatterFields || ['title', 'description'],
@@ -139,7 +139,7 @@ export class OpenLocale {
   /**
    * Update configuration
    */
-  updateConfig(config: Partial<OpenLocaleConfig>): void {
+  updateConfig(config: Partial<IdiomaConfig>): void {
     this.config = { ...this.config, ...config };
 
     if (config.apiKey) {
@@ -151,14 +151,14 @@ export class OpenLocale {
   /**
    * Get current configuration
    */
-  getConfig(): OpenLocaleConfig {
+  getConfig(): IdiomaConfig {
     return { ...this.config };
   }
 
   /**
    * Static factory method
    */
-  static async create(options?: OpenLocaleConfig): Promise<OpenLocale> {
-    return new OpenLocale(options);
+  static async create(options?: IdiomaConfig): Promise<Idioma> {
+    return new Idioma(options);
   }
 }

@@ -64,7 +64,7 @@ export interface CostEstimate {
   }>;
 }
 
-export interface OpenLocaleConfig extends Partial<Config> {
+export interface IdiomaConfig extends Partial<Config> {
   apiKey?: string;
   provider?: 'anthropic' | 'openai';
   model?: string;

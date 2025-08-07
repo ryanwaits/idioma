@@ -1,10 +1,10 @@
-# OpenLocale
+# Idioma
 
 AI-powered internationalization for MDX documentation - 90% cheaper than SaaS alternatives.
 
 ## Overview
 
-OpenLocale is an open-source localization tool that provides automated, AI-powered translations for documentation files. It offers a complete solution with CLI, SDK, and API components, making it suitable for various integration scenarios.
+Idioma is an open-source localization tool that provides automated, AI-powered translations for documentation files. It offers a complete solution with CLI, SDK, and API components, making it suitable for various integration scenarios.
 
 ### Key Features
 
@@ -20,13 +20,13 @@ OpenLocale is an open-source localization tool that provides automated, AI-power
 
 ```bash
 # Using Bun (recommended)
-bun add openlocale
+bun add idioma
 
 # Using npm
-npm install openlocale
+npm install idioma
 
 # Using yarn
-yarn add openlocale
+yarn add idioma
 ```
 
 ## Quick Start
@@ -34,24 +34,24 @@ yarn add openlocale
 ### 1. Initialize Configuration
 
 ```bash
-openlocale init
+idioma init
 ```
 
-This creates an `openlocale.json` configuration file with default settings.
+This creates an `idioma.json` configuration file with default settings.
 
 ### 2. Add Target Languages
 
 ```bash
 # Add single language
-openlocale add es
+idioma add es
 
 # Add multiple languages
-openlocale add es,fr,de
+idioma add es,fr,de
 ```
 
 ### 3. Configure Your Files
 
-Edit `openlocale.json` to specify which files to translate:
+Edit `idioma.json` to specify which files to translate:
 
 ```json
 {
@@ -79,34 +79,34 @@ export OPENAI_API_KEY="your-api-key"
 
 ```bash
 # Basic translation
-openlocale translate
+idioma translate
 
 # With cost tracking
-openlocale translate --costs
+idioma translate --costs
 ```
 
 ## CLI Commands
 
-### `openlocale init`
-Initialize a new OpenLocale configuration file.
+### `idioma init`
+Initialize a new Idioma configuration file.
 
-### `openlocale translate [--costs]`
+### `idioma translate [--costs]`
 Translate all configured files to target languages.
 - `--costs`: Display translation costs based on token usage
 
-### `openlocale add <locales>`
+### `idioma add <locales>`
 Add target locale(s). Supports comma-separated values.
 ```bash
-openlocale add pt,fr,ja
+idioma add pt,fr,ja
 ```
 
-### `openlocale remove <locales>`
+### `idioma remove <locales>`
 Remove target locale(s). Supports comma-separated values.
 
-### `openlocale list`
+### `idioma list`
 List all configured locales.
 
-### `openlocale reset`
+### `idioma reset`
 Reset translation status and remove generated translation files.
 
 ## Configuration
@@ -153,15 +153,15 @@ Reset translation status and remove generated translation files.
 ### Basic Translation
 
 ```typescript
-import { OpenLocale } from 'openlocale/sdk';
+import { Idioma } from 'idioma/sdk';
 
-const openlocale = await OpenLocale.create({
+const idioma = await Idioma.create({
   apiKey: 'your-api-key',
   provider: 'anthropic'
 });
 
 // Translate content
-const result = await openlocale.translateContent({
+const result = await idioma.translateContent({
   content: '# Hello World',
   sourceLocale: 'en',
   targetLocale: 'es',
@@ -176,14 +176,14 @@ console.log(result.usage);   // Token usage statistics
 
 ```typescript
 // Translate a single file
-const fileResult = await openlocale.translateFile({
+const fileResult = await idioma.translateFile({
   filePath: 'docs/intro.mdx',
   sourceLocale: 'en',
   targetLocale: 'fr'
 });
 
 // Translate multiple files
-const batchResult = await openlocale.translateFiles({
+const batchResult = await idioma.translateFiles({
   files: ['docs/**/*.mdx'],
   sourceLocale: 'en',
   targetLocales: ['es', 'fr', 'de']
@@ -238,7 +238,7 @@ curl -X POST http://localhost:3000/api/translate/batch \
 
 ## Cost Estimation
 
-OpenLocale provides transparent cost tracking:
+Idioma provides transparent cost tracking:
 
 - **Anthropic Claude 3.5 Sonnet**: ~$3 per million input tokens, ~$15 per million output tokens
 - **OpenAI GPT-4**: ~$10 per million input tokens, ~$30 per million output tokens
@@ -252,7 +252,7 @@ For a typical documentation site with 400 pages:
 
 ## File Structure Convention
 
-OpenLocale expects a locale-based file structure:
+Idioma expects a locale-based file structure:
 
 ```
 content/
@@ -290,7 +290,7 @@ Skip specific content patterns during translation:
 
 ### Lockfile Management
 
-OpenLocale maintains a `openlocale.lock` file to track:
+Idioma maintains a `idioma.lock` file to track:
 - File content hashes
 - Translation status per locale
 - Prevents unnecessary retranslation
@@ -310,7 +310,7 @@ Easily switch between AI providers:
 
 ## Architecture
 
-OpenLocale follows a modular architecture with clear separation of concerns:
+Idioma follows a modular architecture with clear separation of concerns:
 
 - **CLI**: Command-line interface for interactive use
 - **Core**: Business logic for file processing and translation
@@ -331,7 +331,7 @@ MIT
 
 ## Comparison with Alternatives
 
-| Feature | OpenLocale | Languine | Traditional i18n |
+| Feature | Idioma | Languine | Traditional i18n |
 |---------|------------|----------|------------------|
 | Cost | ~$0.01-0.05/page | $100+/month | Manual labor |
 | AI-Powered | ✅ | ✅ | ❌ |

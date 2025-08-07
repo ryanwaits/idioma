@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 /**
- * Example script to test the OpenLocale API
+ * Example script to test the Idioma API
  * Run with: bun run src/api/examples/test-api.ts
  */
 
@@ -39,7 +39,7 @@ async function testEndpoint(name: string, endpoint: string, options: RequestInit
 }
 
 async function main() {
-  console.log(`${colors.yellow}OpenLocale API Test Suite${colors.reset}`);
+  console.log(`${colors.yellow}Idioma API Test Suite${colors.reset}`);
   console.log(`API URL: ${API_URL}`);
   console.log(`API Key: ${API_KEY.slice(0, 10)}...`);
 
@@ -71,7 +71,7 @@ async function main() {
       'X-API-Key': API_KEY,
     },
     body: JSON.stringify({
-      content: `# Welcome to OpenLocale
+      content: `# Welcome to Idioma
 
 This is a **test document** with:
 - Bullet points

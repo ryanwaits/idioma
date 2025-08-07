@@ -13,7 +13,7 @@ export interface LockFile {
   >;
 }
 
-const lockPath = path.resolve('openlocale.lock');
+const lockPath = path.resolve('idioma.lock');
 
 export async function loadLock(): Promise<LockFile> {
   try {

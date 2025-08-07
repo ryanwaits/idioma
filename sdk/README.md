@@ -1,28 +1,28 @@
-# OpenLocale SDK
+# Idioma SDK
 
-The OpenLocale SDK provides a programmatic interface for AI-powered translations with support for multiple file formats, providers, and cost tracking.
+The Idioma SDK provides a programmatic interface for AI-powered translations with support for multiple file formats, providers, and cost tracking.
 
 ## Installation
 
 ```bash
-npm install @openlocale/sdk
+npm install idioma
 # or
-bun add @openlocale/sdk
+bun add idioma
 ```
 
 ## Quick Start
 
 ```typescript
-import { OpenLocale } from '@openlocale/sdk';
+import { Idioma } from 'idioma';
 
 // Initialize the SDK
-const openlocale = new OpenLocale({
+const idioma = new Idioma({
   provider: 'anthropic',
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 // Translate content
-const result = await openlocale.translateContent({
+const result = await idioma.translateContent({
   content: 'Hello World',
   format: 'string',
   sourceLocale: 'en',
@@ -37,7 +37,7 @@ console.log(result.translatedContent); // "Hola Mundo"
 ### Constructor Options
 
 ```typescript
-interface OpenLocaleConfig {
+interface IdiomaConfig {
   apiKey?: string;              // API key for the provider
   provider?: 'anthropic' | 'openai';  // AI provider (default: 'anthropic')
   model?: string;               // Model to use
@@ -61,7 +61,7 @@ interface OpenLocaleConfig {
 Translate content directly without file I/O.
 
 ```typescript
-const result = await openlocale.translateContent({
+const result = await idioma.translateContent({
   content: '# Hello\nWorld',
   format: 'md',              // 'mdx' | 'md' | 'string'
   sourceLocale: 'en',
@@ -80,7 +80,7 @@ const result = await openlocale.translateContent({
 Translate a single file with caching support.
 
 ```typescript
-const result = await openlocale.translateFile({
+const result = await idioma.translateFile({
   filePath: 'content/docs/en/guide.mdx',
   sourceLocale: 'en',
   targetLocale: 'es',
@@ -101,7 +101,7 @@ const result = await openlocale.translateFile({
 Batch translate multiple files.
 
 ```typescript
-const result = await openlocale.translateFiles({
+const result = await idioma.translateFiles({
   patterns: ['content/**/*.mdx', 'docs/**/*.md'],
   sourceLocale: 'en',
   targetLocales: ['es', 'fr', 'de'],
@@ -122,7 +122,7 @@ const result = await openlocale.translateFiles({
 Estimate translation costs before processing.
 
 ```typescript
-const estimate = await openlocale.estimateCost({
+const estimate = await idioma.estimateCost({
   patterns: ['content/**/*.mdx'],
   targetLocales: ['es', 'fr'],
 });
@@ -139,7 +139,7 @@ const estimate = await openlocale.estimateCost({
 Get supported file formats.
 
 ```typescript
-const formats = openlocale.getAvailableFormats();
+const formats = idioma.getAvailableFormats();
 // Returns: ['mdx', 'md', 'string']
 ```
 
@@ -148,7 +148,7 @@ const formats = openlocale.getAvailableFormats();
 Update configuration at runtime.
 
 ```typescript
-openlocale.updateConfig({
+idioma.updateConfig({
   provider: 'openai',
   model: 'gpt-4o-mini',
 });
@@ -159,9 +159,9 @@ openlocale.updateConfig({
 ### Translate MDX Documentation
 
 ```typescript
-import { OpenLocale } from '@openlocale/sdk';
+import { Idioma } from 'idioma';
 
-const openlocale = new OpenLocale({
+const idioma = new Idioma({
   provider: 'anthropic',
   translation: {
     frontmatterFields: ['title', 'description'],
@@ -170,7 +170,7 @@ const openlocale = new OpenLocale({
 });
 
 // Translate all MDX files
-const result = await openlocale.translateFiles({
+const result = await idioma.translateFiles({
   patterns: ['content/docs/**/*.mdx'],
   sourceLocale: 'en',
   targetLocales: ['es', 'fr', 'zh'],
@@ -184,7 +184,7 @@ console.log(`Total cost: ${result.totalCost?.formattedCost}`);
 ### With Cost Tracking
 
 ```typescript
-const result = await openlocale.translateContent({
+const result = await idioma.translateContent({
   content: 'Your content here...',
   format: 'mdx',
   sourceLocale: 'en',
@@ -201,10 +201,10 @@ if (result.cost) {
 ### Error Handling
 
 ```typescript
-import { TranslationError, FileError } from '@openlocale/sdk';
+import { TranslationError, FileError } from 'idioma';
 
 try {
-  const result = await openlocale.translateFile({
+  const result = await idioma.translateFile({
     filePath: 'path/to/file.mdx',
     sourceLocale: 'en',
     targetLocale: 'es',
@@ -223,7 +223,7 @@ try {
 ### Anthropic (Default)
 
 ```typescript
-const openlocale = new OpenLocale({
+const idioma = new Idioma({
   provider: 'anthropic',
   model: 'claude-3-5-sonnet-20240620',  // Optional, uses default
 });
@@ -232,7 +232,7 @@ const openlocale = new OpenLocale({
 ### OpenAI
 
 ```typescript
-const openlocale = new OpenLocale({
+const idioma = new Idioma({
   provider: 'openai',
   model: 'gpt-4o-2024-08-06',  // Optional, uses default
   apiKey: process.env.OPENAI_API_KEY,
@@ -250,7 +250,7 @@ The SDK includes built-in pricing for accurate cost calculation:
 Access pricing information:
 
 ```typescript
-import { PRICING } from '@openlocale/sdk';
+import { PRICING } from 'idioma';
 console.log(PRICING);
 ```
 

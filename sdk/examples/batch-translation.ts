@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
-import { OpenLocale } from '../src';
+import { Idioma } from '../src';
 
 async function main() {
   // Initialize SDK
-  const openlocale = await OpenLocale.create({
+  const idioma = await Idioma.create({
     provider: 'anthropic',
     translation: {
       frontmatterFields: ['title', 'description', 'sidebarTitle'],
@@ -19,7 +19,7 @@ async function main() {
 
   // Example 1: Translate a single file
   console.log('\nExample 1: Translating a single file...');
-  const fileResult = await openlocale.translateFile({
+  const fileResult = await idioma.translateFile({
     filePath: 'examples/content/en/guide.mdx',
     sourceLocale: 'en',
     targetLocale: 'es',
@@ -38,7 +38,7 @@ async function main() {
 
   // Example 2: Batch translate multiple files
   console.log('\nExample 2: Batch translating multiple files...');
-  const batchResult = await openlocale.translateFiles({
+  const batchResult = await idioma.translateFiles({
     patterns: ['examples/content/en/**/*.mdx'],
     sourceLocale: 'en',
     targetLocales: ['es', 'fr'],
@@ -64,7 +64,7 @@ async function main() {
 
   // Example 3: Cost estimation
   console.log('\nExample 3: Estimating translation costs...');
-  const estimate = await openlocale.estimateCost({
+  const estimate = await idioma.estimateCost({
     patterns: ['examples/content/en/**/*.mdx'],
     targetLocales: ['es', 'fr', 'de', 'ja', 'zh'],
   });
