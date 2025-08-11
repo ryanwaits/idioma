@@ -1,5 +1,5 @@
-import type { Config } from '@/utils/config';
-import type { CostCalculation, TokenUsage } from '@/utils/cost';
+import type { CostCalculation, TokenUsage } from './utils/cost';
+import type { Config } from './utils/config';
 
 export interface TranslateContentParams {
   content: string;

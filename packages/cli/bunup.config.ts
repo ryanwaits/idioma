@@ -1,0 +1,40 @@
+import { defineConfig } from 'bunup';
+
+export default defineConfig({
+  entry: ['src/index.ts', 'src/cli/index.ts'],
+  outDir: 'dist',
+  format: ['esm'],
+  target: 'node',
+  clean: true,
+  dts: true,
+  sourcemap: true,
+
+  external: [
+    'idioma-sdk',
+    '@ai-sdk/anthropic',
+    '@ai-sdk/openai',
+    '@unkey/api',
+    'ai',
+    'commander',
+    'glob',
+    'hono',
+    'hono/*',
+    'js-yaml',
+    'ora',
+    'remark',
+    'remark-directive',
+    'remark-frontmatter',
+    'remark-mdx',
+    'remark-parse',
+    'remark-stringify',
+    'unist-util-visit',
+    'zod',
+    'fs',
+    'path',
+    'url',
+    'node:fs',
+    'node:path',
+    'node:crypto',
+    'node:fs/promises'
+  ],
+});

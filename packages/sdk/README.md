@@ -5,15 +5,15 @@ The Idioma SDK provides a programmatic interface for AI-powered translations wit
 ## Installation
 
 ```bash
-npm install idioma
+npm install idioma-sdk
 # or
-bun add idioma
+bun add idioma-sdk
 ```
 
 ## Quick Start
 
 ```typescript
-import { Idioma } from 'idioma';
+import { Idioma } from 'idioma-sdk';
 
 // Initialize the SDK
 const idioma = await Idioma.create({

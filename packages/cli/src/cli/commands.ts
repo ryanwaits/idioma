@@ -2,15 +2,15 @@ import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { glob } from 'glob';
-import { processFiles } from '../core';
 import {
   type Config,
   loadConfig,
   loadLock,
+  processFiles,
   replaceLocaleInPattern,
   saveConfig,
   saveLock,
-} from '../utils';
+} from 'idioma-sdk';
 
 // Init command - create config file
 export async function initCommand(): Promise<void> {

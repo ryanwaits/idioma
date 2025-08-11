@@ -1,0 +1,57 @@
+---
+title: Klarinette
+sidebarTitle: Überblick
+description: Clarinet ist alles, was Sie zum Schreiben, Testen und Bereitstellen von Clarity-Smart-Contracts auf Stacks benötigen.
+type: overview
+llm: false
+---
+## Überblick
+
+Clarinet ist der schnellste Weg, um Smart Contracts auf der Stacks-Blockchain zu erstellen, zu testen und zu implementieren. Es bietet Ihnen eine lokale Devnet, REPL, Test-Framework und Debugging-Tools, um qualitativ hochwertigen Clarity-Code mit Zuversicht zu liefern.
+
+![Klarinettenübersicht](/images/tools/clarinet/overview.svg)
+
+Um Clarinet-Funktionen mit KI zu erkunden, kopieren und einfügen [llms.txt](/tools/clarinet/llms.txt) in dein LLM deiner Wahl.
+
+## Hauptmerkmale
+
+* [**Nutzen Sie eine leistungsstarke CLI**](/tools/clarinet/cli-reference) - Erstellen Sie neue Projekte, verwalten Sie Ihre Smart Contracts und deren Abhängigkeiten mit Clarinet-Anforderungen und interagieren Sie mit Ihrem Code über die integrierte REPL.
+* [**Schreiben Sie Unit-Tests mit dem SDK**](/tools/clarinet/sdk-introduction) - Verwenden Sie das Clarinet SDK, um Unit-Tests in einer vertrauten JS-Umgebung zu schreiben und das Verhalten von Verträgen zu validieren.
+* [**Betreiben Sie eine private Blockchain-Umgebung**](/tools/clarinet/local-blockchain-development) - Starten Sie ein lokales Devnet mit Knoten, Minern und APIs, damit Sie Ihren Code testen und integrieren können.
+* [**VSCode-Erweiterung**](/tools/clarinet/vscode-extension) - Linter, schrittweiser Debugger, hilft beim Schreiben von Smart Contracts (Autovervollständigung, Dokumentation usw.).
+
+## Installation
+
+<TerminalPicker storage="macOs">
+  ```terminal !! macOS
+  $ brew install clarinet
+  ```
+
+  ```terminal !! Windows
+  $ winget install clarinet
+  ```
+
+  ```terminal !! Cargo
+  $ sudo apt install build-essential pkg-config libssl-dev
+  ```
+
+  ```terminal !! Binary
+  $ wget -nv https://github.com/hirosystems/clarinet/releases/download/v0.27.0/clarinet-linux-x64-glibc.tar.gz -O clarinet-linux-x64.tar.gz
+  $ tar -xf clarinet-linux-x64.tar.gz
+  $ chmod +x ./clarinet
+  $ mv ./clarinet /usr/local/bin
+  ```
+</TerminalPicker>
+
+:::next-steps
+* [Schnellstart](/tools/clarinet/quickstart): Erste Schritte mit Clarinet.
+* [Ein Projekt erstellen](/tools/clarinet/project-development): Erstelle ein neues Clarinet-Projekt.
+:::
+
+:::callout
+type: help
+
+### Benötigen Sie Hilfe beim Entwickeln mit Clarinet?
+
+Kontaktieren Sie uns über die **#Klarinette** Kanal ein [Discord](https://stacks.chat/) unter dem Abschnitt Hiro Developer Tools. Es gibt auch ein [wöchentliche Sprechstunden](https://www.addevent.com/event/kI22007085) Anruf jeden Mittwoch um 13 Uhr ET.
+:::

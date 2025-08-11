@@ -7,15 +7,13 @@
   "files": {
     "mdx": {
       "include": ["content/docs/[locale]/**/*.mdx"],
-      // Only override what you need - everything else uses smart defaults
-      "translatableAttributes": ["customProp", "myAttribute"]  // These will be ADDED to defaults
+      "translatableAttributes": ["customProp", "myAttribute"]
     },
     "json": {
       "include": ["examples/locales/[locale]/**/*.json"],
-      // Can still exclude specific files
       "exclude": ["**/internal.json"]
     },
-    "html": ["examples/locales/[locale]/**/*.html"],  // Can use simple array when no overrides needed
+    "html": ["examples/locales/[locale]/**/*.html"],
     "xml": ["examples/locales/[locale]/**/*.xml"]
   }
 }
