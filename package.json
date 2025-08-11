@@ -1,15 +1,20 @@
 {
   "name": "idioma",
-  "version": "0.1.0",
-  "description": "AI-powered internationalization with smart defaults for MDX, JSON, YAML, HTML, and XML",
-  "keywords": ["i18n", "localization", "translation", "mdx", "json", "yaml", "html", "xml", "ai", "claude", "openai", "convention-over-configuration"],
-  "homepage": "https://github.com/idioma/idioma",
+  "version": "0.0.1",
+  "description": "Internationalization engine with smart defaults for MDX, JSON, YAML, HTML, and XML",
+  "keywords": [
+    "i18n",
+    "localization",
+    "translation",
+    "ai"
+  ],
+  "homepage": "https://github.com/ryanwaits/idioma",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/idioma/idioma.git"
+    "url": "git+https://github.com/ryanwaits/idioma.git"
   },
   "license": "MIT",
-  "author": "Idioma Team",
+  "author": "Ryan Waits",
   "type": "module",
   "main": "./dist/src/index.js",
   "module": "./dist/src/index.js",

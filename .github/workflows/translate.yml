@@ -1,194 +1,194 @@
-name: Auto-Translate Documentation
+# name: Auto-Translate Documentation
 
-on:
-  push:
-    branches: [main]
-    paths:
-      - "content/docs/en/**/*.mdx"
-      - "content/docs/en/**/*.md"
-      - "idioma.json"
-  workflow_dispatch:
-    inputs:
-      force_retranslate:
-        description: "Force retranslate all files"
-        required: false
-        type: boolean
-        default: false
+# on:
+#   push:
+#     branches: [main]
+#     paths:
+#       - "content/docs/en/**/*.mdx"
+#       - "content/docs/en/**/*.md"
+#       - "idioma.json"
+#   workflow_dispatch:
+#     inputs:
+#       force_retranslate:
+#         description: "Force retranslate all files"
+#         required: false
+#         type: boolean
+#         default: false
 
-jobs:
-  translate:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
+# jobs:
+#   translate:
+#     runs-on: ubuntu-latest
+#     permissions:
+#       contents: write
+#       pull-requests: write
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2 # Fetch previous commit to detect changes
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 2 # Fetch previous commit to detect changes
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
+#       - name: Setup Bun
+#         uses: oven-sh/setup-bun@v1
+#         with:
+#           bun-version: latest
 
-      - name: Cache Idioma
-        uses: actions/cache@v3
-        with:
-          path: ~/.bun/install/global
-          key: ${{ runner.os }}-idioma-${{ hashFiles('**/idioma.json') }}
+#       - name: Cache Idioma
+#         uses: actions/cache@v3
+#         with:
+#           path: ~/.bun/install/global
+#           key: ${{ runner.os }}-idioma-${{ hashFiles('**/idioma.json') }}
 
-      - name: Install Idioma CLI
-        run: |
-          bun install -g idioma
-          idioma --version
+#       - name: Install Idioma CLI
+#         run: |
+#           bun install -g idioma
+#           idioma --version
 
-      - name: Reset lock file (if forced)
-        if: ${{ github.event.inputs.force_retranslate == 'true' }}
-        run: |
-          echo "Force retranslate requested - resetting lock file"
-          # Get target locales from config
-          LOCALES=$(cat idioma.json | jq -r '.locale.targets | join(",")')
-          idioma reset --locales $LOCALES
+#       - name: Reset lock file (if forced)
+#         if: ${{ github.event.inputs.force_retranslate == 'true' }}
+#         run: |
+#           echo "Force retranslate requested - resetting lock file"
+#           # Get target locales from config
+#           LOCALES=$(cat idioma.json | jq -r '.locale.targets | join(",")')
+#           idioma reset --locales $LOCALES
 
-      - name: Run translations
-        id: translate
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          # Optional: Use different provider
-          # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          echo "Starting translation process..."
+#       - name: Run translations
+#         id: translate
+#         env:
+#           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+#           # Optional: Use different provider
+#           # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+#         run: |
+#           echo "Starting translation process..."
 
-          # Run translation and capture output
-          idioma translate --costs | tee translation-output.log
+#           # Run translation and capture output
+#           idioma translate --costs | tee translation-output.log
 
-          # Extract key metrics from output
-          if grep -q "Total cost:" translation-output.log; then
-            TOTAL_COST=$(grep "Total cost:" translation-output.log | tail -1 | awk '{print $3}')
-            echo "total_cost=$TOTAL_COST" >> $GITHUB_OUTPUT
-          else
-            echo "total_cost=$0.00" >> $GITHUB_OUTPUT
-          fi
+#           # Extract key metrics from output
+#           if grep -q "Total cost:" translation-output.log; then
+#             TOTAL_COST=$(grep "Total cost:" translation-output.log | tail -1 | awk '{print $3}')
+#             echo "total_cost=$TOTAL_COST" >> $GITHUB_OUTPUT
+#           else
+#             echo "total_cost=$0.00" >> $GITHUB_OUTPUT
+#           fi
 
-          # Count translated files
-          TRANSLATED_COUNT=$(grep -c "✔" translation-output.log || echo "0")
-          echo "translated_count=$TRANSLATED_COUNT" >> $GITHUB_OUTPUT
+#           # Count translated files
+#           TRANSLATED_COUNT=$(grep -c "✔" translation-output.log || echo "0")
+#           echo "translated_count=$TRANSLATED_COUNT" >> $GITHUB_OUTPUT
 
-          # Check if any translations were made
-          if [ "$TRANSLATED_COUNT" -eq "0" ]; then
-            echo "No translations needed"
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-          else
-            echo "has_changes=true" >> $GITHUB_OUTPUT
-          fi
+#           # Check if any translations were made
+#           if [ "$TRANSLATED_COUNT" -eq "0" ]; then
+#             echo "No translations needed"
+#             echo "has_changes=false" >> $GITHUB_OUTPUT
+#           else
+#             echo "has_changes=true" >> $GITHUB_OUTPUT
+#           fi
 
-      - name: Check for changes
-        id: check_changes
-        run: |
-          if git diff --quiet; then
-            echo "No changes to commit"
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-          else
-            echo "Changes detected"
-            echo "has_changes=true" >> $GITHUB_OUTPUT
+#       - name: Check for changes
+#         id: check_changes
+#         run: |
+#           if git diff --quiet; then
+#             echo "No changes to commit"
+#             echo "has_changes=false" >> $GITHUB_OUTPUT
+#           else
+#             echo "Changes detected"
+#             echo "has_changes=true" >> $GITHUB_OUTPUT
 
-            # Get list of changed files
-            CHANGED_FILES=$(git diff --name-only | grep -E "\.(md|mdx)$" | wc -l)
-            echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
-          fi
+#             # Get list of changed files
+#             CHANGED_FILES=$(git diff --name-only | grep -E "\.(md|mdx)$" | wc -l)
+#             echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
+#           fi
 
-      - name: Create Pull Request
-        if: steps.check_changes.outputs.has_changes == 'true'
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: |
-            🌍 Update translations
+#       - name: Create Pull Request
+#         if: steps.check_changes.outputs.has_changes == 'true'
+#         uses: peter-evans/create-pull-request@v5
+#         with:
+#           token: ${{ secrets.GITHUB_TOKEN }}
+#           commit-message: |
+#             🌍 Update translations
 
-            - Translated ${{ steps.translate.outputs.translated_count }} files
-            - Cost: ${{ steps.translate.outputs.total_cost }}
+#             - Translated ${{ steps.translate.outputs.translated_count }} files
+#             - Cost: ${{ steps.translate.outputs.total_cost }}
 
-            Co-authored-by: Idioma <noreply@idioma.dev>
-          branch: translations/auto-update-${{ github.run_number }}
-          delete-branch: true
-          title: "🌍 Update translations"
-          body: |
-            ## Translation Update
+#             Co-authored-by: Idioma <noreply@idioma.dev>
+#           branch: translations/auto-update-${{ github.run_number }}
+#           delete-branch: true
+#           title: "🌍 Update translations"
+#           body: |
+#             ## Translation Update
 
-            This PR contains automatic translations for recent documentation changes.
+#             This PR contains automatic translations for recent documentation changes.
 
-            ### Summary
-            - **Files translated**: ${{ steps.translate.outputs.translated_count }}
-            - **Translation cost**: ${{ steps.translate.outputs.total_cost }}
-            - **Triggered by**: ${{ github.event_name == 'workflow_dispatch' && 'Manual run' || github.event.head_commit.message }}
+#             ### Summary
+#             - **Files translated**: ${{ steps.translate.outputs.translated_count }}
+#             - **Translation cost**: ${{ steps.translate.outputs.total_cost }}
+#             - **Triggered by**: ${{ github.event_name == 'workflow_dispatch' && 'Manual run' || github.event.head_commit.message }}
 
-            ### Translation Log
-            <details>
-            <summary>View detailed output</summary>
+#             ### Translation Log
+#             <details>
+#             <summary>View detailed output</summary>
 
-            ```
-            ${{ steps.translate.outputs.log }}
-            ```
-            </details>
+#             ```
+#             ${{ steps.translate.outputs.log }}
+#             ```
+#             </details>
 
-            ### Review Checklist
-            - [ ] Translations look accurate
-            - [ ] Formatting is preserved
-            - [ ] Links and code blocks are intact
-            - [ ] No untranslated content remains
+#             ### Review Checklist
+#             - [ ] Translations look accurate
+#             - [ ] Formatting is preserved
+#             - [ ] Links and code blocks are intact
+#             - [ ] No untranslated content remains
 
-            ---
-            *🤖 Generated automatically by [Idioma](https://github.com/idioma/idioma)*
-          labels: |
-            translations
-            automated
-            documentation
+#             ---
+#             *🤖 Generated automatically by [Idioma](https://github.com/idioma/idioma)*
+#           labels: |
+#             translations
+#             automated
+#             documentation
 
-      - name: Add comment to PR with cost breakdown
-        if: steps.check_changes.outputs.has_changes == 'true'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const output = require('fs').readFileSync('translation-output.log', 'utf8');
-            const costLines = output.split('\n').filter(line => line.includes('$'));
+#       - name: Add comment to PR with cost breakdown
+#         if: steps.check_changes.outputs.has_changes == 'true'
+#         uses: actions/github-script@v7
+#         with:
+#           script: |
+#             const output = require('fs').readFileSync('translation-output.log', 'utf8');
+#             const costLines = output.split('\n').filter(line => line.includes('$'));
 
-            if (costLines.length > 0) {
-              const comment = `## 💰 Translation Cost Breakdown\n\n\`\`\`\n${costLines.join('\n')}\n\`\`\``;
+#             if (costLines.length > 0) {
+#               const comment = `## 💰 Translation Cost Breakdown\n\n\`\`\`\n${costLines.join('\n')}\n\`\`\``;
 
-              // Find the PR that was just created
-              const { data: prs } = await github.rest.pulls.list({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                state: 'open',
-                head: `${context.repo.owner}:translations/auto-update-${context.runNumber}`
-              });
+#               // Find the PR that was just created
+#               const { data: prs } = await github.rest.pulls.list({
+#                 owner: context.repo.owner,
+#                 repo: context.repo.repo,
+#                 state: 'open',
+#                 head: `${context.repo.owner}:translations/auto-update-${context.runNumber}`
+#               });
 
-              if (prs.length > 0) {
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: prs[0].number,
-                  body: comment
-                });
-              }
-            }
+#               if (prs.length > 0) {
+#                 await github.rest.issues.createComment({
+#                   owner: context.repo.owner,
+#                   repo: context.repo.repo,
+#                   issue_number: prs[0].number,
+#                   body: comment
+#                 });
+#               }
+#             }
 
-      - name: Summary
-        if: always()
-        run: |
-          echo "## Translation Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+#       - name: Summary
+#         if: always()
+#         run: |
+#           echo "## Translation Summary" >> $GITHUB_STEP_SUMMARY
+#           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [ "${{ steps.check_changes.outputs.has_changes }}" == "true" ]; then
-            echo "✅ **Translations completed successfully**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "- Files translated: ${{ steps.translate.outputs.translated_count }}" >> $GITHUB_STEP_SUMMARY
-            echo "- Total cost: ${{ steps.translate.outputs.total_cost }}" >> $GITHUB_STEP_SUMMARY
-            echo "- Pull request created" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "ℹ️ **No translations needed**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "All documentation is up to date." >> $GITHUB_STEP_SUMMARY
-          fi
+#           if [ "${{ steps.check_changes.outputs.has_changes }}" == "true" ]; then
+#             echo "✅ **Translations completed successfully**" >> $GITHUB_STEP_SUMMARY
+#             echo "" >> $GITHUB_STEP_SUMMARY
+#             echo "- Files translated: ${{ steps.translate.outputs.translated_count }}" >> $GITHUB_STEP_SUMMARY
+#             echo "- Total cost: ${{ steps.translate.outputs.total_cost }}" >> $GITHUB_STEP_SUMMARY
+#             echo "- Pull request created" >> $GITHUB_STEP_SUMMARY
+#           else
+#             echo "ℹ️ **No translations needed**" >> $GITHUB_STEP_SUMMARY
+#             echo "" >> $GITHUB_STEP_SUMMARY
+#             echo "All documentation is up to date." >> $GITHUB_STEP_SUMMARY
+#           fi
