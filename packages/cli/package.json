@@ -1,6 +1,6 @@
 {
   "name": "idioma-cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "CLI for Idioma - Internationalization engine with smart defaults",
   "keywords": [
     "i18n",
@@ -35,7 +35,7 @@
     "format": "biome format --write src/"
   },
   "dependencies": {
-    "idioma-sdk": "workspace:*",
+    "idioma-sdk": "^0.0.1",
     "@ai-sdk/anthropic": "^1.2.12",
     "@ai-sdk/openai": "^1.3.23",
     "@types/xml2js": "^0.4.14",
