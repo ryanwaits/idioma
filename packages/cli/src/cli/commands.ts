@@ -27,8 +27,8 @@ export async function initCommand(): Promise<void> {
         targets: [],
       },
       files: {
+        include: ['content/docs/**/*.mdx'],
         mdx: {
-          include: ['content/docs/**/*.mdx'],
           frontmatterFields: ['title', 'description', 'sidebarTitle'],
           jsxAttributes: ['title', 'description', 'tag', 'alt', 'placeholder', 'label'],
         },

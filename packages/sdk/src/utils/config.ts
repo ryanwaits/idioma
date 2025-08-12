@@ -2,7 +2,6 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { z } from 'zod';
 
-// Extended config schema with provider and rules
 export const ConfigSchema: z.ZodSchema = z.object({
   projectId: z.string().optional(),
   locale: z.object({
@@ -10,43 +9,44 @@ export const ConfigSchema: z.ZodSchema = z.object({
     targets: z.array(z.string()).default([]),
   }),
   files: z.union([
-    // Ultra-minimal: just an array of patterns
     z.array(z.string()),
-    
-    // Object with global patterns and format-specific overrides
     z.object({
-      // Global include patterns (matches any format)
-      include: z.array(z.string()),
+      include: z.array(z.union([
+        z.string(),
+        z.object({
+          source: z.string(),
+          target: z.string()
+        })
+      ])),
       exclude: z.array(z.string()).optional(),
-      
-      // Format-specific overrides (optional)
+
       mdx: z.object({
         translatableAttributes: z.array(z.string()).optional(),
         frontmatterFields: z.array(z.string()).optional(),
         jsxAttributes: z.array(z.string()).optional(),
         skipTags: z.array(z.string()).optional(),
       }).optional(),
-      
+
       json: z.object({
         includePaths: z.array(z.string()).optional(),
         excludePaths: z.array(z.string()).optional(),
         skipEmptyStrings: z.boolean().optional(),
         skipKeys: z.array(z.string()).optional(),
       }).optional(),
-      
+
       yaml: z.object({
         includePaths: z.array(z.string()).optional(),
         excludePaths: z.array(z.string()).optional(),
         preserveComments: z.boolean().optional(),
         skipEmptyStrings: z.boolean().optional(),
       }).optional(),
-      
+
       html: z.object({
         translatableAttributes: z.array(z.string()).optional(),
         skipTags: z.array(z.string()).optional(),
         preserveWhitespace: z.boolean().optional(),
       }).optional(),
-      
+
       xml: z.object({
         translatableAttributes: z.array(z.string()).optional(),
         skipTags: z.array(z.string()).optional(),
@@ -58,7 +58,7 @@ export const ConfigSchema: z.ZodSchema = z.object({
   translation: z
     .object({
       provider: z.string().default('anthropic'),
-      model: z.string().optional(), // Optional model specification
+      model: z.string().optional(),
       skipPatterns: z.array(z.string()).default([]),
       rules: z
         .object({

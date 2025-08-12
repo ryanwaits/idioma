@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 import { Command } from 'commander';
 import {
   initCommand,
@@ -13,8 +13,8 @@ const program = new Command();
 
 program
   .name('idioma')
-  .description('AI-powered internationalization for MDX documentation')
-  .version('0.1.0');
+  .description('Internationalization engine')
+  .version('0.0.4');
 
 // Init command
 program.command('init').description('Initialize Idioma configuration').action(initCommand);

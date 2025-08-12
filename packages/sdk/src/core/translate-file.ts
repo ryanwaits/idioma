@@ -15,6 +15,8 @@ import {
 
 export interface TranslateFileOptions {
   showCosts?: boolean;
+  customTarget?: string;
+  sourcePattern?: string;
 }
 
 export interface TranslateFileResult {
@@ -121,7 +123,7 @@ export async function translateFile(
     }
 
     // Generate output path and write translated content
-    const outputPath = generateOutputPath(filePath, source, target);
+    const outputPath = generateOutputPath(filePath, source, target, options.customTarget, options.sourcePattern);
     await fs.mkdir(path.dirname(outputPath), { recursive: true });
     await fs.writeFile(outputPath, translatedContent);
 

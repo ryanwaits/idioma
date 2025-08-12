@@ -16,8 +16,34 @@ export function replaceLocaleInPattern(
 export function generateOutputPath(
   sourcePath: string,
   sourceLocale: string,
-  targetLocale: string
+  targetLocale: string,
+  customTarget?: string,
+  sourcePattern?: string
 ): string {
+  if (customTarget && sourcePattern) {
+    let basePath = '';
+
+    if (sourcePattern.includes('**')) {
+      // Pattern like "content/docs/**/*.mdx"
+      basePath = sourcePattern.split('**')[0].replace(/\/$/, '');
+    } else if (sourcePattern.includes('*')) {
+      // Pattern like "api/*.yaml" - take directory part
+      basePath = sourcePattern.substring(0, sourcePattern.lastIndexOf('/'));
+    } else {
+      // Explicit file path - use the directory part
+      basePath = sourcePattern.substring(0, sourcePattern.lastIndexOf('/'));
+    }
+
+    // Remove the base path from the source path
+    const relativePath = basePath && sourcePath.startsWith(basePath)
+      ? sourcePath.slice(basePath.length).replace(/^\//, '')
+      : sourcePath;
+
+    // Combine custom target with locale and relative path
+    return `${customTarget}/${targetLocale}/${relativePath}`;
+  }
+
+  // Default behavior: locale replacement in path
   // Check if the source path has [locale] placeholder
   if (sourcePath.includes('[locale]')) {
     return sourcePath.replace(/\[locale\]/g, targetLocale);
