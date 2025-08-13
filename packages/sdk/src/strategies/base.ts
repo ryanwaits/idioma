@@ -110,7 +110,7 @@ export abstract class BaseTranslationStrategy {
       
       // Add small delay between API calls to avoid rate limits (except for last item)
       if (entries.indexOf([path, node]) < entries.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 50)); // 50ms delay (reduced from 100ms)
       }
     }
     

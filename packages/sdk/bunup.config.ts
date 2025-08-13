@@ -3,7 +3,7 @@ import { defineConfig } from "bunup";
 export default defineConfig({
   entry: ["./src/index.ts"],
   dts: true,
-  target: "node",
+  target: "node",  // Keep SDK universal for all users
   format: ["esm"],
   clean: true,
   sourcemap: true,

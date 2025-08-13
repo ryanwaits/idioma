@@ -8,6 +8,7 @@ import {
   formatTokenCount,
   type LockFile,
   type TokenUsage,
+  saveLock,
 } from '../utils';
 import { detectFormat } from '../utils/format-detector';
 import { type TranslateFileOptions, translateFile } from './translate-file';
@@ -101,7 +102,14 @@ export async function processFiles(
     throw new Error('No target locales configured. Run "idioma add <locale>" first.');
   }
 
+  // Save initial lock file if it's empty (first run)
+  if (Object.keys(lock.files).length === 0) {
+    await saveLock(lock);
+  }
+
   const allUsages: TokenUsage[] = [];
+  let filesSinceLastSave = 0;
+  const SAVE_INTERVAL = 5; // Save lock file every 5 successful translations
 
   // Get the include patterns (handle both array and object formats)
   const includePatterns = Array.isArray(config.files) ? config.files : config.files?.include || [];
@@ -135,7 +143,7 @@ export async function processFiles(
           try {
             // Add a small delay between translations to avoid rate limits
             if (allUsages.length > 0) {
-              await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
+              await new Promise(resolve => setTimeout(resolve, 250)); // 250ms delay (reduced from 500ms)
             }
 
             const result = await translateFile(file, sourceLocale, targetLocale, lock, config, {
@@ -145,6 +153,15 @@ export async function processFiles(
             });
             if (result.usage) {
               allUsages.push(result.usage);
+            }
+            
+            // Increment counter and save lock file periodically
+            filesSinceLastSave++;
+            if (filesSinceLastSave >= SAVE_INTERVAL) {
+              await saveLock(lock);
+              filesSinceLastSave = 0;
+              // Optional: Show progress saved message (can be removed if too verbose)
+              console.log('💾 Progress saved to idioma.lock');
             }
           } catch (error) {
             // Check if it's a parsing/syntax error for XML/HTML files
@@ -167,6 +184,11 @@ export async function processFiles(
         }
       }
     }
+  }
+
+  // Save any remaining progress if there were successful translations since last save
+  if (filesSinceLastSave > 0) {
+    await saveLock(lock);
   }
 
   // Aggregate total usage

@@ -1,7 +1,7 @@
 import { defineConfig } from 'bunup';
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/cli/index.ts'],
+  entry: ['src/index.ts', 'src/cli/index.ts', 'src/cli/worker.ts'],
   outDir: 'dist',
   format: ['esm'],
   target: 'node',

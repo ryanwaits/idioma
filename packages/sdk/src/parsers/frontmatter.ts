@@ -45,7 +45,7 @@ export async function translateFrontmatter(
       translatedLines.push(`${indent}${key}: ${result.text}`);
 
       // Add small delay between translations to avoid rate limits
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 50)); // 50ms delay (reduced from 100ms)
     } else {
       translatedLines.push(line);
     }

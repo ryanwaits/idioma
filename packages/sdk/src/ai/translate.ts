@@ -106,7 +106,7 @@ export async function translateBatch(
     results.push(result);
     // Small delay between requests to avoid concurrent connection limits
     if (texts.indexOf(text) < texts.length - 1) {
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 100)); // 100ms delay (reduced from 200ms)
     }
   }
   return results;

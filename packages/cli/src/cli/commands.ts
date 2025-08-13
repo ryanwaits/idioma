@@ -11,6 +11,11 @@ import {
   saveConfig,
   saveLock,
 } from 'idioma-sdk';
+import {
+  startBackgroundTranslation,
+  getTranslationStatus,
+  stopBackgroundTranslation,
+} from './background';
 
 // Init command - create config file
 export async function initCommand(): Promise<void> {
@@ -243,4 +248,55 @@ export async function resetCommand(): Promise<void> {
     }
     process.exit(1);
   }
+}
+
+
+// Status command - check background translation status
+export async function statusCommand(): Promise<void> {
+  const status = await getTranslationStatus();
+  
+  if (!status) {
+    console.log('No background translation is currently running.');
+    return;
+  }
+  
+  const percentage = status.totalFiles > 0 
+    ? Math.round((status.processedFiles / status.totalFiles) * 100)
+    : 0;
+  
+  console.log('\n📊 Translation Status');
+  console.log('─'.repeat(40));
+  console.log(`Status: ${status.status === 'running' ? '🔄' : status.status === 'completed' ? '✅' : '❌'} ${status.status}`);
+  console.log(`Progress: ${status.processedFiles}/${status.totalFiles} files (${percentage}%)`);
+  
+  if (status.currentFile) {
+    console.log(`Current file: ${status.currentFile}`);
+  }
+  
+  console.log(`Started: ${new Date(status.startTime).toLocaleString()}`);
+  
+  if (status.endTime) {
+    console.log(`Ended: ${new Date(status.endTime).toLocaleString()}`);
+    const duration = new Date(status.endTime).getTime() - new Date(status.startTime).getTime();
+    const minutes = Math.floor(duration / 60000);
+    const seconds = Math.floor((duration % 60000) / 1000);
+    console.log(`Duration: ${minutes}m ${seconds}s`);
+  }
+  
+  if (status.errors.length > 0) {
+    console.log(`\n⚠️  Errors (${status.errors.length}):`);
+    status.errors.slice(-5).forEach(error => {
+      console.log(`  - ${error}`);
+    });
+  }
+  
+  if (status.pid && status.status === 'running') {
+    console.log(`\nProcess ID: ${status.pid}`);
+    console.log('To stop: idioma stop');
+  }
+}
+
+// Stop command - stop background translation
+export async function stopCommand(): Promise<void> {
+  await stopBackgroundTranslation();
 }
