@@ -14,7 +14,7 @@ const program = new Command();
 program
   .name('idioma')
   .description('Internationalization engine')
-  .version('0.0.4');
+  .version('0.0.6');
 
 // Init command
 program.command('init').description('Initialize Idioma configuration').action(initCommand);

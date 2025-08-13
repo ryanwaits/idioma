@@ -89,37 +89,30 @@ export abstract class BaseTranslationStrategy {
       };
     }
     
-    // Translate all strings (in parallel for performance)
+    // Translate all strings sequentially to avoid rate limits
     const translations = new Map<string, string>();
-    const translationPromises: Promise<void>[] = [];
     const usages: TokenUsage[] = [];
     
-    // Batch translations for efficiency (optional optimization)
-    const batchSize = 10; // Translate 10 strings at a time
+    // Process translations sequentially to avoid concurrent connection limits
     const entries = Array.from(parseResult.translatableContent.entries());
     
-    for (let i = 0; i < entries.length; i += batchSize) {
-      const batch = entries.slice(i, i + batchSize);
-      
-      const batchPromise = Promise.all(
-        batch.map(async ([path, node]) => {
-          const result = await translateText(
-            node.value,
-            sourceLocale,
-            targetLocale,
-            provider || config.translation?.provider || 'anthropic',
-            model || config.translation?.model
-          );
-          
-          translations.set(path, result.text);
-          usages.push(result.usage);
-        })
+    for (const [path, node] of entries) {
+      const result = await translateText(
+        node.value,
+        sourceLocale,
+        targetLocale,
+        provider || config.translation?.provider || 'anthropic',
+        model || config.translation?.model
       );
       
-      translationPromises.push(batchPromise);
+      translations.set(path, result.text);
+      usages.push(result.usage);
+      
+      // Add small delay between API calls to avoid rate limits (except for last item)
+      if (entries.indexOf([path, node]) < entries.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
     }
-    
-    await Promise.all(translationPromises);
     
     // Reconstruct with translations
     const translatedContent = await this.reconstruct(translations, parseResult.metadata);

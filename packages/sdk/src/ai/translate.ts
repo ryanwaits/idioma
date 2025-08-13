@@ -91,7 +91,6 @@ ${trimmedText}`,
   };
 }
 
-// Batch translation helper for performance
 export async function translateBatch(
   texts: string[],
   source: string,
@@ -100,10 +99,17 @@ export async function translateBatch(
   model?: string,
   provider?: string
 ): Promise<TranslationResult[]> {
-  // Process translations in parallel for better performance
-  return Promise.all(
-    texts.map((text) => translateText(text, source, target, clientOrProvider, model, provider))
-  );
+  // Process translations sequentially to avoid rate limits
+  const results: TranslationResult[] = [];
+  for (const text of texts) {
+    const result = await translateText(text, source, target, clientOrProvider, model, provider);
+    results.push(result);
+    // Small delay between requests to avoid concurrent connection limits
+    if (texts.indexOf(text) < texts.length - 1) {
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+  }
+  return results;
 }
 
 // Backward compatibility wrapper - returns just the text

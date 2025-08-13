@@ -24,26 +24,32 @@ export async function translateFrontmatter(
   const lines = frontmatter.split('\n');
   const usages: TokenUsage[] = [];
 
-  const translatedLines = await Promise.all(
-    lines.map(async (line) => {
-      const match = line.match(/^(\s*)([\w-]+):\s*(.+)$/);
-      if (match) {
-        const [, indent, key, value] = match;
-        // Only translate if the key is in the translatable fields list
-        if (!translatableFields.includes(key!)) {
-          return line;
-        }
-        // Don't translate boolean values or numbers
-        if (value === 'true' || value === 'false' || !Number.isNaN(Number(value))) {
-          return line;
-        }
-        const result = await translateText(value!, source, target, aiClient, model, provider);
-        usages.push(result.usage);
-        return `${indent}${key}: ${result.text}`;
+  // Process lines sequentially to avoid rate limits
+  const translatedLines: string[] = [];
+
+  for (const line of lines) {
+    const match = line.match(/^(\s*)([\w-]+):\s*(.+)$/);
+    if (match) {
+      const [, indent, key, value] = match;
+      // Only translate if the key is in the translatable fields list
+      if (!translatableFields.includes(key!)) {
+        translatedLines.push(line);
+        continue;
       }
-      return line;
-    })
-  );
+      if (value === 'true' || value === 'false' || !Number.isNaN(Number(value))) {
+        translatedLines.push(line);
+        continue;
+      }
+      const result = await translateText(value!, source, target, aiClient, model, provider);
+      usages.push(result.usage);
+      translatedLines.push(`${indent}${key}: ${result.text}`);
+
+      // Add small delay between translations to avoid rate limits
+      await new Promise(resolve => setTimeout(resolve, 100));
+    } else {
+      translatedLines.push(line);
+    }
+  }
 
   return {
     content: translatedLines.join('\n'),

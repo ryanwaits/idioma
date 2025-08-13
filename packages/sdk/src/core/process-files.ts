@@ -133,6 +133,11 @@ export async function processFiles(
 
         for (const targetLocale of targetLocales) {
           try {
+            // Add a small delay between translations to avoid rate limits
+            if (allUsages.length > 0) {
+              await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
+            }
+
             const result = await translateFile(file, sourceLocale, targetLocale, lock, config, {
               ...options,
               customTarget,
