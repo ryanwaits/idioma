@@ -109,7 +109,7 @@ export async function processFiles(
 
   const allUsages: TokenUsage[] = [];
   let filesSinceLastSave = 0;
-  const SAVE_INTERVAL = 5; // Save lock file every 5 successful translations
+  const SAVE_INTERVAL = 1; // Save lock file after every successful translation for safety
 
   // Get the include patterns (handle both array and object formats)
   const includePatterns = Array.isArray(config.files) ? config.files : config.files?.include || [];
@@ -160,7 +160,7 @@ export async function processFiles(
             if (filesSinceLastSave >= SAVE_INTERVAL) {
               await saveLock(lock);
               filesSinceLastSave = 0;
-              // Optional: Show progress saved message (can be removed if too verbose)
+              // Show progress saved message
               console.log('💾 Progress saved to idioma.lock');
             }
           } catch (error) {
