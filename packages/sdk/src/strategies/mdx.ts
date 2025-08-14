@@ -41,29 +41,9 @@ export class MdxStrategy extends BaseTranslationStrategy {
     model?: string,
     provider?: string
   ): Promise<TranslationResult> {
-    // Check if content has frontmatter and handle it separately
+    // Note: Frontmatter is already handled by translate-file.ts
+    // This strategy only receives the main content without frontmatter
     let frontmatterUsage = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
-    const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-    
-    if (frontmatterMatch) {
-      const frontmatter = frontmatterMatch[1];
-      const mainContent = frontmatterMatch[2];
-      
-      // Translate only the frontmatter content (not the delimiters)
-      const frontmatterResult = await translateFrontmatter(
-        frontmatter,
-        sourceLocale,
-        targetLocale,
-        config,
-        aiClient,
-        model,
-        provider || config.translation?.provider || 'anthropic'
-      );
-      
-      frontmatterUsage = frontmatterResult.usage;
-      // Reassemble with original delimiters preserved
-      content = `---\n${frontmatterResult.content}\n---\n${mainContent}`;
-    }
     
     // Parse MDX content with directive support
     const tree = remark().use(remarkMdx).use(remarkDirective).parse(content);

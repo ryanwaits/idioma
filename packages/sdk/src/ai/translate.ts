@@ -72,26 +72,41 @@ export async function translateText(
     };
   }
 
+  // Check if this looks like frontmatter content (should never happen but add safeguard)
+  const looksLikeFrontmatter = trimmedText.includes('title:') || trimmedText.includes('description:');
+  
   const result = await generateText({
     model: client(model || getDefaultModel(actualProvider)),
     system:
       'You are a translation assistant. You MUST return ONLY the translated text without any additional commentary, explanations, or phrases like "Here is the translation". Do not add any text before or after the translation.',
     prompt: `Translate the following text from ${source} to ${target}. 
 
-CRITICAL RULES:
-- Preserve exact formatting, tone, and structure
-- NEVER translate technical markers like ---, ***, ___, ===, or any delimiter characters
-- NEVER translate YAML/frontmatter field names (e.g., keep "title:", "description:", not "título:", "descripción:")
-- DO translate the VALUES after the colons, but NOT the field names themselves
-- Preserve all Markdown syntax exactly (headers, links, code blocks)
-- Keep all code blocks, import statements, and technical syntax unchanged
+CRITICAL RULES - MUST FOLLOW:
+1. NEVER change "---" to anything else (not to "***", not to "___", not to anything)
+2. If you see "---" anywhere, keep it EXACTLY as "---"
+3. NEVER translate field names like "title:", "description:", "sidebarTitle:" - keep them in English
+4. ONLY translate the text VALUES that come after colons
+5. Preserve ALL Markdown/YAML formatting exactly as-is
+6. Never change horizontal rules or delimiters
+${looksLikeFrontmatter ? '\nWARNING: This appears to be frontmatter. ONLY translate the values, NOT the field names or structure!' : ''}
 
 Text to translate:
 ${trimmedText}`,
   });
 
+  // Post-process to fix common AI translation errors
+  let processedText = result.text.trim();
+  
+  // Fix if AI changed --- to *** or other variants
+  if (trimmedText.includes('---') && !processedText.includes('---')) {
+    // AI might have changed --- to *** or ___ or other variants
+    processedText = processedText.replace(/^\*\*\*$/gm, '---');
+    processedText = processedText.replace(/^___$/gm, '---');
+    processedText = processedText.replace(/^-{5,}$/gm, '---');  // Replace 5+ dashes with ---
+  }
+  
   // Re-apply the original whitespace
-  const translatedText = leadingWhitespace + result.text.trim() + trailingWhitespace;
+  const translatedText = leadingWhitespace + processedText + trailingWhitespace;
 
   return {
     text: translatedText,

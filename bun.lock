@@ -12,7 +12,7 @@
     },
     "packages/cli": {
       "name": "idioma-cli",
-      "version": "0.0.2",
+      "version": "0.0.10",
       "bin": {
         "idioma": "./dist/cli/index.js",
       },
@@ -23,7 +23,7 @@
         "ai": "^4.3.19",
         "commander": "^14.0.0",
         "glob": "^11.0.3",
-        "idioma-sdk": "^0.0.1",
+        "idioma-sdk": "^0.0.10",
         "js-yaml": "^4.1.0",
         "ora": "^8.2.0",
         "parse5": "^8.0.0",
@@ -45,7 +45,7 @@
     },
     "packages/sdk": {
       "name": "idioma-sdk",
-      "version": "0.0.1",
+      "version": "0.0.11",
       "dependencies": {
         "@ai-sdk/anthropic": "^1.2.12",
         "@ai-sdk/openai": "^1.3.23",
@@ -621,6 +621,8 @@
     "cliui/strip-ansi": ["strip-ansi@6.0.1", "", { "dependencies": { "ansi-regex": "^5.0.1" } }, "sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A=="],
 
     "cliui/wrap-ansi": ["wrap-ansi@7.0.0", "", { "dependencies": { "ansi-styles": "^4.0.0", "string-width": "^4.1.0", "strip-ansi": "^6.0.0" } }, "sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q=="],
+
+    "idioma-cli/idioma-sdk": ["idioma-sdk@0.0.10", "", { "dependencies": { "@ai-sdk/anthropic": "^1.2.12", "@ai-sdk/openai": "^1.3.23", "@types/xml2js": "^0.4.14", "ai": "^4.3.19", "glob": "^11.0.3", "js-yaml": "^4.1.0", "parse5": "^8.0.0", "remark": "^15.0.1", "remark-directive": "^4.0.0", "remark-frontmatter": "^5.0.0", "remark-mdx": "^3.1.0", "remark-parse": "^11.0.0", "remark-stringify": "^11.0.0", "xml2js": "^0.6.2", "zod": "^4.0.5" } }, "sha512-WL7xqtZktmAbsf/+LNPNKnKHjKbzEn2cWNEE1iF2uvYh2tGBnZT3kSMCJXTpsLmTWnNvwJN/Cx48ifuc/ow6DQ=="],
 
     "idioma-sdk/@types/bun": ["@types/bun@1.2.20", "", { "dependencies": { "bun-types": "1.2.20" } }, "sha512-dX3RGzQ8+KgmMw7CsW4xT5ITBSCrSbfHc36SNT31EOUg/LA9JWq0VDdEXDRSe1InVWpd2yLUM1FUF/kEOyTzYA=="],
 
