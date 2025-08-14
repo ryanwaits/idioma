@@ -42,7 +42,15 @@ export async function translateFrontmatter(
       }
       const result = await translateText(value!, source, target, aiClient, model, provider);
       usages.push(result.usage);
-      translatedLines.push(`${indent}${key}: ${result.text}`);
+      
+      // Escape the translated text if it contains colons or special YAML characters
+      let translatedValue = result.text;
+      if (translatedValue.includes(':') || translatedValue.includes('"') || translatedValue.includes("'")) {
+        // Wrap in quotes and escape any existing quotes
+        translatedValue = `"${translatedValue.replace(/"/g, '\\"')}"`;
+      }
+      
+      translatedLines.push(`${indent}${key}: ${translatedValue}`);
 
       // Add small delay between translations to avoid rate limits
       await new Promise(resolve => setTimeout(resolve, 50)); // 50ms delay (reduced from 100ms)

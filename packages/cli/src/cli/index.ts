@@ -14,7 +14,7 @@ import {
 
 const program = new Command();
 
-program.name('idioma').description('Internationalization engine').version('0.0.8');
+program.name('idioma').description('Internationalization engine').version('0.0.10');
 
 // Init command
 program.command('init').description('Initialize Idioma configuration').action(initCommand);

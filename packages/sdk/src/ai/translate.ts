@@ -76,7 +76,15 @@ export async function translateText(
     model: client(model || getDefaultModel(actualProvider)),
     system:
       'You are a translation assistant. You MUST return ONLY the translated text without any additional commentary, explanations, or phrases like "Here is the translation". Do not add any text before or after the translation.',
-    prompt: `Translate the following text from ${source} to ${target}. Preserve exact formatting, tone, and structure (e.g., Markdown headers, links, code blocks).
+    prompt: `Translate the following text from ${source} to ${target}. 
+
+CRITICAL RULES:
+- Preserve exact formatting, tone, and structure
+- NEVER translate technical markers like ---, ***, ___, ===, or any delimiter characters
+- NEVER translate YAML/frontmatter field names (e.g., keep "title:", "description:", not "título:", "descripción:")
+- DO translate the VALUES after the colons, but NOT the field names themselves
+- Preserve all Markdown syntax exactly (headers, links, code blocks)
+- Keep all code blocks, import statements, and technical syntax unchanged
 
 Text to translate:
 ${trimmedText}`,

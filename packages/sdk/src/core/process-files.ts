@@ -7,8 +7,8 @@ import {
   calculateCost,
   formatTokenCount,
   type LockFile,
-  type TokenUsage,
   saveLock,
+  type TokenUsage,
 } from '../utils';
 import { detectFormat } from '../utils/format-detector';
 import { type TranslateFileOptions, translateFile } from './translate-file';
@@ -143,7 +143,7 @@ export async function processFiles(
           try {
             // Add a small delay between translations to avoid rate limits
             if (allUsages.length > 0) {
-              await new Promise(resolve => setTimeout(resolve, 250)); // 250ms delay (reduced from 500ms)
+              await new Promise((resolve) => setTimeout(resolve, 250)); // 250ms delay (reduced from 500ms)
             }
 
             const result = await translateFile(file, sourceLocale, targetLocale, lock, config, {
@@ -154,14 +154,12 @@ export async function processFiles(
             if (result.usage) {
               allUsages.push(result.usage);
             }
-            
+
             // Increment counter and save lock file periodically
             filesSinceLastSave++;
             if (filesSinceLastSave >= SAVE_INTERVAL) {
               await saveLock(lock);
               filesSinceLastSave = 0;
-              // Show progress saved message
-              console.log('💾 Progress saved to idioma.lock');
             }
           } catch (error) {
             // Check if it's a parsing/syntax error for XML/HTML files

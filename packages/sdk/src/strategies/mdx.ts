@@ -41,18 +41,29 @@ export class MdxStrategy extends BaseTranslationStrategy {
     model?: string,
     provider?: string
   ): Promise<TranslationResult> {
-    // Parse frontmatter if present
-    const frontmatterResult = await translateFrontmatter(
-      content,
-      sourceLocale,
-      targetLocale,
-      config,
-      provider || config.translation?.provider || 'anthropic',
-      model || config.translation?.model
-    );
+    // Check if content has frontmatter and handle it separately
+    let frontmatterUsage = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
+    const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
     
-    // Use the frontmatter-processed content
-    content = frontmatterResult.content;
+    if (frontmatterMatch) {
+      const frontmatter = frontmatterMatch[1];
+      const mainContent = frontmatterMatch[2];
+      
+      // Translate only the frontmatter content (not the delimiters)
+      const frontmatterResult = await translateFrontmatter(
+        frontmatter,
+        sourceLocale,
+        targetLocale,
+        config,
+        aiClient,
+        model,
+        provider || config.translation?.provider || 'anthropic'
+      );
+      
+      frontmatterUsage = frontmatterResult.usage;
+      // Reassemble with original delimiters preserved
+      content = `---\n${frontmatterResult.content}\n---\n${mainContent}`;
+    }
     
     // Parse MDX content with directive support
     const tree = remark().use(remarkMdx).use(remarkDirective).parse(content);
@@ -142,7 +153,7 @@ export class MdxStrategy extends BaseTranslationStrategy {
     // Aggregate usage from all translations
     const totalUsage = aggregateUsage([
       ...translationResults.map((r) => r.usage),
-      frontmatterResult.usage
+      frontmatterUsage
     ]);
     
     // Stringify back to MDX with directive support
