@@ -2,13 +2,22 @@ import { remark } from 'remark';
 import remarkDirective from 'remark-directive';
 import remarkMdx from 'remark-mdx';
 import { visit } from 'unist-util-visit';
-import { translateFrontmatter } from '../parsers/frontmatter';
-import { BaseTranslationStrategy, type ParseResult, type TranslatableNode, type ValidationResult, type TranslationResult } from './base';
+import { translateBatch } from '../ai/translate';
 import type { Config } from '../utils/config';
 import { getEffectiveFileConfig } from '../utils/config-normalizer';
-import { translateBatch } from '../ai/translate';
 import { aggregateUsage } from '../utils/cost';
-import { parsePreserveRules, shouldSkipNode, getPreservedTerms, hasSmartPreservePattern } from '../utils/preserve';
+import {
+  getPreservedTerms,
+  hasSmartPreservePattern,
+  parsePreserveRules,
+  shouldSkipNode,
+} from '../utils/preserve';
+import {
+  BaseTranslationStrategy,
+  type ParseResult,
+  type TranslationResult,
+  type ValidationResult,
+} from './base';
 
 // Add parent references to all nodes in the tree
 function addParentReferences(tree: any) {
@@ -20,15 +29,14 @@ function addParentReferences(tree: any) {
 }
 
 export class MdxStrategy extends BaseTranslationStrategy {
-  
   canHandle(filePath: string): boolean {
     return filePath.endsWith('.mdx') || filePath.endsWith('.md');
   }
-  
+
   getName(): string {
     return 'MDX';
   }
-  
+
   /**
    * Override the main translate method for MDX since it needs special handling
    * MDX uses batch translation and AST manipulation instead of key-value pairs
@@ -44,22 +52,22 @@ export class MdxStrategy extends BaseTranslationStrategy {
   ): Promise<TranslationResult> {
     // Note: Frontmatter is already handled by translate-file.ts
     // This strategy only receives the main content without frontmatter
-    let frontmatterUsage = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
-    
+    const frontmatterUsage = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
+
     // Parse preserve rules
     const preserveRules = parsePreserveRules(config.preserve || []);
     const preservedTerms = getPreservedTerms(preserveRules);
-    
+
     // Parse MDX content with directive support
     const tree = remark().use(remarkMdx).use(remarkDirective).parse(content);
-    
+
     // Add parent references to enable directive checking
     addParentReferences(tree);
-    
-    // Get effective config with smart defaults  
+
+    // Get effective config with smart defaults
     const effectiveConfig = getEffectiveFileConfig(config, 'mdx');
     const skipJsxAttrs = effectiveConfig.skipAttributes?.jsx || [];
-    
+
     // Collect all translatable text
     const textsToTranslate: {
       node: any;
@@ -68,7 +76,7 @@ export class MdxStrategy extends BaseTranslationStrategy {
       parent?: any;
       originalText: string;
     }[] = [];
-    
+
     // Visit text nodes
     visit(tree, 'text', (node, index, parent) => {
       if (this.shouldTranslateNode(node, parent, preserveRules, index)) {
@@ -80,7 +88,7 @@ export class MdxStrategy extends BaseTranslationStrategy {
         });
       }
     });
-    
+
     // Visit JSX elements to find string attributes
     visit(tree, ['mdxJsxFlowElement', 'mdxJsxTextElement'], (node: any) => {
       if (node.attributes) {
@@ -99,7 +107,7 @@ export class MdxStrategy extends BaseTranslationStrategy {
         });
       }
     });
-    
+
     // Visit image nodes to translate alt text
     visit(tree, 'image', (node: any) => {
       if (node.alt?.trim()) {
@@ -111,7 +119,7 @@ export class MdxStrategy extends BaseTranslationStrategy {
         });
       }
     });
-    
+
     // Batch translate all texts for performance
     const textsToTranslateArray = textsToTranslate.map((item) => item.originalText);
     const translationResults = await translateBatch(
@@ -123,7 +131,7 @@ export class MdxStrategy extends BaseTranslationStrategy {
       provider,
       preservedTerms
     );
-    
+
     // Apply translations
     textsToTranslate.forEach((item, index) => {
       const translatedText = translationResults[index]?.text;
@@ -135,33 +143,38 @@ export class MdxStrategy extends BaseTranslationStrategy {
         item.node.value = translatedText;
       }
     });
-    
+
     // Aggregate usage from all translations
     const totalUsage = aggregateUsage([
       ...translationResults.map((r) => r.usage),
-      frontmatterUsage
+      frontmatterUsage,
     ]);
-    
+
     // Stringify back to MDX with directive support
     const translatedContent = remark().use(remarkMdx).use(remarkDirective).stringify(tree);
-    
+
     return {
       content: translatedContent,
       usage: totalUsage,
     };
   }
-  
+
   // Check if a text node should be translated based on preserve rules
-  private shouldTranslateNode(node: any, parent: any, preserveRules: any[], nodeIndex?: number): boolean {
+  private shouldTranslateNode(
+    node: any,
+    parent: any,
+    preserveRules: any[],
+    nodeIndex?: number
+  ): boolean {
     if (node.type !== 'text' || !node.value.trim()) return false;
-    
+
     const trimmedValue = node.value.trim();
-    
+
     // Check smart preserve patterns first (automatic preservation)
     if (hasSmartPreservePattern(trimmedValue)) {
       return false;
     }
-    
+
     // Special handling for headers - be extra strict with API endpoints
     if (parent?.type === 'heading') {
       // Extra strict for headers - preserve anything that looks like an endpoint
@@ -173,7 +186,7 @@ export class MdxStrategy extends BaseTranslationStrategy {
         return false;
       }
     }
-    
+
     // Check if this is a directive pseudo-attribute (first line of directive content)
     // This handles patterns like "type: help" that appear as the first content in directives
     if (parent && parent.type === 'paragraph' && nodeIndex === 0) {
@@ -195,24 +208,24 @@ export class MdxStrategy extends BaseTranslationStrategy {
         }
       }
     }
-    
+
     // Check if text should be skipped based on preserve rules
     if (shouldSkipNode(trimmedValue, preserveRules)) {
       return false;
     }
-    
+
     return true;
   }
-  
+
   // MDX doesn't use the parse/reconstruct pattern, so these are not implemented
-  protected async parse(content: string): Promise<ParseResult> {
+  protected async parse(_content: string): Promise<ParseResult> {
     throw new Error('MDX strategy uses custom translate method');
   }
-  
-  protected async reconstruct(translations: Map<string, string>, metadata: any): Promise<string> {
+
+  protected async reconstruct(_translations: Map<string, string>, _metadata: any): Promise<string> {
     throw new Error('MDX strategy uses custom translate method');
   }
-  
+
   validate(content: string): ValidationResult {
     try {
       remark().use(remarkMdx).use(remarkDirective).parse(content);
@@ -220,9 +233,11 @@ export class MdxStrategy extends BaseTranslationStrategy {
     } catch (error) {
       return {
         valid: false,
-        errors: [{
-          message: error instanceof Error ? error.message : 'Invalid MDX'
-        }]
+        errors: [
+          {
+            message: error instanceof Error ? error.message : 'Invalid MDX',
+          },
+        ],
       };
     }
   }

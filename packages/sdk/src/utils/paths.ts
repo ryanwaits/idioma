@@ -35,9 +35,10 @@ export function generateOutputPath(
     }
 
     // Remove the base path from the source path
-    const relativePath = basePath && sourcePath.startsWith(basePath)
-      ? sourcePath.slice(basePath.length).replace(/^\//, '')
-      : sourcePath;
+    const relativePath =
+      basePath && sourcePath.startsWith(basePath)
+        ? sourcePath.slice(basePath.length).replace(/^\//, '')
+        : sourcePath;
 
     // Combine custom target with locale and relative path
     return `${customTarget}/${targetLocale}/${relativePath}`;

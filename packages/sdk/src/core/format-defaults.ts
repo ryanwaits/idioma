@@ -24,41 +24,84 @@ export const MDX_DEFAULTS: FormatDefaults = {
   skipAttributes: {
     jsx: [
       // Technical/structural attributes
-      'className', 'id', 'key', 'ref', 'style',
+      'className',
+      'id',
+      'key',
+      'ref',
+      'style',
       // URLs and paths
-      'href', 'src', 'action', 'formAction', 'poster',
+      'href',
+      'src',
+      'action',
+      'formAction',
+      'poster',
       // Form attributes
-      'name', 'type', 'method', 'encType', 'target',
+      'name',
+      'type',
+      'method',
+      'encType',
+      'target',
       // Data attributes (usually technical)
-      'data-testid', 'data-id', 'data-key', 'data-index',
+      'data-testid',
+      'data-id',
+      'data-key',
+      'data-index',
       // Component/framework attributes
-      'component', 'as', 'variant', 'size', 'color',
+      'component',
+      'as',
+      'variant',
+      'size',
+      'color',
       // Event handlers
-      'onClick', 'onChange', 'onSubmit', 'onFocus', 'onBlur',
+      'onClick',
+      'onChange',
+      'onSubmit',
+      'onFocus',
+      'onBlur',
       // Boolean/enum values
-      'disabled', 'hidden', 'required', 'autoFocus', 'readOnly'
+      'disabled',
+      'hidden',
+      'required',
+      'autoFocus',
+      'readOnly',
     ],
     frontmatter: [
       // Technical metadata
-      'layout', 'template', 'permalink', 'slug', 'path',
-      // Publishing metadata  
-      'published', 'draft', 'date', 'updated', 'modified',
+      'layout',
+      'template',
+      'permalink',
+      'slug',
+      'path',
+      // Publishing metadata
+      'published',
+      'draft',
+      'date',
+      'updated',
+      'modified',
       // Author/source info
-      'author', 'authors', 'source', 'originalUrl',
+      'author',
+      'authors',
+      'source',
+      'originalUrl',
       // Technical settings
-      'type', 'component', 'sidebar_position', 'sidebar_class_name',
+      'type',
+      'component',
+      'sidebar_position',
+      'sidebar_class_name',
       // SEO technical fields
-      'canonical', 'robots', 'index', 'sitemap',
+      'canonical',
+      'robots',
+      'index',
+      'sitemap',
       // Development flags
-      'llm', 'hide_table_of_contents', 'hide_title'
-    ]
+      'llm',
+      'hide_table_of_contents',
+      'hide_title',
+    ],
   },
-  
+
   // Skip code-related components
-  skipTags: [
-    'code', 'Code', 'CodeBlock', 'pre', 'Pre',
-    'Mermaid', 'Math', 'Latex', 'GraphQL'
-  ]
+  skipTags: ['code', 'Code', 'CodeBlock', 'pre', 'Pre', 'Mermaid', 'Math', 'Latex', 'GraphQL'],
 };
 
 /**
@@ -67,23 +110,63 @@ export const MDX_DEFAULTS: FormatDefaults = {
  */
 export const JSON_DEFAULTS: FormatDefaults = {
   skipTags: [],
-  
+
   // Common non-translatable JSON keys
   skipKeys: [
-    'id', 'key', 'uuid', 'guid', 'slug', 'ref', 'href',
-    'url', 'uri', 'path', 'route', 'endpoint',
-    'type', 'kind', 'category', 'status', 'state',
-    'version', 'timestamp', 'date', 'time', 'datetime',
-    'count', 'total', 'index', 'offset', 'limit',
-    'width', 'height', 'size', 'length', 'duration',
-    'lat', 'lng', 'latitude', 'longitude', 'coordinates',
-    'email', 'phone', 'username', 'password', 'token',
-    'api_key', 'secret', 'hash', 'checksum',
-    'mime_type', 'content_type', 'encoding', 'charset'
+    'id',
+    'key',
+    'uuid',
+    'guid',
+    'slug',
+    'ref',
+    'href',
+    'url',
+    'uri',
+    'path',
+    'route',
+    'endpoint',
+    'type',
+    'kind',
+    'category',
+    'status',
+    'state',
+    'version',
+    'timestamp',
+    'date',
+    'time',
+    'datetime',
+    'count',
+    'total',
+    'index',
+    'offset',
+    'limit',
+    'width',
+    'height',
+    'size',
+    'length',
+    'duration',
+    'lat',
+    'lng',
+    'latitude',
+    'longitude',
+    'coordinates',
+    'email',
+    'phone',
+    'username',
+    'password',
+    'token',
+    'api_key',
+    'secret',
+    'hash',
+    'checksum',
+    'mime_type',
+    'content_type',
+    'encoding',
+    'charset',
   ],
-  
+
   // Skip empty strings by default
-  skipEmptyStrings: true
+  skipEmptyStrings: true,
 };
 
 /**
@@ -93,7 +176,7 @@ export const JSON_DEFAULTS: FormatDefaults = {
 export const YAML_DEFAULTS: FormatDefaults = {
   ...JSON_DEFAULTS,
   preserveComments: true,
-  preserveAnchors: true
+  preserveAnchors: true,
 };
 
 /**
@@ -103,27 +186,57 @@ export const YAML_DEFAULTS: FormatDefaults = {
 export const HTML_DEFAULTS: FormatDefaults = {
   skipAttributes: [
     // Technical/structural attributes
-    'class', 'className', 'id', 'style', 'data-*',
+    'class',
+    'className',
+    'id',
+    'style',
+    'data-*',
     // URLs and paths
-    'href', 'src', 'action', 'poster', 'srcset',
+    'href',
+    'src',
+    'action',
+    'poster',
+    'srcset',
     // Form attributes
-    'name', 'type', 'method', 'enctype', 'target',
+    'name',
+    'type',
+    'method',
+    'enctype',
+    'target',
     // Boolean attributes
-    'disabled', 'hidden', 'required', 'readonly', 'checked',
+    'disabled',
+    'hidden',
+    'required',
+    'readonly',
+    'checked',
     // Event handlers
-    'onclick', 'onload', 'onchange', 'onsubmit'
+    'onclick',
+    'onload',
+    'onchange',
+    'onsubmit',
   ],
-  
+
   // Skip non-content elements
   skipTags: [
-    'script', 'style', 'code', 'pre', 'kbd', 'samp', 'var',
-    'svg', 'math', 'object', 'embed', 'iframe',
-    'noscript', 'template'
+    'script',
+    'style',
+    'code',
+    'pre',
+    'kbd',
+    'samp',
+    'var',
+    'svg',
+    'math',
+    'object',
+    'embed',
+    'iframe',
+    'noscript',
+    'template',
   ],
-  
+
   // Preserve formatting
   preserveWhitespace: false,
-  preserveEntities: true
+  preserveEntities: true,
 };
 
 /**
@@ -133,21 +246,38 @@ export const HTML_DEFAULTS: FormatDefaults = {
 export const XML_DEFAULTS: FormatDefaults = {
   skipAttributes: [
     // Technical attributes
-    'id', 'key', 'ref', 'type', 'class', 'namespace',
-    // URLs and paths  
-    'href', 'src', 'url', 'path',
+    'id',
+    'key',
+    'ref',
+    'type',
+    'class',
+    'namespace',
+    // URLs and paths
+    'href',
+    'src',
+    'url',
+    'path',
     // Schema/validation
-    'xmlns', 'xsi:type', 'schemaLocation'
+    'xmlns',
+    'xsi:type',
+    'schemaLocation',
   ],
-  
+
   skipTags: [
-    'script', 'style', 'code',
+    'script',
+    'style',
+    'code',
     // Common technical XML elements
-    'id', 'key', 'ref', 'type', 'class', 'namespace'
+    'id',
+    'key',
+    'ref',
+    'type',
+    'class',
+    'namespace',
   ],
-  
+
   preserveCDATA: true,
-  preserveComments: false
+  preserveComments: false,
 };
 
 /**
@@ -171,7 +301,7 @@ export function getFormatDefaults(fileType: string): FormatDefaults {
     default:
       // Return minimal defaults for unknown formats
       return {
-        skipTags: []
+        skipTags: [],
       };
   }
 }
@@ -185,9 +315,9 @@ export function mergeWithDefaults<T extends Record<string, any>>(
   defaults: T
 ): T {
   if (!userConfig) return defaults;
-  
+
   const merged = { ...defaults };
-  
+
   for (const [key, value] of Object.entries(userConfig)) {
     if (Array.isArray(value) && Array.isArray(defaults[key])) {
       // For arrays, combine user values with defaults (user first)
@@ -197,6 +327,6 @@ export function mergeWithDefaults<T extends Record<string, any>>(
       merged[key] = value;
     }
   }
-  
+
   return merged;
 }

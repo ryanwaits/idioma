@@ -123,7 +123,13 @@ export async function translateFile(
     }
 
     // Generate output path and write translated content
-    const outputPath = generateOutputPath(filePath, source, target, options.customTarget, options.sourcePattern);
+    const outputPath = generateOutputPath(
+      filePath,
+      source,
+      target,
+      options.customTarget,
+      options.sourcePattern
+    );
     await fs.mkdir(path.dirname(outputPath), { recursive: true });
     await fs.writeFile(outputPath, translatedContent);
 
@@ -136,7 +142,10 @@ export async function translateFile(
         lock.files[filePath].translations = {};
       }
     }
-    lock.files[filePath].translations![target] = true;
+    if (!lock.files[filePath].translations) {
+      throw new Error('Translations object should have been initialized');
+    }
+    lock.files[filePath].translations[target] = true;
 
     // Calculate total usage and cost
     const totalUsage = aggregateUsage(usages);

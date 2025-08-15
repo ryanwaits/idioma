@@ -1,5 +1,10 @@
 import * as yaml from 'js-yaml';
-import { BaseTranslationStrategy, type ParseResult, type TranslatableNode, type ValidationResult } from './base';
+import {
+  BaseTranslationStrategy,
+  type ParseResult,
+  type TranslatableNode,
+  type ValidationResult,
+} from './base';
 
 export interface YamlConfig {
   preserveComments?: boolean;
@@ -29,7 +34,7 @@ export class YamlStrategy extends BaseTranslationStrategy {
   canHandle(filePath: string): boolean {
     return filePath.endsWith('.yaml') || filePath.endsWith('.yml');
   }
-  
+
   getName(): string {
     return 'YAML';
   }
@@ -39,7 +44,7 @@ export class YamlStrategy extends BaseTranslationStrategy {
       // Handle multi-document YAML
       const documents = yaml.loadAll(content);
       const translatableContent = new Map<string, TranslatableNode>();
-      
+
       // Extract YAML metadata for preservation
       const yamlMetadata: YamlMetadata = {
         hasAnchors: content.includes('&'),
@@ -48,31 +53,29 @@ export class YamlStrategy extends BaseTranslationStrategy {
         multilineStyle: this.detectMultilineStyle(content),
         commentPositions: this.extractCommentPositions(content),
         indentSize: this.detectIndentSize(content),
-        isMultiDocument: documents.length > 1
+        isMultiDocument: documents.length > 1,
       };
-      
+
       // Process each document
       documents.forEach((doc, docIndex) => {
         if (doc && typeof doc === 'object') {
           const prefix = documents.length > 1 ? `doc${docIndex}.` : '';
-          this.extractFromDocument(
-            doc as Record<string, any>,
-            translatableContent,
-            prefix
-          );
+          this.extractFromDocument(doc as Record<string, any>, translatableContent, prefix);
         }
       });
-      
+
       return {
         translatableContent,
         metadata: {
           documents,
           yamlMetadata,
-          originalContent: content
-        }
+          originalContent: content,
+        },
       };
     } catch (error) {
-      throw new Error(`Failed to parse YAML: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to parse YAML: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -85,17 +88,17 @@ export class YamlStrategy extends BaseTranslationStrategy {
   private extractCommentPositions(content: string): Array<{ line: number; text: string }> {
     const comments: Array<{ line: number; text: string }> = [];
     const lines = content.split('\n');
-    
+
     lines.forEach((line, index) => {
       const commentMatch = line.match(/#(.*)$/);
       if (commentMatch) {
         comments.push({
           line: index + 1,
-          text: commentMatch[1].trim()
+          text: commentMatch[1].trim(),
         });
       }
     });
-    
+
     return comments;
   }
 
@@ -125,7 +128,7 @@ export class YamlStrategy extends BaseTranslationStrategy {
     for (const [key, value] of Object.entries(obj)) {
       const currentPath = [...path, key];
       const fullPath = prefix + currentPath.join('.');
-      
+
       if (typeof value === 'string') {
         // Skip empty strings if configured
         if (this.config.skipEmptyStrings && !value.trim()) {
@@ -144,7 +147,7 @@ export class YamlStrategy extends BaseTranslationStrategy {
             context: path[path.length - 1] || 'root',
             depth,
             siblings: Object.keys(obj),
-            isArrayItem: false
+            isArrayItem: false,
           });
         }
       } else if (Array.isArray(value)) {
@@ -158,7 +161,7 @@ export class YamlStrategy extends BaseTranslationStrategy {
                   context: key,
                   depth,
                   isArrayItem: true,
-                  arrayIndex: index
+                  arrayIndex: index,
                 });
               }
             }
@@ -182,16 +185,16 @@ export class YamlStrategy extends BaseTranslationStrategy {
     // Skip environment variables
     if (/^\$\{.*\}$/.test(value)) return false;
     if (/^\$[A-Z_]+$/.test(value)) return false;
-    
+
     // Skip file paths
-    if (/^[\.\/~]/.test(value)) return false;
-    
+    if (/^[./~]/.test(value)) return false;
+
     // Skip shell commands
     if (/^(npm|yarn|pnpm|bun|docker|kubectl|git|python|node|bash|sh)\s/.test(value)) return false;
-    
+
     // Skip common CI/CD keywords
     if (/^(on|uses|with|run|name|if|needs|strategy|matrix)$/.test(key)) return false;
-    
+
     // Apply standard translatable string rules
     return this.isTranslatableString(value, key);
   }
@@ -200,7 +203,7 @@ export class YamlStrategy extends BaseTranslationStrategy {
     // Check excludePaths
     if (this.config.excludePaths) {
       for (const excludePath of this.config.excludePaths) {
-        if (path === excludePath || path.startsWith(excludePath + '.')) {
+        if (path === excludePath || path.startsWith(`${excludePath}.`)) {
           return true;
         }
       }
@@ -210,7 +213,7 @@ export class YamlStrategy extends BaseTranslationStrategy {
     if (this.config.includePaths && this.config.includePaths.length > 0) {
       let included = false;
       for (const includePath of this.config.includePaths) {
-        if (path === includePath || path.startsWith(includePath + '.')) {
+        if (path === includePath || path.startsWith(`${includePath}.`)) {
           included = true;
           break;
         }
@@ -224,26 +227,26 @@ export class YamlStrategy extends BaseTranslationStrategy {
   async reconstruct(translations: Map<string, string>, metadata: any): Promise<string> {
     const { documents, yamlMetadata } = metadata;
     const results: string[] = [];
-    
+
     // Process each document
     documents.forEach((doc: any, index: number) => {
       const docCopy = JSON.parse(JSON.stringify(doc));
       const prefix = documents.length > 1 ? `doc${index}.` : '';
-      
+
       // Apply translations for this document
       for (const [path, translation] of translations) {
         if (documents.length > 1) {
           if (path.startsWith(prefix)) {
             const docPath = path.substring(prefix.length);
-            const segments = docPath.split(/\.|\[|\]/).filter(s => s);
+            const segments = docPath.split(/\.|\[|\]/).filter((s) => s);
             this.setValueByPath(docCopy, segments, translation);
           }
         } else {
-          const segments = path.split(/\.|\[|\]/).filter(s => s);
+          const segments = path.split(/\.|\[|\]/).filter((s) => s);
           this.setValueByPath(docCopy, segments, translation);
         }
       }
-      
+
       // Dump with appropriate options
       const yamlStr = yaml.dump(docCopy, {
         lineWidth: -1, // Preserve line breaks
@@ -253,23 +256,27 @@ export class YamlStrategy extends BaseTranslationStrategy {
         forceQuotes: false,
         skipInvalid: false,
         flowLevel: -1,
-        sortKeys: false
+        sortKeys: false,
       });
-      
+
       results.push(yamlStr);
     });
-    
+
     // Join documents with separator if multi-document
     if (yamlMetadata.isMultiDocument) {
-      return '---\n' + results.join('---\n');
+      return `---\n${results.join('---\n')}`;
     }
-    
+
     // Add comments back if preserveComments is enabled
     let result = results[0];
     if (this.config.preserveComments && yamlMetadata.commentPositions.length > 0) {
-      result = this.restoreComments(result, yamlMetadata.commentPositions, metadata.originalContent);
+      result = this.restoreComments(
+        result,
+        yamlMetadata.commentPositions,
+        metadata.originalContent
+      );
     }
-    
+
     return result;
   }
 
@@ -282,9 +289,9 @@ export class YamlStrategy extends BaseTranslationStrategy {
     // In production, you'd want more sophisticated comment restoration
     const translatedLines = translatedYaml.split('\n');
     const originalLines = originalContent.split('\n');
-    
+
     // Try to match structure and restore comments
-    commentPositions.forEach(comment => {
+    commentPositions.forEach((comment) => {
       const originalLine = originalLines[comment.line - 1];
       if (originalLine) {
         const keyMatch = originalLine.match(/^(\s*)(\S+):/);
@@ -300,7 +307,7 @@ export class YamlStrategy extends BaseTranslationStrategy {
         }
       }
     });
-    
+
     return translatedLines.join('\n');
   }
 
@@ -311,11 +318,13 @@ export class YamlStrategy extends BaseTranslationStrategy {
     } catch (error) {
       return {
         valid: false,
-        errors: [{
-          line: this.extractYamlLineNumber(error),
-          column: this.extractYamlColumnNumber(error),
-          message: error instanceof Error ? error.message : 'Invalid YAML'
-        }]
+        errors: [
+          {
+            line: this.extractYamlLineNumber(error),
+            column: this.extractYamlColumnNumber(error),
+            message: error instanceof Error ? error.message : 'Invalid YAML',
+          },
+        ],
       };
     }
   }

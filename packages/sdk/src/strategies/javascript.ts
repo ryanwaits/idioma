@@ -315,7 +315,7 @@ export class JavaScriptStrategy extends BaseTranslationStrategy {
     // Apply translations to the AST
     for (const [path, translation] of translations) {
       const context = contexts.find((c: TranslationContext) => c.path === path);
-      if (context && context.node) {
+      if (context?.node) {
         if (t.isStringLiteral(context.node)) {
           context.node.value = translation;
         } else if (t.isJSXText(context.node)) {

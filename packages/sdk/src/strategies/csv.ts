@@ -1,9 +1,4 @@
 import { BaseTranslationStrategy, type ParseResult, type ValidationResult } from './base';
-import type { TranslationContext } from '../types';
-
-interface CSVRow {
-  [key: string]: string;
-}
 
 export class CSVTranslationStrategy extends BaseTranslationStrategy {
   private delimiter: string = ',';
@@ -25,30 +20,30 @@ export class CSVTranslationStrategy extends BaseTranslationStrategy {
       if (!trimmed || trimmed.length === 0) {
         return { valid: false, errors: [{ message: 'Empty CSV file' }] };
       }
-      
+
       const lines = trimmed.split('\n');
       if (lines.length === 0) {
         return { valid: false, errors: [{ message: 'Empty CSV file' }] };
       }
-      
+
       // Try to parse first line to detect delimiter
       this.detectDelimiter(content);
-      
+
       return { valid: true };
     } catch (error) {
-      return { 
-        valid: false, 
-        errors: [{ message: `Invalid CSV format: ${error}` }] 
+      return {
+        valid: false,
+        errors: [{ message: `Invalid CSV format: ${error}` }],
       };
     }
   }
 
   protected async parse(content: string): Promise<ParseResult> {
     const translatableContent = new Map();
-    
+
     // Auto-detect delimiter
     this.delimiter = this.detectDelimiter(content);
-    
+
     // Parse CSV content
     const lines = content.trim().split('\n');
     if (lines.length === 0) {
@@ -57,13 +52,13 @@ export class CSVTranslationStrategy extends BaseTranslationStrategy {
 
     // Extract headers
     this.headers = this.parseCSVLine(lines[0]);
-    
+
     // Parse rows
-    this.rows = lines.slice(1).map(line => this.parseCSVLine(line));
-    
+    this.rows = lines.slice(1).map((line) => this.parseCSVLine(line));
+
     // Auto-detect translatable columns based on content
     this.translatableColumns = this.detectTranslatableColumns(this.headers, this.rows);
-    
+
     // Extract translatable content
     this.rows.forEach((row, rowIndex) => {
       this.headers.forEach((header, colIndex) => {
@@ -83,23 +78,20 @@ export class CSVTranslationStrategy extends BaseTranslationStrategy {
         delimiter: this.delimiter,
         headers: this.headers,
         translatableColumns: Array.from(this.translatableColumns),
-        rows: this.rows
-      }
+        rows: this.rows,
+      },
     };
   }
 
-  protected async reconstruct(
-    translations: Map<string, string>,
-    metadata: any
-  ): Promise<string> {
+  protected async reconstruct(translations: Map<string, string>, metadata: any): Promise<string> {
     const { delimiter, headers, rows } = metadata;
-    
+
     // Build CSV output
     const lines: string[] = [];
-    
+
     // Add header row
     lines.push(this.formatCSVLine(headers, delimiter));
-    
+
     // Add data rows with translations
     rows.forEach((row: string[], rowIndex: number) => {
       const translatedRow = row.map((value, colIndex) => {
@@ -116,26 +108,24 @@ export class CSVTranslationStrategy extends BaseTranslationStrategy {
     // Common delimiters to check
     const delimiters = [',', ';', '\t', '|'];
     const firstLine = content.split('\n')[0];
-    
+
     if (!firstLine) return ',';
-    
+
     // Count occurrences of each delimiter
-    const counts = delimiters.map(delim => ({
+    const counts = delimiters.map((delim) => ({
       delimiter: delim,
-      count: (firstLine.match(new RegExp(`\\${delim}`, 'g')) || []).length
+      count: (firstLine.match(new RegExp(`\\${delim}`, 'g')) || []).length,
     }));
-    
+
     // Return the delimiter with the highest count
-    const best = counts.reduce((prev, curr) => 
-      curr.count > prev.count ? curr : prev
-    );
-    
+    const best = counts.reduce((prev, curr) => (curr.count > prev.count ? curr : prev));
+
     return best.count > 0 ? best.delimiter : ',';
   }
 
   private detectTranslatableColumns(headers: string[], rows: string[][]): Set<string> {
     const translatable = new Set<string>();
-    
+
     headers.forEach((header, index) => {
       // Skip columns that look like IDs, codes, or technical fields
       const headerLower = header.toLowerCase();
@@ -157,10 +147,11 @@ export class CSVTranslationStrategy extends BaseTranslationStrategy {
       }
 
       // Check if column contains translatable content
-      const samples = rows.slice(0, 10).map(row => row[index]).filter(Boolean);
-      const hasTranslatableContent = samples.some(sample => 
-        this.isTranslatableString(sample)
-      );
+      const samples = rows
+        .slice(0, 10)
+        .map((row) => row[index])
+        .filter(Boolean);
+      const hasTranslatableContent = samples.some((sample) => this.isTranslatableString(sample));
 
       if (hasTranslatableContent) {
         translatable.add(header);
@@ -168,9 +159,19 @@ export class CSVTranslationStrategy extends BaseTranslationStrategy {
     });
 
     // Always include common content columns
-    const contentColumns = ['title', 'name', 'description', 'content', 'text', 'message', 'label', 'category', 'tags'];
-    headers.forEach(header => {
-      if (contentColumns.some(col => header.toLowerCase().includes(col))) {
+    const contentColumns = [
+      'title',
+      'name',
+      'description',
+      'content',
+      'text',
+      'message',
+      'label',
+      'category',
+      'tags',
+    ];
+    headers.forEach((header) => {
+      if (contentColumns.some((col) => header.toLowerCase().includes(col))) {
         translatable.add(header);
       }
     });
@@ -182,11 +183,11 @@ export class CSVTranslationStrategy extends BaseTranslationStrategy {
     const result: string[] = [];
     let current = '';
     let inQuotes = false;
-    
+
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
       const nextChar = line[i + 1];
-      
+
       if (char === '"') {
         if (inQuotes && nextChar === '"') {
           // Escaped quote
@@ -204,27 +205,29 @@ export class CSVTranslationStrategy extends BaseTranslationStrategy {
         current += char;
       }
     }
-    
+
     // Don't forget the last field
     result.push(current.trim());
-    
+
     return result;
   }
 
   private formatCSVLine(values: string[], delimiter: string = this.delimiter): string {
-    return values.map(value => {
-      // Quote values that contain delimiter, quotes, or newlines
-      if (
-        value.includes(delimiter) ||
-        value.includes('"') ||
-        value.includes('\n') ||
-        value.includes('\r')
-      ) {
-        // Escape quotes by doubling them
-        const escaped = value.replace(/"/g, '""');
-        return `"${escaped}"`;
-      }
-      return value;
-    }).join(delimiter);
+    return values
+      .map((value) => {
+        // Quote values that contain delimiter, quotes, or newlines
+        if (
+          value.includes(delimiter) ||
+          value.includes('"') ||
+          value.includes('\n') ||
+          value.includes('\r')
+        ) {
+          // Escape quotes by doubling them
+          const escaped = value.replace(/"/g, '""');
+          return `"${escaped}"`;
+        }
+        return value;
+      })
+      .join(delimiter);
   }
 }

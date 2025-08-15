@@ -2,8 +2,8 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { glob } from 'glob';
-import { createAiClient, translateText } from '@/ai/translate';
 import { getEffectiveProviderAndModel } from '@/ai/defaults';
+import { createAiClient, translateText } from '@/ai/translate';
 import { translateFile as coreTranslateFile } from '@/core/translate-file';
 import { getFileStrategy } from '@/parsers';
 import type { Config } from '@/utils/config';
@@ -81,14 +81,11 @@ export class Idioma {
 
       if (format === 'string') {
         // Direct text translation with smart defaults
-        const { provider, model } = getEffectiveProviderAndModel(this.config.provider, this.config.model);
-        const result = await translateText(
-          content,
-          sourceLocale,
-          targetLocale,
-          provider,
-          model
+        const { provider, model } = getEffectiveProviderAndModel(
+          this.config.provider,
+          this.config.model
         );
+        const result = await translateText(content, sourceLocale, targetLocale, provider, model);
         translatedContent = result.text;
         usage = result.usage;
       } else {
@@ -99,7 +96,10 @@ export class Idioma {
         }
 
         // Create AI client for the strategy with smart defaults
-        const { provider, model } = getEffectiveProviderAndModel(this.config.provider, this.config.model);
+        const { provider, model } = getEffectiveProviderAndModel(
+          this.config.provider,
+          this.config.model
+        );
         const aiClient = createAiClient(provider, this.apiKey);
 
         const result = await strategy.translate(
@@ -119,7 +119,10 @@ export class Idioma {
 
       if (trackCosts && usage) {
         response.usage = usage;
-        const { provider, model } = getEffectiveProviderAndModel(this.config.provider, this.config.model);
+        const { provider, model } = getEffectiveProviderAndModel(
+          this.config.provider,
+          this.config.model
+        );
         response.cost = calculateCost(usage, provider, model);
       }
 
@@ -212,8 +215,14 @@ export class Idioma {
           usage: result.usage,
           cost: result.usage
             ? (() => {
-                const { provider, model } = getEffectiveProviderAndModel(this.config.provider, this.config.model);
-                return calculateCost(result.usage!, provider, model);
+                const { provider, model } = getEffectiveProviderAndModel(
+                  this.config.provider,
+                  this.config.model
+                );
+                if (!result.usage) {
+                  throw new Error('Usage data is required for cost calculation');
+                }
+                return calculateCost(result.usage, provider, model);
               })()
             : undefined,
         };
@@ -280,7 +289,10 @@ export class Idioma {
       const totalUsage = allUsages.length > 0 ? aggregateUsage(allUsages) : undefined;
       const totalCost = totalUsage
         ? (() => {
-            const { provider, model } = getEffectiveProviderAndModel(this.config.provider, this.config.model);
+            const { provider, model } = getEffectiveProviderAndModel(
+              this.config.provider,
+              this.config.model
+            );
             return calculateCost(totalUsage, provider, model);
           })()
         : undefined;
@@ -327,7 +339,10 @@ export class Idioma {
         totalTokens: estimatedTokens,
       };
 
-      const { provider, model } = getEffectiveProviderAndModel(this.config.provider, this.config.model);
+      const { provider, model } = getEffectiveProviderAndModel(
+        this.config.provider,
+        this.config.model
+      );
       const cost = calculateCost(usage, provider, model);
 
       const breakdown = targetLocales.map((locale) => ({
@@ -357,9 +372,10 @@ export class Idioma {
     // Update API key if provided
     if (config.apiKey) {
       this.apiKey = config.apiKey;
-      const envKey = (config.provider || this.config.provider) === 'openai' 
-        ? 'OPENAI_API_KEY' 
-        : 'ANTHROPIC_API_KEY';
+      const envKey =
+        (config.provider || this.config.provider) === 'openai'
+          ? 'OPENAI_API_KEY'
+          : 'ANTHROPIC_API_KEY';
       process.env[envKey] = config.apiKey;
     }
   }

@@ -1,4 +1,3 @@
-import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { glob } from 'glob';
@@ -11,11 +10,7 @@ import {
   saveConfig,
   saveLock,
 } from 'idioma-sdk';
-import {
-  startBackgroundTranslation,
-  getTranslationStatus,
-  stopBackgroundTranslation,
-} from './background';
+import { getTranslationStatus, stopBackgroundTranslation } from './background';
 
 // Init command - create config file
 export async function initCommand(): Promise<void> {
@@ -236,24 +231,24 @@ export async function resetCommand(): Promise<void> {
   }
 }
 
-
 // Display translation status (shared helper)
 function displayStatus(status: any): void {
-  const percentage = status.totalFiles > 0 
-    ? Math.round((status.processedFiles / status.totalFiles) * 100)
-    : 0;
-  
+  const percentage =
+    status.totalFiles > 0 ? Math.round((status.processedFiles / status.totalFiles) * 100) : 0;
+
   console.log('\n📊 Translation Status');
   console.log('─'.repeat(40));
-  console.log(`Status: ${status.status === 'running' ? '🔄' : status.status === 'completed' ? '✅' : '❌'} ${status.status}`);
+  console.log(
+    `Status: ${status.status === 'running' ? '🔄' : status.status === 'completed' ? '✅' : '❌'} ${status.status}`
+  );
   console.log(`Progress: ${status.processedFiles}/${status.totalFiles} files (${percentage}%)`);
-  
+
   if (status.currentFile) {
     console.log(`Current file: ${status.currentFile}`);
   }
-  
+
   console.log(`Started: ${new Date(status.startTime).toLocaleString()}`);
-  
+
   if (status.endTime) {
     console.log(`Ended: ${new Date(status.endTime).toLocaleString()}`);
     const duration = new Date(status.endTime).getTime() - new Date(status.startTime).getTime();
@@ -261,14 +256,14 @@ function displayStatus(status: any): void {
     const seconds = Math.floor((duration % 60000) / 1000);
     console.log(`Duration: ${minutes}m ${seconds}s`);
   }
-  
+
   if (status.errors.length > 0) {
     console.log(`\n⚠️  Errors (${status.errors.length}):`);
-    status.errors.slice(-5).forEach(error => {
+    status.errors.slice(-5).forEach((error) => {
       console.log(`  - ${error}`);
     });
   }
-  
+
   if (status.pid && status.status === 'running') {
     console.log(`\nProcess ID: ${status.pid}`);
     console.log('To stop: idioma stop');
@@ -281,17 +276,17 @@ export async function statusCommand(options: { tail?: boolean } = {}): Promise<v
     // Real-time status updates
     console.log('📡 Real-time translation status (Press Ctrl+C to exit)');
     console.log('═'.repeat(50));
-    
+
     let lastStatus: any = null;
-    
+
     const updateDisplay = async () => {
       const status = await getTranslationStatus();
-      
+
       if (!status) {
         console.log('\n❌ No background translation is currently running.');
         process.exit(0);
       }
-      
+
       // Only update display if status changed
       const statusStr = JSON.stringify(status);
       if (statusStr !== lastStatus) {
@@ -300,39 +295,38 @@ export async function statusCommand(options: { tail?: boolean } = {}): Promise<v
         console.log('📡 Real-time translation status (Press Ctrl+C to exit)');
         console.log('═'.repeat(50));
         displayStatus(status);
-        
+
         // Exit if translation completed or failed
         if (status.status !== 'running') {
           console.log('\n🎯 Translation finished!');
           process.exit(0);
         }
-        
+
         lastStatus = statusStr;
       }
     };
-    
+
     // Initial display
     await updateDisplay();
-    
+
     // Update every 2 seconds
     const interval = setInterval(updateDisplay, 2000);
-    
+
     // Handle Ctrl+C gracefully
     process.on('SIGINT', () => {
       clearInterval(interval);
       console.log('\n\n👋 Exiting real-time status...');
       process.exit(0);
     });
-    
   } else {
     // Single status check
     const status = await getTranslationStatus();
-    
+
     if (!status) {
       console.log('No background translation is currently running.');
       return;
     }
-    
+
     displayStatus(status);
   }
 }

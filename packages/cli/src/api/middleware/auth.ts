@@ -2,8 +2,12 @@ import { Unkey } from '@unkey/api';
 import type { Context, Next } from 'hono';
 
 // Initialize Unkey client
+const rootKey = process.env.UNKEY_ROOT_KEY;
+if (!rootKey) {
+  throw new Error('UNKEY_ROOT_KEY environment variable is required');
+}
 const unkey = new Unkey({
-  rootKey: process.env.UNKEY_ROOT_KEY!,
+  rootKey,
 });
 
 export interface AuthContext {
@@ -64,8 +68,18 @@ export async function unkeyAuth(c: Context, next: Next) {
     }
 
     // Add auth context to request
+    if (!result.keyId) {
+      return c.json(
+        {
+          success: false,
+          error: 'API key verification failed - no key ID returned',
+        },
+        500
+      );
+    }
+
     const authContext: AuthContext = {
-      apiKey: result.keyId!,
+      apiKey: result.keyId,
       ownerId: result.ownerId,
       meta: result.meta,
     };

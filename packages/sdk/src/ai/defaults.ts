@@ -12,7 +12,7 @@ export interface SmartDefaults {
  * Get smart defaults for provider and model based on available API keys
  * Priority:
  * 1. If both OPENAI_API_KEY and ANTHROPIC_API_KEY exist -> anthropic (more capable)
- * 2. If only OPENAI_API_KEY -> openai 
+ * 2. If only OPENAI_API_KEY -> openai
  * 3. If only ANTHROPIC_API_KEY -> anthropic
  * 4. If neither -> anthropic (user will get error when they try to use it)
  */
@@ -24,19 +24,19 @@ export function getSmartDefaults(): SmartDefaults {
     // Prefer Anthropic if available (more capable models)
     return {
       provider: 'anthropic',
-      model: 'claude-3-5-sonnet-20240620'
+      model: 'claude-3-5-sonnet-20240620',
     };
   } else if (hasOpenAI) {
     // Use OpenAI if only OpenAI key is available
     return {
-      provider: 'openai', 
-      model: 'gpt-4o'  // Using gpt-4o instead of gpt-5 as it's more available
+      provider: 'openai',
+      model: 'gpt-4o', // Using gpt-4o instead of gpt-5 as it's more available
     };
   } else {
     // Default to Anthropic (user will need to set API key)
     return {
       provider: 'anthropic',
-      model: 'claude-3-5-sonnet-20240620'
+      model: 'claude-3-5-sonnet-20240620',
     };
   }
 }
@@ -77,9 +77,9 @@ export function getEffectiveProviderAndModel(
   configModel?: string
 ): SmartDefaults {
   const smartDefaults = getSmartDefaults();
-  
+
   const provider = configProvider || smartDefaults.provider;
   const model = configModel || getDefaultModelForProvider(provider);
-  
+
   return { provider, model };
 }

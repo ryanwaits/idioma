@@ -12,48 +12,62 @@ export const ConfigSchema: z.ZodSchema = z.object({
   files: z.union([
     z.array(z.string()),
     z.object({
-      include: z.array(z.union([
-        z.string(),
-        z.object({
-          source: z.string(),
-          target: z.string()
-        })
-      ])),
+      include: z.array(
+        z.union([
+          z.string(),
+          z.object({
+            source: z.string(),
+            target: z.string(),
+          }),
+        ])
+      ),
       exclude: z.array(z.string()).optional(),
 
-      mdx: z.object({
-        skipAttributes: z.object({
-          jsx: z.array(z.string()).optional(),
-          frontmatter: z.array(z.string()).optional(),
-        }).optional(),
-        skipTags: z.array(z.string()).optional(),
-      }).optional(),
+      mdx: z
+        .object({
+          skipAttributes: z
+            .object({
+              jsx: z.array(z.string()).optional(),
+              frontmatter: z.array(z.string()).optional(),
+            })
+            .optional(),
+          skipTags: z.array(z.string()).optional(),
+        })
+        .optional(),
 
-      json: z.object({
-        skipPaths: z.array(z.string()).optional(),
-        skipKeys: z.array(z.string()).optional(),
-        skipEmptyStrings: z.boolean().optional(),
-      }).optional(),
+      json: z
+        .object({
+          skipPaths: z.array(z.string()).optional(),
+          skipKeys: z.array(z.string()).optional(),
+          skipEmptyStrings: z.boolean().optional(),
+        })
+        .optional(),
 
-      yaml: z.object({
-        skipPaths: z.array(z.string()).optional(),
-        skipKeys: z.array(z.string()).optional(),
-        skipEmptyStrings: z.boolean().optional(),
-        preserveComments: z.boolean().optional(),
-      }).optional(),
+      yaml: z
+        .object({
+          skipPaths: z.array(z.string()).optional(),
+          skipKeys: z.array(z.string()).optional(),
+          skipEmptyStrings: z.boolean().optional(),
+          preserveComments: z.boolean().optional(),
+        })
+        .optional(),
 
-      html: z.object({
-        skipAttributes: z.array(z.string()).optional(),
-        skipTags: z.array(z.string()).optional(),
-        preserveWhitespace: z.boolean().optional(),
-      }).optional(),
+      html: z
+        .object({
+          skipAttributes: z.array(z.string()).optional(),
+          skipTags: z.array(z.string()).optional(),
+          preserveWhitespace: z.boolean().optional(),
+        })
+        .optional(),
 
-      xml: z.object({
-        skipAttributes: z.array(z.string()).optional(),
-        skipTags: z.array(z.string()).optional(),
-        preserveCDATA: z.boolean().optional(),
-        preserveNamespaces: z.boolean().optional(),
-      }).optional(),
+      xml: z
+        .object({
+          skipAttributes: z.array(z.string()).optional(),
+          skipTags: z.array(z.string()).optional(),
+          preserveCDATA: z.boolean().optional(),
+          preserveNamespaces: z.boolean().optional(),
+        })
+        .optional(),
     }),
   ]),
   preserve: z.array(z.string()).optional(),
@@ -88,9 +102,6 @@ export function mergeConfig(base: Config, overrides: Partial<Config>): Config {
       ...(base?.files || {}),
       ...(overrides.files || {}),
     },
-    preserve: [
-      ...(base?.preserve || []),
-      ...(overrides.preserve || []),
-    ],
+    preserve: [...(base?.preserve || []), ...(overrides.preserve || [])],
   };
 }

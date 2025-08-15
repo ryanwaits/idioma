@@ -8,16 +8,14 @@ export interface PreserveRule {
  * Parse preserve configuration into structured rules
  */
 export function parsePreserveRules(preserve: string[] = []): PreserveRule[] {
-  return preserve.map(rule => {
+  return preserve.map((rule) => {
     // Auto-detect if it's a regex pattern
     const isRegex = rule.startsWith('/') || /[\^$.*+?()[\]{}|\\]/.test(rule);
-    
+
     if (isRegex) {
       // Remove leading/trailing slashes if present
-      const pattern = rule.startsWith('/') && rule.endsWith('/') 
-        ? rule.slice(1, -1) 
-        : rule;
-      
+      const pattern = rule.startsWith('/') && rule.endsWith('/') ? rule.slice(1, -1) : rule;
+
       return {
         type: 'pattern' as const,
         value: new RegExp(pattern, 'i'), // Case insensitive by default
@@ -39,8 +37,8 @@ export function parsePreserveRules(preserve: string[] = []): PreserveRule[] {
 export function shouldSkipNode(text: string, rules: PreserveRule[]): boolean {
   const trimmedText = text.trim();
   if (!trimmedText) return false;
-  
-  return rules.some(rule => {
+
+  return rules.some((rule) => {
     if (rule.type === 'pattern') {
       return (rule.value as RegExp).test(trimmedText);
     }
@@ -54,18 +52,14 @@ export function shouldSkipNode(text: string, rules: PreserveRule[]): boolean {
  * (not including patterns, which are for node skipping)
  */
 export function getPreservedTerms(rules: PreserveRule[]): string[] {
-  return rules
-    .filter(rule => rule.type === 'term')
-    .map(rule => rule.value as string);
+  return rules.filter((rule) => rule.type === 'term').map((rule) => rule.value as string);
 }
 
 /**
  * Get pattern rules for node skipping
  */
 export function getPatternRules(rules: PreserveRule[]): RegExp[] {
-  return rules
-    .filter(rule => rule.type === 'pattern')
-    .map(rule => rule.value as RegExp);
+  return rules.filter((rule) => rule.type === 'pattern').map((rule) => rule.value as RegExp);
 }
 
 /**
@@ -74,23 +68,23 @@ export function getPatternRules(rules: PreserveRule[]): RegExp[] {
  */
 const SMART_PRESERVE_PATTERNS = [
   // API endpoints and HTTP methods in headers
-  /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\s+\//i,  // "POST /api/translate"
-  /^\/api\/[\w\-\/]+$/,                               // "/api/anything" (full path only)
-  /^\/v\d+\/[\w\-\/]+$/,                              // "/v1/users" (full versioned path only)
-  
+  /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\s+\//i, // "POST /api/translate"
+  /^\/api\/[\w\-/]+$/, // "/api/anything" (full path only)
+  /^\/v\d+\/[\w\-/]+$/, // "/v1/users" (full versioned path only)
+
   // Common technical patterns (more specific)
-  /^\/[\w\-\.\/]+$/,                                  // Unix-style paths (full line only)
-  /localhost:\d+/,                                     // localhost:3000
-  
+  /^\/[\w\-./]+$/, // Unix-style paths (full line only)
+  /localhost:\d+/, // localhost:3000
+
   // Technical identifiers (more specific)
-  /\b[A-Z][A-Z0-9_]{2,}[A-Z0-9]\b/,                  // CONSTANT_CASE (3+ chars)
-  /process\.env\.[A-Z_]+/,                            // process.env.VAR (uppercase only)
-  /\$\{[\w\.]+\}/,                                    // ${variable} (stricter)
-  
+  /\b[A-Z][A-Z0-9_]{2,}[A-Z0-9]\b/, // CONSTANT_CASE (3+ chars)
+  /process\.env\.[A-Z_]+/, // process.env.VAR (uppercase only)
+  /\$\{[\w.]+\}/, // ${variable} (stricter)
+
   // Code-like patterns (more specific)
-  /^\w+\(\)$/,                                        // function() (full line only)
-  /^\w+\[\]$/,                                        // array[] (full line only)
-  /^@[\w\/\-]+$/,                                     // @imports/scoped-packages (full line only)
+  /^\w+\(\)$/, // function() (full line only)
+  /^\w+\[\]$/, // array[] (full line only)
+  /^@[\w/-]+$/, // @imports/scoped-packages (full line only)
 ];
 
 /**
@@ -98,7 +92,7 @@ const SMART_PRESERVE_PATTERNS = [
  */
 export function hasSmartPreservePattern(text: string): boolean {
   const trimmed = text.trim();
-  return SMART_PRESERVE_PATTERNS.some(pattern => pattern.test(trimmed));
+  return SMART_PRESERVE_PATTERNS.some((pattern) => pattern.test(trimmed));
 }
 
 /**
@@ -106,6 +100,6 @@ export function hasSmartPreservePattern(text: string): boolean {
  */
 export function formatPreservedTermsForPrompt(terms: string[]): string {
   if (terms.length === 0) return '';
-  
+
   return `NEVER translate these terms - keep them EXACTLY as written: ${terms.join(', ')}`;
 }

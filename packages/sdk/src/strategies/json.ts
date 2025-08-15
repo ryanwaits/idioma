@@ -1,4 +1,9 @@
-import { BaseTranslationStrategy, type ParseResult, type TranslatableNode, type ValidationResult } from './base';
+import {
+  BaseTranslationStrategy,
+  type ParseResult,
+  type TranslatableNode,
+  type ValidationResult,
+} from './base';
 
 export interface JsonConfig {
   includePaths?: string[];
@@ -18,7 +23,7 @@ export class JsonStrategy extends BaseTranslationStrategy {
   canHandle(filePath: string): boolean {
     return filePath.endsWith('.json');
   }
-  
+
   getName(): string {
     return 'JSON';
   }
@@ -27,25 +32,27 @@ export class JsonStrategy extends BaseTranslationStrategy {
     try {
       const data = JSON.parse(content);
       const translatableContent = new Map<string, TranslatableNode>();
-      
+
       // Detect formatting style for preservation
       const hasNewlines = content.includes('\n');
       const indentMatch = content.match(/^\s+"/m);
       const indentSize = indentMatch ? indentMatch[0].length - 1 : 2;
-      
+
       this.extractStrings(data, translatableContent);
-      
+
       return {
         translatableContent,
         metadata: {
           structure: data,
           originalContent: content,
           hasNewlines,
-          indentSize
-        }
+          indentSize,
+        },
       };
     } catch (error) {
-      throw new Error(`Failed to parse JSON: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to parse JSON: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -62,7 +69,7 @@ export class JsonStrategy extends BaseTranslationStrategy {
 
     for (const [key, value] of Object.entries(obj)) {
       const currentPath = [...path, key];
-      
+
       if (typeof value === 'string') {
         // Skip empty strings if configured
         if (this.config.skipEmptyStrings && !value.trim()) {
@@ -82,7 +89,7 @@ export class JsonStrategy extends BaseTranslationStrategy {
             context: path[path.length - 1] || 'root',
             depth,
             siblings: Object.keys(obj),
-            isArrayItem: false
+            isArrayItem: false,
           });
         }
       } else if (Array.isArray(value)) {
@@ -96,7 +103,7 @@ export class JsonStrategy extends BaseTranslationStrategy {
                   context: key,
                   depth,
                   isArrayItem: true,
-                  arrayIndex: index
+                  arrayIndex: index,
                 });
               }
             }
@@ -119,7 +126,7 @@ export class JsonStrategy extends BaseTranslationStrategy {
     // Check excludePaths
     if (this.config.excludePaths) {
       for (const excludePath of this.config.excludePaths) {
-        if (path === excludePath || path.startsWith(excludePath + '.')) {
+        if (path === excludePath || path.startsWith(`${excludePath}.`)) {
           return true;
         }
       }
@@ -129,7 +136,7 @@ export class JsonStrategy extends BaseTranslationStrategy {
     if (this.config.includePaths && this.config.includePaths.length > 0) {
       let included = false;
       for (const includePath of this.config.includePaths) {
-        if (path === includePath || path.startsWith(includePath + '.')) {
+        if (path === includePath || path.startsWith(`${includePath}.`)) {
           included = true;
           break;
         }
@@ -142,12 +149,12 @@ export class JsonStrategy extends BaseTranslationStrategy {
 
   async reconstruct(translations: Map<string, string>, metadata: any): Promise<string> {
     const result = JSON.parse(JSON.stringify(metadata.structure));
-    
+
     for (const [path, translation] of translations) {
-      const segments = path.split(/\.|\[|\]/).filter(s => s);
+      const segments = path.split(/\.|\[|\]/).filter((s) => s);
       this.setValueByPath(result, segments, translation);
     }
-    
+
     // Preserve original formatting style
     if (metadata.hasNewlines) {
       return JSON.stringify(result, null, metadata.indentSize || 2);
@@ -162,11 +169,13 @@ export class JsonStrategy extends BaseTranslationStrategy {
     } catch (error) {
       return {
         valid: false,
-        errors: [{
-          line: this.extractLineNumber(error),
-          column: this.extractColumnNumber(error),
-          message: error instanceof Error ? error.message : 'Invalid JSON'
-        }]
+        errors: [
+          {
+            line: this.extractLineNumber(error),
+            column: this.extractColumnNumber(error),
+            message: error instanceof Error ? error.message : 'Invalid JSON',
+          },
+        ],
       };
     }
   }

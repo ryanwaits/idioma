@@ -1,11 +1,11 @@
-import * as path from 'path';
+import * as path from 'node:path';
 
 /**
  * Detect file format from file extension
  */
 export function detectFormat(filePath: string): string | null {
   const ext = path.extname(filePath).toLowerCase();
-  
+
   switch (ext) {
     case '.mdx':
     case '.md':
@@ -37,7 +37,7 @@ export function detectFormat(filePath: string): string | null {
  */
 export function groupFilesByFormat(filePaths: string[]): Record<string, string[]> {
   const grouped: Record<string, string[]> = {};
-  
+
   for (const filePath of filePaths) {
     const format = detectFormat(filePath);
     if (format) {
@@ -47,7 +47,7 @@ export function groupFilesByFormat(filePaths: string[]): Record<string, string[]
       grouped[format].push(filePath);
     }
   }
-  
+
   return grouped;
 }
 
@@ -60,17 +60,17 @@ export function expandFilesConfig(filesConfig: any): Record<string, any> {
   if (!filesConfig.include || typeof filesConfig.include[0] !== 'string') {
     return filesConfig;
   }
-  
+
   // It's a flat include array - expand it by format
   const expanded: Record<string, any> = {};
   const byFormat = groupFilesByFormat(filesConfig.include);
-  
+
   for (const [format, patterns] of Object.entries(byFormat)) {
     expanded[format] = {
       include: patterns,
-      exclude: filesConfig.exclude
+      exclude: filesConfig.exclude,
     };
   }
-  
+
   return expanded;
 }

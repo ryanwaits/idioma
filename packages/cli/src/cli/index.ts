@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
+import { readFileSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 import { startBackgroundTranslation } from './background';
 import {
   initCommand,
@@ -12,9 +15,14 @@ import {
   translateCommand,
 } from './commands';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJsonPath = join(__dirname, '../../package.json');
+const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+
 const program = new Command();
 
-program.name('idioma').description('Internationalization engine').version('0.0.11');
+program.name('idioma').description('Internationalization engine').version(packageJson.version);
 
 // Init command
 program.command('init').description('Initialize Idioma configuration').action(initCommand);

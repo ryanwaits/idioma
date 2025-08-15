@@ -1,6 +1,6 @@
+import * as path from 'node:path';
 import { glob } from 'glob';
 import { minimatch } from 'minimatch';
-import * as path from 'path';
 import {
   aggregateUsage,
   type Config,
