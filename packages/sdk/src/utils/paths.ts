@@ -40,8 +40,10 @@ export function generateOutputPath(
         ? sourcePath.slice(basePath.length).replace(/^\//, '')
         : sourcePath;
 
-    // Combine custom target with locale and relative path
-    return `${customTarget}/${targetLocale}/${relativePath}`;
+    // For object notation, use literal path replacement in custom target
+    // Replace [locale] placeholder in target with actual target locale
+    const processedTarget = customTarget.replace(/\[locale\]/g, targetLocale);
+    return `${processedTarget}/${relativePath}`;
   }
 
   // Default behavior: locale replacement in path

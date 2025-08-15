@@ -1,6 +1,6 @@
 {
   "name": "idioma-sdk",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Idioma SDK for programmatic AI-powered translations",
   "type": "module",
   "main": "dist/index.js",

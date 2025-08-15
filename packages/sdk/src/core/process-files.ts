@@ -120,7 +120,7 @@ export async function processFiles(
     for (const pattern of includePatterns) {
       const isPatternObject = typeof pattern === 'object' && 'source' in pattern;
       const sourcePattern = isPatternObject
-        ? pattern.source.replace(/\[locale\]/g, sourceLocale)
+        ? pattern.source
         : pattern.replace(/\[locale\]/g, sourceLocale);
       const customTarget = isPatternObject ? pattern.target : undefined;
 
