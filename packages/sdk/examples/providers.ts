@@ -23,8 +23,8 @@ async function main() {
 
   console.log('Original:', 'Artificial intelligence is transforming the world');
   console.log('Spanish:', anthropicResult.translatedContent);
-  console.log('Provider:', anthropicSDK.getConfig().translation.provider);
-  console.log('Model:', anthropicSDK.getConfig().translation.model || 'default');
+  console.log('Provider:', anthropicSDK.getConfig().provider);
+  console.log('Model:', anthropicSDK.getConfig().model || 'default');
   if (anthropicResult.cost) {
     console.log('Cost:', anthropicResult.cost.formattedCost);
     console.log('Tokens:', anthropicResult.usage?.totalTokens);
@@ -52,8 +52,8 @@ async function main() {
 
     console.log('Original:', 'Machine learning models are becoming more sophisticated');
     console.log('French:', openaiResult.translatedContent);
-    console.log('Provider:', openaiSDK.getConfig().translation.provider);
-    console.log('Model:', openaiSDK.getConfig().translation.model);
+    console.log('Provider:', openaiSDK.getConfig().provider);
+    console.log('Model:', openaiSDK.getConfig().model);
     if (openaiResult.cost) {
       console.log('Cost:', openaiResult.cost.formattedCost);
       console.log('Tokens:', openaiResult.usage?.totalTokens);
@@ -70,7 +70,7 @@ async function main() {
     provider: 'anthropic',
   });
 
-  console.log('Initial provider:', sdk.getConfig().translation.provider);
+  console.log('Initial provider:', sdk.getConfig().provider);
 
   // Update to use OpenAI GPT-4o-mini for cost savings
   sdk.updateConfig({
@@ -78,8 +78,8 @@ async function main() {
     model: 'gpt-4o-mini',
   });
 
-  console.log('Updated provider:', sdk.getConfig().translation.provider);
-  console.log('Updated model:', sdk.getConfig().translation.model);
+  console.log('Updated provider:', sdk.getConfig().provider);
+  console.log('Updated model:', sdk.getConfig().model);
 
   // Example 4: Display pricing information
   console.log('\n\nExample 4: Pricing Information');

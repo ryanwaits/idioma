@@ -2,6 +2,7 @@ import { translateText } from '../ai/translate';
 import type { Config } from '../utils/config';
 import { getEffectiveFileConfig } from '../utils/config-normalizer';
 import { aggregateUsage, type TokenUsage } from '../utils/cost';
+import { parsePreserveRules, getPreservedTerms } from '../utils/preserve';
 
 export interface FrontmatterTranslationResult {
   content: string;
@@ -20,7 +21,12 @@ export async function translateFrontmatter(
 ): Promise<FrontmatterTranslationResult> {
   // Get effective config with smart defaults
   const effectiveConfig = getEffectiveFileConfig(config, 'mdx');
-  const translatableFields = effectiveConfig.frontmatterFields || [];
+  const skipFrontmatterFields = effectiveConfig.skipAttributes?.frontmatter || [];
+  
+  // Parse preserve rules
+  const preserveRules = parsePreserveRules(config.preserve || []);
+  const preservedTerms = getPreservedTerms(preserveRules);
+  
   const lines = frontmatter.split('\n');
   const usages: TokenUsage[] = [];
 
@@ -31,8 +37,8 @@ export async function translateFrontmatter(
     const match = line.match(/^(\s*)([\w-]+):\s*(.+)$/);
     if (match) {
       const [, indent, key, value] = match;
-      // Only translate if the key is in the translatable fields list
-      if (!translatableFields.includes(key!)) {
+      // Skip if the key is in the skip fields list
+      if (skipFrontmatterFields.includes(key!)) {
         translatedLines.push(line);
         continue;
       }
@@ -40,7 +46,7 @@ export async function translateFrontmatter(
         translatedLines.push(line);
         continue;
       }
-      const result = await translateText(value!, source, target, aiClient, model, provider);
+      const result = await translateText(value!, source, target, aiClient, model, provider, preservedTerms);
       usages.push(result.usage);
       
       // Escape the translated text if it contains colons or special YAML characters

@@ -3,6 +3,9 @@ export * from './errors';
 export { Idioma } from './Idioma';
 export * from './types';
 
+// AI exports
+export { getSmartDefaults, getEffectiveProviderAndModel, hasApiKeyForProvider } from './ai/defaults';
+
 // Utility exports
 export type { CostCalculation, TokenUsage } from './utils/cost';
 export { PRICING, calculateCost, aggregateUsage, formatCost, formatTokenCount } from './utils/cost';

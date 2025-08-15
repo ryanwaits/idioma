@@ -1,6 +1,0 @@
-service_code	service_name	description	duration	price_usd
-SRV-001	Website Development	"Full-stack web development with modern frameworks, includes design and deployment"	3 months	15000.00
-SRV-002	Mobile App Design	"UI/UX design for iOS and Android applications, including prototypes"	6 weeks	8500.00
-SRV-003	Digital Marketing	"Comprehensive digital marketing strategy including SEO, social media, and content"	ongoing	3000.00
-SRV-004	Cloud Migration	"Migrate existing infrastructure to cloud platforms (AWS, Azure, or GCP)"	2 months	12000.00
-SRV-005	Data Analytics	"Business intelligence and data analytics setup with custom dashboards"	1 month	7500.00

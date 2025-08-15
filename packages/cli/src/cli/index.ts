@@ -58,6 +58,7 @@ program
 program
   .command('status')
   .description('Check the status of a background translation')
+  .option('--tail', 'Show real-time status updates')
   .action(statusCommand);
 
 // Stop command - stop background translation

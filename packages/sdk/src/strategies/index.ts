@@ -4,24 +4,31 @@
  * for cleaner imports and better developer experience
  */
 
-import { JsonStrategy } from './json';
-import { YamlStrategy } from './yaml';
-import { MdxStrategy } from './mdx';
-import { HtmlStrategy } from './html';
-import { XmlStrategy } from './xml';
-import { CSVTranslationStrategy } from './csv';
 import type { BaseTranslationStrategy } from './base';
+import { CSVTranslationStrategy } from './csv';
+import { HtmlStrategy } from './html';
+import { JavaScriptStrategy } from './javascript';
+import { JsonStrategy } from './json';
+import { MdxStrategy } from './mdx';
+import { XmlStrategy } from './xml';
+import { YamlStrategy } from './yaml';
 
 // Export base class and types for extending
-export { BaseTranslationStrategy, type TranslationResult, type ParseResult, type TranslatableNode, type ValidationResult } from './base';
-
+export {
+  BaseTranslationStrategy,
+  type ParseResult,
+  type TranslatableNode,
+  type TranslationResult,
+  type ValidationResult,
+} from './base';
+export { CSVTranslationStrategy } from './csv';
+export { HtmlStrategy } from './html';
+export { JavaScriptStrategy } from './javascript';
 // Export individual strategies
 export { JsonStrategy } from './json';
-export { YamlStrategy } from './yaml';
 export { MdxStrategy } from './mdx';
-export { HtmlStrategy } from './html';
 export { XmlStrategy } from './xml';
-export { CSVTranslationStrategy } from './csv';
+export { YamlStrategy } from './yaml';
 
 // Strategy registry - all strategies in one place
 export const strategies: BaseTranslationStrategy[] = [
@@ -31,8 +38,7 @@ export const strategies: BaseTranslationStrategy[] = [
   new HtmlStrategy(),
   new XmlStrategy(),
   new CSVTranslationStrategy(),
-  // Future strategies:
-  // new JavaScriptStrategy(),
+  new JavaScriptStrategy(),
 ];
 
 /**
@@ -68,19 +74,31 @@ export function isFileSupported(filePath: string): boolean {
  */
 export function getSupportedExtensions(): string[] {
   const extensions = new Set<string>();
-  
+
   // Test common extensions against strategies
   const testExtensions = [
-    '.mdx', '.md', '.json', '.yaml', '.yml', 
-    '.html', '.htm', '.xml', '.csv', 
-    '.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs'
+    '.mdx',
+    '.md',
+    '.json',
+    '.yaml',
+    '.yml',
+    '.html',
+    '.htm',
+    '.xml',
+    '.csv',
+    '.js',
+    '.jsx',
+    '.ts',
+    '.tsx',
+    '.mjs',
+    '.cjs',
   ];
-  
+
   for (const ext of testExtensions) {
-    if (strategies.some(s => s.canHandle(`test${ext}`))) {
+    if (strategies.some((s) => s.canHandle(`test${ext}`))) {
       extensions.add(ext);
     }
   }
-  
+
   return Array.from(extensions);
 }

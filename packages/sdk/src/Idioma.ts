@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { glob } from 'glob';
 import { createAiClient, translateText } from '@/ai/translate';
+import { getEffectiveProviderAndModel } from '@/ai/defaults';
 import { translateFile as coreTranslateFile } from '@/core/translate-file';
 import { getFileStrategy } from '@/parsers';
 import type { Config } from '@/utils/config';
@@ -48,35 +49,19 @@ export class Idioma {
     let config: Config;
     try {
       const baseConfig = await loadConfig();
-      // Map top-level provider/model to translation.provider/model
-      const configOverrides: Partial<Config> = {
-        ...options,
-        translation: {
-          ...options.translation,
-          provider: options.provider || options.translation?.provider,
-          model: options.model || options.translation?.model,
-        },
-      };
-      config = mergeConfig(baseConfig, configOverrides);
+      config = mergeConfig(baseConfig, options);
     } catch (_error) {
-      // If no config file exists, create a minimal config
+      // If no config file exists, create a minimal config with smart defaults
+      const smartDefaults = getEffectiveProviderAndModel(options.provider, options.model);
       config = {
-        projectId: `prj_${Date.now()}`,
+        provider: smartDefaults.provider,
+        model: smartDefaults.model,
         locale: {
           source: options.locale?.source || 'en',
           targets: options.locale?.targets || [],
         },
         files: options.files || {},
-        translation: {
-          provider: options.provider || 'anthropic',
-          model: options.model,
-          frontmatterFields: options.translation?.frontmatterFields || ['title', 'description'],
-          jsxAttributes: options.translation?.jsxAttributes || ['alt', 'title', 'placeholder'],
-          skipPatterns: options.translation?.skipPatterns || [],
-          rules: options.translation?.rules || {
-            patternsToSkip: ['^type:\\s*\\w+$'],
-          },
-        },
+        preserve: options.preserve || [],
       } as Config;
     }
 
@@ -95,13 +80,14 @@ export class Idioma {
       let usage: TokenUsage | undefined;
 
       if (format === 'string') {
-        // Direct text translation
+        // Direct text translation with smart defaults
+        const { provider, model } = getEffectiveProviderAndModel(this.config.provider, this.config.model);
         const result = await translateText(
           content,
           sourceLocale,
           targetLocale,
-          this.config.translation?.provider || 'anthropic',
-          this.config.translation?.model
+          provider,
+          model
         );
         translatedContent = result.text;
         usage = result.usage;
@@ -112,11 +98,9 @@ export class Idioma {
           throw new TranslationError(`No parser strategy found for format: ${format}`);
         }
 
-        // Create AI client for the strategy
-        const aiClient = createAiClient(
-          this.config.translation?.provider || 'anthropic',
-          this.apiKey
-        );
+        // Create AI client for the strategy with smart defaults
+        const { provider, model } = getEffectiveProviderAndModel(this.config.provider, this.config.model);
+        const aiClient = createAiClient(provider, this.apiKey);
 
         const result = await strategy.translate(
           content,
@@ -124,8 +108,8 @@ export class Idioma {
           targetLocale,
           this.config,
           aiClient,
-          this.config.translation?.model,
-          this.config.translation?.provider || 'anthropic'
+          model,
+          provider
         );
         translatedContent = result.content;
         usage = result.usage;
@@ -135,11 +119,8 @@ export class Idioma {
 
       if (trackCosts && usage) {
         response.usage = usage;
-        response.cost = calculateCost(
-          usage,
-          this.config.translation?.provider || 'anthropic',
-          this.config.translation?.model
-        );
+        const { provider, model } = getEffectiveProviderAndModel(this.config.provider, this.config.model);
+        response.cost = calculateCost(usage, provider, model);
       }
 
       return response;
@@ -230,11 +211,10 @@ export class Idioma {
           outputPath: this.getDefaultOutputPath(filePath, sourceLocale, targetLocale),
           usage: result.usage,
           cost: result.usage
-            ? calculateCost(
-                result.usage,
-                this.config.translation?.provider || 'anthropic',
-                this.config.translation?.model
-              )
+            ? (() => {
+                const { provider, model } = getEffectiveProviderAndModel(this.config.provider, this.config.model);
+                return calculateCost(result.usage!, provider, model);
+              })()
             : undefined,
         };
       }
@@ -299,11 +279,10 @@ export class Idioma {
       // Aggregate usage and costs
       const totalUsage = allUsages.length > 0 ? aggregateUsage(allUsages) : undefined;
       const totalCost = totalUsage
-        ? calculateCost(
-            totalUsage,
-            this.config.translation?.provider || 'anthropic',
-            this.config.translation?.model
-          )
+        ? (() => {
+            const { provider, model } = getEffectiveProviderAndModel(this.config.provider, this.config.model);
+            return calculateCost(totalUsage, provider, model);
+          })()
         : undefined;
 
       return {
@@ -348,11 +327,8 @@ export class Idioma {
         totalTokens: estimatedTokens,
       };
 
-      const cost = calculateCost(
-        usage,
-        this.config.translation?.provider || 'anthropic',
-        this.config.translation?.model
-      );
+      const { provider, model } = getEffectiveProviderAndModel(this.config.provider, this.config.model);
+      const cost = calculateCost(usage, provider, model);
 
       const breakdown = targetLocales.map((locale) => ({
         locale,
@@ -376,21 +352,12 @@ export class Idioma {
    * Update configuration
    */
   updateConfig(config: Partial<IdiomaConfig>): void {
-    // Map top-level provider/model to translation.provider/model
-    const configOverrides: Partial<Config> = {
-      ...config,
-      translation: {
-        ...config.translation,
-        provider: config.provider || config.translation?.provider,
-        model: config.model || config.translation?.model,
-      },
-    };
-    this.config = mergeConfig(this.config, configOverrides);
+    this.config = mergeConfig(this.config, config);
 
     // Update API key if provided
     if (config.apiKey) {
       this.apiKey = config.apiKey;
-      const envKey = (config.provider || this.config.translation?.provider) === 'openai' 
+      const envKey = (config.provider || this.config.provider) === 'openai' 
         ? 'OPENAI_API_KEY' 
         : 'ANTHROPIC_API_KEY';
       process.env[envKey] = config.apiKey;

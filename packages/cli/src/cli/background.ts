@@ -122,5 +122,11 @@ export async function updateStatus(updates: Partial<TranslationStatus>): Promise
   };
   
   const updated = { ...current, ...updates };
+  
+  // Handle errors array specially - append instead of replace
+  if (updates.errors && Array.isArray(updates.errors)) {
+    updated.errors = [...(current.errors || []), ...updates.errors];
+  }
+  
   await fs.writeFile(STATUS_FILE, JSON.stringify(updated, null, 2));
 }

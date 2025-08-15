@@ -26,24 +26,12 @@ export async function initCommand(): Promise<void> {
     console.log('Configuration file already exists.');
   } catch {
     const defaultConfig: Config = {
-      projectId: `prj_${crypto.randomBytes(16).toString('hex').slice(0, 20)}`,
       locale: {
         source: 'en',
         targets: [],
       },
       files: {
-        include: ['content/docs/**/*.mdx'],
-        mdx: {
-          frontmatterFields: ['title', 'description', 'sidebarTitle'],
-          jsxAttributes: ['title', 'description', 'tag', 'alt', 'placeholder', 'label'],
-        },
-      },
-      translation: {
-        provider: 'anthropic',
-        model: 'claude-3-5-sonnet-20240620',
-        rules: {
-          patternsToSkip: ['^type:\\s*\\w+$'],
-        },
+        include: ['**/*.mdx'],
       },
     };
 
@@ -173,54 +161,52 @@ export async function resetCommand(): Promise<void> {
 
     const deletedFiles: string[] = [];
 
-    // Process each file type and pattern
-    for (const [_fileType, fileConfig] of Object.entries(config.files)) {
-      for (const pattern of fileConfig.include) {
-        for (const targetLocale of config.locale.targets) {
-          // Replace [locale] placeholder with target locale
-          const targetPattern = replaceLocaleInPattern(pattern, config.locale.source, targetLocale);
+    // Process each file pattern
+    for (const pattern of config.files) {
+      for (const targetLocale of config.locale.targets) {
+        // Replace [locale] placeholder with target locale
+        const targetPattern = replaceLocaleInPattern(pattern, config.locale.source, targetLocale);
 
-          // Find all files matching the target pattern
-          const files = await glob(targetPattern);
+        // Find all files matching the target pattern
+        const files = await glob(targetPattern);
 
-          for (const file of files) {
-            try {
-              await fs.unlink(file);
-              deletedFiles.push(file);
-            } catch (_error) {
-              // File might not exist, continue
-            }
+        for (const file of files) {
+          try {
+            await fs.unlink(file);
+            deletedFiles.push(file);
+          } catch (_error) {
+            // File might not exist, continue
           }
+        }
 
-          // Try to remove empty directories after deleting files
-          if (files.length > 0) {
-            try {
-              // Get unique directories from deleted files
-              const dirsToCheck = new Set<string>();
-              for (const file of files) {
-                let dir = path.dirname(file);
-                // Add all parent directories up to the locale directory
-                while (dir.includes(`/${targetLocale}/`) || dir.endsWith(`/${targetLocale}`)) {
-                  dirsToCheck.add(dir);
-                  dir = path.dirname(dir);
-                }
+        // Try to remove empty directories after deleting files
+        if (files.length > 0) {
+          try {
+            // Get unique directories from deleted files
+            const dirsToCheck = new Set<string>();
+            for (const file of files) {
+              let dir = path.dirname(file);
+              // Add all parent directories up to the locale directory
+              while (dir.includes(`/${targetLocale}/`) || dir.endsWith(`/${targetLocale}`)) {
+                dirsToCheck.add(dir);
+                dir = path.dirname(dir);
               }
-
-              // Sort directories by depth (deepest first) to remove from bottom up
-              const sortedDirs = Array.from(dirsToCheck).sort(
-                (a, b) => b.split('/').length - a.split('/').length
-              );
-
-              for (const dir of sortedDirs) {
-                try {
-                  await fs.rmdir(dir);
-                } catch {
-                  // Directory not empty or doesn't exist, continue
-                }
-              }
-            } catch {
-              // Error removing directories, continue
             }
+
+            // Sort directories by depth (deepest first) to remove from bottom up
+            const sortedDirs = Array.from(dirsToCheck).sort(
+              (a, b) => b.split('/').length - a.split('/').length
+            );
+
+            for (const dir of sortedDirs) {
+              try {
+                await fs.rmdir(dir);
+              } catch {
+                // Directory not empty or doesn't exist, continue
+              }
+            }
+          } catch {
+            // Error removing directories, continue
           }
         }
       }
@@ -251,15 +237,8 @@ export async function resetCommand(): Promise<void> {
 }
 
 
-// Status command - check background translation status
-export async function statusCommand(): Promise<void> {
-  const status = await getTranslationStatus();
-  
-  if (!status) {
-    console.log('No background translation is currently running.');
-    return;
-  }
-  
+// Display translation status (shared helper)
+function displayStatus(status: any): void {
   const percentage = status.totalFiles > 0 
     ? Math.round((status.processedFiles / status.totalFiles) * 100)
     : 0;
@@ -293,6 +272,68 @@ export async function statusCommand(): Promise<void> {
   if (status.pid && status.status === 'running') {
     console.log(`\nProcess ID: ${status.pid}`);
     console.log('To stop: idioma stop');
+  }
+}
+
+// Status command - check background translation status
+export async function statusCommand(options: { tail?: boolean } = {}): Promise<void> {
+  if (options.tail) {
+    // Real-time status updates
+    console.log('📡 Real-time translation status (Press Ctrl+C to exit)');
+    console.log('═'.repeat(50));
+    
+    let lastStatus: any = null;
+    
+    const updateDisplay = async () => {
+      const status = await getTranslationStatus();
+      
+      if (!status) {
+        console.log('\n❌ No background translation is currently running.');
+        process.exit(0);
+      }
+      
+      // Only update display if status changed
+      const statusStr = JSON.stringify(status);
+      if (statusStr !== lastStatus) {
+        // Clear screen and show updated status
+        process.stdout.write('\x1B[2J\x1B[0f');
+        console.log('📡 Real-time translation status (Press Ctrl+C to exit)');
+        console.log('═'.repeat(50));
+        displayStatus(status);
+        
+        // Exit if translation completed or failed
+        if (status.status !== 'running') {
+          console.log('\n🎯 Translation finished!');
+          process.exit(0);
+        }
+        
+        lastStatus = statusStr;
+      }
+    };
+    
+    // Initial display
+    await updateDisplay();
+    
+    // Update every 2 seconds
+    const interval = setInterval(updateDisplay, 2000);
+    
+    // Handle Ctrl+C gracefully
+    process.on('SIGINT', () => {
+      clearInterval(interval);
+      console.log('\n\n👋 Exiting real-time status...');
+      process.exit(0);
+    });
+    
+  } else {
+    // Single status check
+    const status = await getTranslationStatus();
+    
+    if (!status) {
+      console.log('No background translation is currently running.');
+      return;
+    }
+    
+    displayStatus(status);
   }
 }
 

@@ -2,6 +2,7 @@ import { createAnthropic } from '@ai-sdk/anthropic';
 import { createOpenAI } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import type { TokenUsage } from '../utils/cost';
+import { getEffectiveProviderAndModel, getDefaultModelForProvider } from './defaults';
 
 // Result types that include usage metadata
 export interface TranslationResult {
@@ -9,16 +10,9 @@ export interface TranslationResult {
   usage: TokenUsage;
 }
 
-// Get default model for each provider
+// Get default model for each provider (using centralized defaults)
 export function getDefaultModel(provider: string): string {
-  switch (provider) {
-    case 'anthropic':
-      return 'claude-3-5-sonnet-20240620';
-    case 'openai':
-      return 'gpt-4o-2024-08-06';
-    default:
-      return 'claude-3-5-sonnet-20240620';
-  }
+  return getDefaultModelForProvider(provider);
 }
 
 // AI Provider factory - returns configured AI client
@@ -52,13 +46,19 @@ export async function translateText(
   target: string,
   clientOrProvider: any,
   model?: string,
-  provider?: string
+  provider?: string,
+  preservedTerms?: string[]
 ): Promise<TranslationResult> {
+  // Apply smart defaults if provider/model not specified
+  const { provider: effectiveProvider, model: effectiveModel } = getEffectiveProviderAndModel(
+    typeof clientOrProvider === 'string' ? clientOrProvider : provider,
+    model
+  );
+  
   // Handle both client instance and provider string
   const client =
-    typeof clientOrProvider === 'string' ? createAiClient(clientOrProvider) : clientOrProvider;
-  const actualProvider =
-    typeof clientOrProvider === 'string' ? clientOrProvider : provider || 'anthropic';
+    typeof clientOrProvider === 'string' ? createAiClient(effectiveProvider) : clientOrProvider;
+  const actualProvider = effectiveProvider;
   // Preserve leading/trailing whitespace
   const leadingWhitespace = text.match(/^\s*/)?.[0] || '';
   const trailingWhitespace = text.match(/\s*$/)?.[0] || '';
@@ -75,8 +75,13 @@ export async function translateText(
   // Check if this looks like frontmatter content (should never happen but add safeguard)
   const looksLikeFrontmatter = trimmedText.includes('title:') || trimmedText.includes('description:');
   
+  // Format preserved terms for the prompt
+  const preserveInstructions = preservedTerms && preservedTerms.length > 0
+    ? `\n7. NEVER translate these terms - keep them EXACTLY as written: ${preservedTerms.join(', ')}`
+    : '';
+  
   const result = await generateText({
-    model: client(model || getDefaultModel(actualProvider)),
+    model: client(effectiveModel),
     system:
       'You are a translation assistant. You MUST return ONLY the translated text without any additional commentary, explanations, or phrases like "Here is the translation". Do not add any text before or after the translation.',
     prompt: `Translate the following text from ${source} to ${target}. 
@@ -87,7 +92,7 @@ CRITICAL RULES - MUST FOLLOW:
 3. NEVER translate field names like "title:", "description:", "sidebarTitle:" - keep them in English
 4. ONLY translate the text VALUES that come after colons
 5. Preserve ALL Markdown/YAML formatting exactly as-is
-6. Never change horizontal rules or delimiters
+6. Never change horizontal rules or delimiters${preserveInstructions}
 ${looksLikeFrontmatter ? '\nWARNING: This appears to be frontmatter. ONLY translate the values, NOT the field names or structure!' : ''}
 
 Text to translate:
@@ -120,12 +125,13 @@ export async function translateBatch(
   target: string,
   clientOrProvider: any,
   model?: string,
-  provider?: string
+  provider?: string,
+  preservedTerms?: string[]
 ): Promise<TranslationResult[]> {
   // Process translations sequentially to avoid rate limits
   const results: TranslationResult[] = [];
   for (const text of texts) {
-    const result = await translateText(text, source, target, clientOrProvider, model, provider);
+    const result = await translateText(text, source, target, clientOrProvider, model, provider, preservedTerms);
     results.push(result);
     // Small delay between requests to avoid concurrent connection limits
     if (texts.indexOf(text) < texts.length - 1) {
@@ -142,8 +148,9 @@ export async function translateTextSimple(
   target: string,
   clientOrProvider: any,
   model?: string,
-  provider?: string
+  provider?: string,
+  preservedTerms?: string[]
 ): Promise<string> {
-  const result = await translateText(text, source, target, clientOrProvider, model, provider);
+  const result = await translateText(text, source, target, clientOrProvider, model, provider, preservedTerms);
   return result.text;
 }

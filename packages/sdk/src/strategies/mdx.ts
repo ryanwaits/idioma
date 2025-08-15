@@ -8,6 +8,7 @@ import type { Config } from '../utils/config';
 import { getEffectiveFileConfig } from '../utils/config-normalizer';
 import { translateBatch } from '../ai/translate';
 import { aggregateUsage } from '../utils/cost';
+import { parsePreserveRules, shouldSkipNode, getPreservedTerms, hasSmartPreservePattern } from '../utils/preserve';
 
 // Add parent references to all nodes in the tree
 function addParentReferences(tree: any) {
@@ -45,15 +46,19 @@ export class MdxStrategy extends BaseTranslationStrategy {
     // This strategy only receives the main content without frontmatter
     let frontmatterUsage = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
     
+    // Parse preserve rules
+    const preserveRules = parsePreserveRules(config.preserve || []);
+    const preservedTerms = getPreservedTerms(preserveRules);
+    
     // Parse MDX content with directive support
     const tree = remark().use(remarkMdx).use(remarkDirective).parse(content);
     
     // Add parent references to enable directive checking
     addParentReferences(tree);
     
-    // Get effective config with smart defaults
+    // Get effective config with smart defaults  
     const effectiveConfig = getEffectiveFileConfig(config, 'mdx');
-    const translatableAttrs = effectiveConfig.translatableAttributes || [];
+    const skipJsxAttrs = effectiveConfig.skipAttributes?.jsx || [];
     
     // Collect all translatable text
     const textsToTranslate: {
@@ -66,7 +71,7 @@ export class MdxStrategy extends BaseTranslationStrategy {
     
     // Visit text nodes
     visit(tree, 'text', (node, index, parent) => {
-      if (this.shouldTranslateNode(node, parent, config, index)) {
+      if (this.shouldTranslateNode(node, parent, preserveRules, index)) {
         textsToTranslate.push({
           node,
           type: 'text',
@@ -81,8 +86,8 @@ export class MdxStrategy extends BaseTranslationStrategy {
       if (node.attributes) {
         node.attributes.forEach((attr: any) => {
           if (attr.type === 'mdxJsxAttribute' && attr.value && typeof attr.value === 'string') {
-            // Only translate configured attributes
-            if (translatableAttrs.includes(attr.name)) {
+            // Skip attributes that are in the skip list
+            if (!skipJsxAttrs.includes(attr.name)) {
               textsToTranslate.push({
                 node: attr,
                 type: 'attribute',
@@ -115,7 +120,8 @@ export class MdxStrategy extends BaseTranslationStrategy {
       targetLocale,
       aiClient,
       model,
-      provider
+      provider,
+      preservedTerms
     );
     
     // Apply translations
@@ -145,11 +151,28 @@ export class MdxStrategy extends BaseTranslationStrategy {
     };
   }
   
-  // Check if a text node should be translated based on config rules
-  private shouldTranslateNode(node: any, parent: any, config: Config, nodeIndex?: number): boolean {
+  // Check if a text node should be translated based on preserve rules
+  private shouldTranslateNode(node: any, parent: any, preserveRules: any[], nodeIndex?: number): boolean {
     if (node.type !== 'text' || !node.value.trim()) return false;
     
     const trimmedValue = node.value.trim();
+    
+    // Check smart preserve patterns first (automatic preservation)
+    if (hasSmartPreservePattern(trimmedValue)) {
+      return false;
+    }
+    
+    // Special handling for headers - be extra strict with API endpoints
+    if (parent?.type === 'heading') {
+      // Extra strict for headers - preserve anything that looks like an endpoint
+      if (/^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\s+\//i.test(trimmedValue)) {
+        return false;
+      }
+      // Preserve paths in headers
+      if (/^\/\w+/.test(trimmedValue)) {
+        return false;
+      }
+    }
     
     // Check if this is a directive pseudo-attribute (first line of directive content)
     // This handles patterns like "type: help" that appear as the first content in directives
@@ -173,14 +196,8 @@ export class MdxStrategy extends BaseTranslationStrategy {
       }
     }
     
-    // Get skip patterns from config for other cases
-    const patterns =
-      config.translation?.rules?.patternsToSkip?.map((p) => new RegExp(p)) ||
-      config.translation?.skipPatterns?.map((p) => new RegExp(p)) ||
-      [];
-    
-    // Check if text matches any skip pattern
-    if (patterns.some((p) => p.test(trimmedValue))) {
+    // Check if text should be skipped based on preserve rules
+    if (shouldSkipNode(trimmedValue, preserveRules)) {
       return false;
     }
     

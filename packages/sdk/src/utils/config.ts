@@ -3,7 +3,8 @@ import path from 'node:path';
 import { z } from 'zod';
 
 export const ConfigSchema: z.ZodSchema = z.object({
-  projectId: z.string().optional(),
+  provider: z.string().default('anthropic'),
+  model: z.string().optional(),
   locale: z.object({
     source: z.string().default('en'),
     targets: z.array(z.string()).default([]),
@@ -21,52 +22,41 @@ export const ConfigSchema: z.ZodSchema = z.object({
       exclude: z.array(z.string()).optional(),
 
       mdx: z.object({
-        translatableAttributes: z.array(z.string()).optional(),
-        frontmatterFields: z.array(z.string()).optional(),
-        jsxAttributes: z.array(z.string()).optional(),
+        skipAttributes: z.object({
+          jsx: z.array(z.string()).optional(),
+          frontmatter: z.array(z.string()).optional(),
+        }).optional(),
         skipTags: z.array(z.string()).optional(),
       }).optional(),
 
       json: z.object({
-        includePaths: z.array(z.string()).optional(),
-        excludePaths: z.array(z.string()).optional(),
-        skipEmptyStrings: z.boolean().optional(),
+        skipPaths: z.array(z.string()).optional(),
         skipKeys: z.array(z.string()).optional(),
+        skipEmptyStrings: z.boolean().optional(),
       }).optional(),
 
       yaml: z.object({
-        includePaths: z.array(z.string()).optional(),
-        excludePaths: z.array(z.string()).optional(),
-        preserveComments: z.boolean().optional(),
+        skipPaths: z.array(z.string()).optional(),
+        skipKeys: z.array(z.string()).optional(),
         skipEmptyStrings: z.boolean().optional(),
+        preserveComments: z.boolean().optional(),
       }).optional(),
 
       html: z.object({
-        translatableAttributes: z.array(z.string()).optional(),
+        skipAttributes: z.array(z.string()).optional(),
         skipTags: z.array(z.string()).optional(),
         preserveWhitespace: z.boolean().optional(),
       }).optional(),
 
       xml: z.object({
-        translatableAttributes: z.array(z.string()).optional(),
+        skipAttributes: z.array(z.string()).optional(),
         skipTags: z.array(z.string()).optional(),
         preserveCDATA: z.boolean().optional(),
         preserveNamespaces: z.boolean().optional(),
       }).optional(),
     }),
   ]),
-  translation: z
-    .object({
-      provider: z.string().default('anthropic'),
-      model: z.string().optional(),
-      skipPatterns: z.array(z.string()).default([]),
-      rules: z
-        .object({
-          patternsToSkip: z.array(z.string()).default([]), // No default patterns - intelligent detection instead
-        })
-        .optional(),
-    })
-    .optional(),
+  preserve: z.array(z.string()).optional(),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;
@@ -87,18 +77,6 @@ export async function saveConfig(config: Config): Promise<void> {
 }
 
 export function mergeConfig(base: Config, overrides: Partial<Config>): Config {
-  const mergedTranslation = {
-    provider: overrides.translation?.provider || base?.translation?.provider || 'anthropic',
-    model: overrides.translation?.model || base?.translation?.model,
-    skipPatterns: overrides.translation?.skipPatterns || base?.translation?.skipPatterns || [],
-    rules: {
-      patternsToSkip: [
-        ...(base?.translation?.rules?.patternsToSkip || []),
-        ...(overrides.translation?.rules?.patternsToSkip || []),
-      ],
-    },
-  };
-
   return {
     ...base,
     ...overrides,
@@ -110,6 +88,9 @@ export function mergeConfig(base: Config, overrides: Partial<Config>): Config {
       ...(base?.files || {}),
       ...(overrides.files || {}),
     },
-    translation: mergedTranslation,
+    preserve: [
+      ...(base?.preserve || []),
+      ...(overrides.preserve || []),
+    ],
   };
 }
