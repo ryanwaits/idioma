@@ -1,4 +1,6 @@
 import generate from '@babel/generator';
+// @ts-ignore - ESM compatibility fix for @babel/generator
+const generateCode = generate.default || generate;
 import { parse } from '@babel/parser';
 import traverse from '@babel/traverse';
 // @ts-ignore - ESM compatibility fix for @babel/traverse
@@ -327,7 +329,7 @@ export class JavaScriptStrategy extends BaseTranslationStrategy {
     }
 
     // Generate code from modified AST
-    const result = generate(ast, {
+    const result = generateCode(ast, {
       retainLines: this.config.preserveComments,
       comments: this.config.preserveComments,
       // Preserve Unicode characters instead of escaping them
