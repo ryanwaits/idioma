@@ -1,6 +1,8 @@
 import generate from '@babel/generator';
 import { parse } from '@babel/parser';
 import traverse from '@babel/traverse';
+// @ts-ignore - ESM compatibility fix for @babel/traverse
+const traverseAST = traverse.default || traverse;
 import * as t from '@babel/types';
 import { translateBatch } from '../ai/translate';
 import type { Config } from '../utils/config';
@@ -97,7 +99,7 @@ export class JavaScriptStrategy extends BaseTranslationStrategy {
       });
 
       // Traverse AST to find translatable content
-      traverse(ast, {
+      traverseAST(ast, {
         // Handle object expressions (translation objects)
         ObjectExpression: (path) => {
           if (this.config.extractMode === 'functions') return;
